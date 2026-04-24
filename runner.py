@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Crimson Mandate Agent — Combat-capable Runner (v3)
+Crimson Mandate Agent — Combat-capable Runner (v4)
 WebSocket client + REST API + decision engine + combat support
 """
 import json, sys, os, time, logging, threading
@@ -57,7 +57,7 @@ class MMOClient:
         self.running = False
         self.ws = None
         self.thread = None
-        self._events = {}       # type -> list of payloads
+        self._events = {}
         self._cv = threading.Condition()
         self._die = threading.Event()
 
@@ -87,9 +87,8 @@ class MMOClient:
     def _on_open(self, ws):
         self._send({"type": "auth", "payload": {"sessionId": self.token}})
 
-    # Persistent event tracking for golden asteroid alerts
     _golden_asteroid_spawned = None
-    
+
     def _on_message(self, ws, msg):
         try:
             data = json.loads(msg)
@@ -102,7 +101,6 @@ class MMOClient:
             self._events.setdefault(msg_type, []).append(payload)
             self._cv.notify_all()
 
-        # Inline handlers
         if msg_type == "auth_success":
             self.authenticated = True
             self._send({"type": "mmo_join_world", "payload": {"worldId": 1}})
@@ -220,7 +218,8 @@ class MMOClient:
                 self.ws.close()
             except:
                 pass
-        self.thread.join(timeout=3)
+        if self.thread:
+            self.thread.join(timeout=3)
 
 
 # ─── Game Actions ────────────────────────────────────────────────────────────
@@ -278,7 +277,7 @@ def execute_combat(token: str, session_id: str, scout: dict, enemies: list):
         return False, []
 
     target = enemies[0]
-    
+
     # Fetch FRESH world state for current positions
     c = MMOClient(token, session_id)
     c.start()
@@ -287,64 +286,65 @@ def execute_combat(token: str, session_id: str, scout: dict, enemies: list):
         return False, []
     fresh_ws = c.get_world_state(timeout=10)
     c.stop()
-    
+
     # Find scout's current position from fresh state
-    user_id = scout.get("ownerId")
-    spos = scout.get("position", {})
     for u in fresh_ws.get("units", []):
         if u.get("id") == scout["id"]:
-            spos = u.get("position", spos)
+            scout_pos = u.get("position", scout.get("position", {}))
             break
-    
+    else:
+        scout_pos = scout.get("position", {})
+
     tpos = target.get("position", {})
-    dist = distance_hex(spos, tpos)
-    logger.info(f"Combat: Scout at {spos}, target {target['id']} at {tpos}, dist={dist}")
-
-    c = MMOClient(token, session_id)
-    c.start()
-    if not c.wait_for_auth(timeout=8):
-        c.stop()
-        return False, []
-
-    _ = c.get_world_state(timeout=10)
+    dist = distance_hex(scout_pos, tpos)
+    logger.info(f"Combat: Scout at {scout_pos}, target {target['id']} at {tpos}, dist={dist}")
 
     if dist <= 1:
         # Adjacent — attack directly
+        c2 = MMOClient(token, session_id)
+        c2.start()
+        if not c2.wait_for_auth(timeout=8):
+            c2.stop()
+            return False, []
+        _ = c2.get_world_state(timeout=10)
         logger.info(f"⚔ Attacking {target['id']} (dist={dist})")
-        c._send({"type": "mmo_attack", "payload": {"attackerId": scout["id"], "targetId": target["id"], "position": target.get("position", {})}})
-        events = c.wait_for_combat_result(timeout=20)
-        c.stop()
+        c2._send({"type": "mmo_attack", "payload": {
+            "attackerId": scout["id"],
+            "targetId": target["id"],
+            "position": tpos
+        }})
+        events = c2.wait_for_combat_result(timeout=20)
+        c2.stop()
         return True, events
 
     elif dist <= 20:
-        # Move adjacent first
-        # Find adjacent hex to target
-        q, r = tpos.get("q", 0), tpos.get("r", 0)
-        move_target = {"q": q, "r": r + 1}  # Adjacent hex
-        logger.info(f"→ Moving Scout to {move_target} (dist={dist})")
-        c._send({"type": "mmo_move_unit", "payload": {"unitId": scout["id"], "targetHex": move_target}})
-        c.wait_for("mmo_unit_moved", timeout=15)
+        # Move to an adjacent hex (one step toward target)
+        # Use axial direction: move one step in direction of target
+        q_diff = tpos.get("q", 0) - scout_pos.get("q", 0)
+        r_diff = tpos.get("r", 0) - scout_pos.get("r", 0)
+        # Normalize to one step
+        step_q = 0 if q_diff == 0 else (1 if q_diff > 0 else -1)
+        step_r = 0 if r_diff == 0 else (1 if r_diff > 0 else -1)
+        move_target = {
+            "q": scout_pos.get("q", 0) + step_q,
+            "r": scout_pos.get("r", 0) + step_r
+        }
+        logger.info(f"→ Moving Scout toward {move_target} (dist={dist})")
 
-        # Re-check position
-        ws2 = c.get_world_state(timeout=10)
-        c.stop()
-
-        # Find scout again
-        for u in ws2.get("units", []):
-            if u.get("ownerId") == scout.get("ownerId"):
-                new_dist = distance_hex(u.get("position", {}), tpos)
-                if new_dist <= 1:
-                    # Attack now
-                    c2 = MMOClient(token, session_id)
-                    c2.start()
-                    if c2.wait_for_auth(timeout=8):
-                        _ = c2.get_world_state(timeout=10)
-                        logger.info(f"⚔ Attacking {target['id']} after move")
-                        c2._send({"type": "mmo_attack", "payload": {"attackerId": scout["id"], "targetId": target["id"], "position": target.get("position", {})}})
-                        events = c2.wait_for_combat_result(timeout=20)
-                        c2.stop()
-                        return True, events
-                break
+        c2 = MMOClient(token, session_id)
+        c2.start()
+        if not c2.wait_for_auth(timeout=8):
+            c2.stop()
+            return False, []
+        _ = c2.get_world_state(timeout=10)
+        c2._send({"type": "mmo_move_unit", "payload": {
+            "unitId": scout["id"],
+            "targetHex": move_target
+        }})
+        c2.wait_for("mmo_unit_moved", timeout=15)
+        c2.stop()
+        # Movement executed — combat not resolved this cycle
+        return False, []
 
     return False, []
 
@@ -404,16 +404,9 @@ def run_cycle():
     scout = next((u for u in owned if u.get("type") == "Scout"), None)
     combat_happened = False
     if scout:
-        enemies = [u for u in units if u.get("ownerId") not in (user_id, None) and u.get("ownerName") not in ("Earth Defense Force", None)]
-        # Prioritize EDF (NPC enemies)
         edf = [u for u in units if u.get("ownerName") == "Earth Defense Force"]
-        others = [u for u in units if u.get("ownerId") not in (user_id, None) and u.get("ownerName") not in ("Earth Defense Force",)]
-        # ONLY attack EDF NPCs, never other players
-        enemies = edf
-        
-        # Sort by distance from scout (closest first)
         scout_pos = scout.get("position", {})
-        enemies = sorted(enemies, key=lambda e: distance_hex(scout_pos, e.get("position", {})))
+        enemies = sorted(edf, key=lambda e: distance_hex(scout_pos, e.get("position", {})))
 
         if enemies:
             attacked, combat_events = execute_combat(token, session_id, scout, enemies)
@@ -449,16 +442,15 @@ def run_cycle():
                     continue
                 _ = c.get_world_state(timeout=10)
                 c._send({"type": ws_msg_type, "payload": payload})
-                
-                # Track position after move
+
+                # Track position after move optimistically
                 if atype == "move_unit":
                     move_target = payload.get("targetHex", {})
-                    # Optimistically update Scout position in state
                     for u in state.get("units", []):
                         if u.get("id") == payload.get("unitId"):
                             u["position"] = move_target
-                    state["lastRun"] = datetime.now(timezone.utc).isoformat()
-                
+                            break
+
                 time.sleep(3)
                 c.stop()
                 state = log_action(state, atype, str(payload), "ok")
