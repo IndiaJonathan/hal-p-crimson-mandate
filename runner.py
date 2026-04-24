@@ -87,6 +87,9 @@ class MMOClient:
     def _on_open(self, ws):
         self._send({"type": "auth", "payload": {"sessionId": self.token}})
 
+    # Persistent event tracking for golden asteroid alerts
+    _golden_asteroid_spawned = None
+    
     def _on_message(self, ws, msg):
         try:
             data = json.loads(msg)
@@ -114,6 +117,13 @@ class MMOClient:
             state["balance"]["credits"] = r.get("credits", 0)
             state["balance"]["minerals"] = r.get("minerals", 0)
             save_state(state)
+
+        elif msg_type == "mmo_golden_asteroid_spawned":
+            logger.warning(f"🌟 GOLDEN ASTEROID SPAWNED: {payload}")
+            MMOClient._golden_asteroid_spawned = payload
+
+        elif msg_type == "mmo_golden_asteroid_claimed":
+            logger.info(f"🌟 GOLDEN ASTEROID CLAIMED: {payload}")
 
         elif msg_type == "mmo_mine_result":
             minerals = payload.get("mineralsGained", {})
@@ -171,6 +181,21 @@ class MMOClient:
         if not msgs:
             return {}
         return parse_world_state(msgs[-1])
+
+    def wait_for_golden_asteroid(self, timeout: float = 300.0) -> dict:
+        """Wait for a golden asteroid spawn event (up to 5 min)."""
+        with self._cv:
+            end = time.time() + timeout
+            while time.time() < end:
+                if MMOClient._golden_asteroid_spawned:
+                    result = MMOClient._golden_asteroid_spawned
+                    MMOClient._golden_asteroid_spawned = None
+                    return result
+                remaining = end - time.time()
+                if remaining <= 0:
+                    break
+                self._cv.wait(timeout=min(remaining, 10.0))
+            return None
 
     def wait_for_combat_result(self, timeout: float = 20.0) -> list:
         """Wait for combat events."""
@@ -243,20 +268,37 @@ def action_contribute_research(token: str, board_id: str, isd_amount: float) -> 
 
 # ─── Combat Loop ─────────────────────────────────────────────────────────────
 
-def execute_combat(token: str, session_id: str, scout: dict, enemies: list, ws_state: dict):
+def execute_combat(token: str, session_id: str, scout: dict, enemies: list):
     """
     If scout is adjacent to enemy, attack. Otherwise move adjacent first.
+    Fresh WS state fetched here to get real positions.
     Returns (attacked: bool, events: list)
     """
     if not enemies:
         return False, []
 
     target = enemies[0]
-    tpos = target.get("position", {})
+    
+    # Fetch FRESH world state for current positions
+    c = MMOClient(token, session_id)
+    c.start()
+    if not c.wait_for_auth(timeout=8):
+        c.stop()
+        return False, []
+    fresh_ws = c.get_world_state(timeout=10)
+    c.stop()
+    
+    # Find scout's current position from fresh state
+    user_id = scout.get("ownerId")
     spos = scout.get("position", {})
-
+    for u in fresh_ws.get("units", []):
+        if u.get("id") == scout["id"]:
+            spos = u.get("position", spos)
+            break
+    
+    tpos = target.get("position", {})
     dist = distance_hex(spos, tpos)
-    logger.info(f"Combat: Scout at {spos}, target at {tpos}, dist={dist}")
+    logger.info(f"Combat: Scout at {spos}, target {target['id']} at {tpos}, dist={dist}")
 
     c = MMOClient(token, session_id)
     c.start()
@@ -360,21 +402,32 @@ def run_cycle():
 
     # ── Combat: Attack nearby enemies if scout is available ──
     scout = next((u for u in owned if u.get("type") == "Scout"), None)
+    combat_happened = False
     if scout:
         enemies = [u for u in units if u.get("ownerId") not in (user_id, None) and u.get("ownerName") not in ("Earth Defense Force", None)]
         # Prioritize EDF (NPC enemies)
         edf = [u for u in units if u.get("ownerName") == "Earth Defense Force"]
         others = [u for u in units if u.get("ownerId") not in (user_id, None) and u.get("ownerName") not in ("Earth Defense Force",)]
-        enemies = edf + others
+        # ONLY attack EDF NPCs, never other players
+        enemies = edf
+        
+        # Sort by distance from scout (closest first)
+        scout_pos = scout.get("position", {})
+        enemies = sorted(enemies, key=lambda e: distance_hex(scout_pos, e.get("position", {})))
 
         if enemies:
-            attacked, combat_events = execute_combat(token, session_id, scout, enemies, ws_state)
+            attacked, combat_events = execute_combat(token, session_id, scout, enemies)
             for ev_type, ev_payload in combat_events:
                 state = log_action(state, ev_type, str(ev_payload), "ok")
+                combat_happened = True
 
-    # ── Decision engine ──
-    actions = decide_actions(state, ws_state)
-    logger.info(f"Decision: {[a['type'] for a in actions]}")
+    # ── Decision engine — only if combat didn't consume the cycle ──
+    if not combat_happened:
+        actions = decide_actions(state, ws_state)
+        logger.info(f"Decision: {[a['type'] for a in actions]}")
+    else:
+        logger.info("Combat happened — skipping decision engine this cycle")
+        actions = []
 
     # ── Execute actions ──
     for action in actions:
@@ -396,6 +449,16 @@ def run_cycle():
                     continue
                 _ = c.get_world_state(timeout=10)
                 c._send({"type": ws_msg_type, "payload": payload})
+                
+                # Track position after move
+                if atype == "move_unit":
+                    move_target = payload.get("targetHex", {})
+                    # Optimistically update Scout position in state
+                    for u in state.get("units", []):
+                        if u.get("id") == payload.get("unitId"):
+                            u["position"] = move_target
+                    state["lastRun"] = datetime.now(timezone.utc).isoformat()
+                
                 time.sleep(3)
                 c.stop()
                 state = log_action(state, atype, str(payload), "ok")
