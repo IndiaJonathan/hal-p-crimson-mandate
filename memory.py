@@ -3,7 +3,7 @@ Crimson Mandate Agent — Persistent State Memory
 """
 import json
 import os
-import datetime
+from datetime import datetime, timezone
 
 STATE_FILE = os.path.join(os.path.dirname(__file__), "state.json")
 
@@ -33,7 +33,7 @@ def log_action(state, action: str, detail: str = "", result: str = "ok"):
     """Append to action log, keep last 100 entries."""
     log = state.get("actionLog", [])
     log.append({
-        "time": datetime.datetime.utcnow().isoformat(),
+        "time": datetime.now(timezone.utc).isoformat(),
         "action": action,
         "detail": detail,
         "result": result
