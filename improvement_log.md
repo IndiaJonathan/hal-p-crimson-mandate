@@ -155,3 +155,20 @@ Escalation: Discord escalation already attempted prior cycles. Jonathan has been
 - Committed: `b555682`
 
 **Root stall:** Game economy — 0 ISD, no Mk1 Mining Laser, scout attack=0. Agent now correctly accumulates titanium and should sell in ~3 mining cycles. No code failures remain.
+
+## 2026-04-25 22:34 UTC (Self-Review)
+
+**Resource Trend:** ISD=0 | sells=0 combat_wins=0 mining=0 ⚠️ Stalled
+**Token:** ✅ Valid (expires 2026-05-02 01:26 UTC)
+
+**Status:** Fixed Basic Mining Array common-mineral filter bug.
+
+**What I did:**
+- Root cause: Agent targeting ast_2e330239 (mineralComposition: {min_titanium: 4, min_copper: 0, min_iron: 0}) — titanium is UNCOMMON, requires Mk1 Mining Laser. Basic Mining Array can only extract copper/iron. Server was rejecting every mine_asteroid call.
+- Fix: Added `asteroid_has_common_minerals()` check in decisions.py (COMMON_MINERAL_IDS = [min_copper, min_iron]) — filter asteroids to only those with extractable common minerals.
+- Same filter added to job_crimson_mandate.py Priority 4 block.
+- Committed: `f1acb9f` — "fix: Basic Mining Array common-mineral filter"
+
+**Root stall:** Game economy deadlock — 0 ISD, no Mining Laser, scout attack=0, all nearby asteroids have only uncommon/rare minerals (titanium, platinum). No progression path without ISD injection to buy Mk1 Laser.
+
+**Escalation:** Discord escalation sent to Jonathan.
