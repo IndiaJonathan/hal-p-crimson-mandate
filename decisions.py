@@ -59,13 +59,10 @@ def find_nearest_asteroid(unit_pos: dict, asteroids: list, max_tier: int = 0) ->
     """
     if not asteroids:
         return None
-    # Filter by tier if known (asteroids with known common minerals)
     candidates = []
     for a in asteroids:
         if a.get("isDepleted"):
             continue
-        # Only pick asteroids that are likely common-tier
-        # All spawned asteroids in Core zone near Earth are typically common
         pos = a.get("position", {})
         if pos:
             candidates.append((distance_hex(unit_pos, pos), a))
@@ -107,49 +104,54 @@ def decide_actions(state: dict, ws_state: dict) -> list:
     asteroids_in_world = ws_state.get("asteroids", [])
     planets_in_world = ws_state.get("planets", [])
 
-    # ── Check if we have a Mining Laser (skip mining if not) ──
-    mining_failures = state.get("mining_failures", 0)
-    has_laser = state.get("has_mining_laser", False)
-
-    # ── Action: Move toward asteroid if not adjacent ──
-    mining = [u for u in owned if u.get("miningAsteroidId")]
-    idle = [u for u in owned if not u.get("miningAsteroidId") and not u.get("dockedAtPlanetId")]
-
-    # Try mining regardless of laser status — let the server tell us if it fails.
-    # Failure counter then drives the block after 5 attempts.
     mining_failures = state.get("mining_failures", 0)
     has_laser = state.get("has_mining_laser", False)
     mining_blocked = (mining_failures >= 5)
 
+    mining = [u for u in owned if u.get("miningAsteroidId")]
+    idle = [u for u in owned if not u.get("miningAsteroidId") and not u.get("dockedAtPlanetId")]
+
+    # ── Tier-0 asteroids: miningLevel=0 AND no required component ──
+    tier0_asteroids = [
+        a for a in asteroids_in_world
+        if not a.get("isDepleted")
+        and a.get("miningLevel", 0) == 0
+        and a.get("requiredComponentId") is None
+    ]
+
+    # Fall back to any asteroid with no required component if none have miningLevel=0
+    if not tier0_asteroids:
+        tier0_asteroids = [
+            a for a in asteroids_in_world
+            if not a.get("isDepleted")
+            and a.get("requiredComponentId") is None
+        ]
+
+    # ── Mine or move to asteroid ──
     if scout and not mining and asteroids_in_world and not mining_blocked:
-        # Only mine from tier-0 asteroids (miningLevel=0) compatible with Basic Mining Array
-        # Asteroids with miningLevel >= 1 require Mk1+ mining laser
-        tier0_asteroids = [a for a in asteroids_in_world
-                         if not a.get("isDepleted") and a.get("miningLevel", 0) == 0]
         target = find_nearest_asteroid(scout.get("position", {}), tier0_asteroids, max_tier=0)
         if target:
             tpos = target.get("position", {})
             dist = distance_hex(scout.get("position", {}), tpos)
             if dist <= 1:
-                # Adjacent — mine
                 actions.append({
                     "type": "mine_asteroid",
                     "payload": {"unitId": scout["id"], "asteroidId": target["id"]},
                     "ws": True
                 })
             elif dist <= 20:
-                # Move toward asteroid
                 actions.append({
                     "type": "move_unit",
                     "payload": {"unitId": scout["id"], "targetHex": tpos},
                     "ws": True
                 })
         elif not tier0_asteroids:
-            logger.warning("No tier-0 asteroids available. Basic Mining Array blocked.")
-    elif mining_blocked:
-        logger.warning("Mining blocked: 5 consecutive failures. Waiting for Mk1 Mining Laser.")
+            logger.warning("No mineable asteroids (Basic Mining Array compatible).")
 
-    # ── Action: Sell minerals above threshold ──
+    elif mining_blocked:
+        logger.warning("Mining blocked: 5+ failures. Waiting for Mk1 Mining Laser.")
+
+    # ── Sell minerals above threshold ──
     sell_order = ["min_darkmat", "min_iridium", "min_rhodium", "min_palladium",
                   "min_platinum", "min_titanium", "min_copper", "min_iron"]
     for mid in sell_order:
@@ -158,7 +160,7 @@ def decide_actions(state: dict, ws_state: dict) -> list:
             actions.append({"type": "sell", "payload": {"mineralTypeId": mid, "amount": amt}, "ws": False})
             break
 
-    # ── Action: Contribute to research if ISD available ──
+    # ── Contribute to research if ISD available ──
     isd = balance.get("isdBalance", 0)
     if isd >= 100:
         board = state.get("research_board", [])
