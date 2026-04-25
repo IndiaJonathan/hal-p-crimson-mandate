@@ -107,20 +107,24 @@ def decide_actions(state: dict, ws_state: dict) -> list:
     asteroids_in_world = ws_state.get("asteroids", [])
     planets_in_world = ws_state.get("planets", [])
 
-    # ── Sync: update owned units from ws_state ──
-    # (already done in runner)
+    # ── Check if we have a Mining Laser (skip mining if not) ──
+    mining_failures = state.get("mining_failures", 0)
+    has_laser = state.get("has_mining_laser", False)
 
     # ── Action: Move toward asteroid if not adjacent ──
     mining = [u for u in owned if u.get("miningAsteroidId")]
     idle = [u for u in owned if not u.get("miningAsteroidId") and not u.get("dockedAtPlanetId")]
 
-    if scout and not mining and asteroids_in_world:
+    # Only try mining if we have a laser OR failures are low
+    can_mine = has_laser or mining_failures < 2
+
+    if scout and not mining and asteroids_in_world and can_mine:
         target = find_nearest_asteroid(scout.get("position", {}), asteroids_in_world, max_tier=0)
         if target:
             tpos = target.get("position", {})
             dist = distance_hex(scout.get("position", {}), tpos)
             if dist <= 1:
-                # Adjacent — try to mine (will fail gracefully if no mining laser)
+                # Adjacent — mine
                 actions.append({
                     "type": "mine_asteroid",
                     "payload": {"unitId": scout["id"], "asteroidId": target["id"]},
@@ -133,6 +137,8 @@ def decide_actions(state: dict, ws_state: dict) -> list:
                     "payload": {"unitId": scout["id"], "targetHex": tpos},
                     "ws": True
                 })
+    elif scout and not mining and asteroids_in_world and not can_mine:
+        logger.warning("Mining blocked: no Mining Laser detected. Waiting for unlock.")
 
     # ── Action: Sell minerals above threshold ──
     sell_order = ["min_darkmat", "min_iridium", "min_rhodium", "min_palladium",

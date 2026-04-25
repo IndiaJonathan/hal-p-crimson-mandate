@@ -232,6 +232,7 @@ def action_sync(state: dict, token: str) -> dict:
             ("/api/profile/me/ships", "ships"),
             ("/api/balance", "balance"),
             ("/api/minerals/inventory", "minerals"),
+            ("/api/components/inventory", "components"),
             ("/api/research/board", "research_board"),
         ]:
             data = api_get(path, token)
@@ -248,6 +249,13 @@ def action_sync(state: dict, token: str) -> dict:
                 state = update_minerals(state, data.get("minerals", []))
             elif key == "research_board":
                 state["research_board"] = data if isinstance(data, list) else (data.get("data") or [])
+            elif key == "components":
+                components = data.get("components", []) if isinstance(data, dict) else []
+                has_laser = any("mining" in c.get("name","").lower() or "laser" in c.get("name","").lower() for c in components)
+                if has_laser:
+                    state["has_mining_laser"] = True
+                    state["mining_failures"] = 0
+                    logger.info(f"✓ Mining Laser detected ({len(components)} components)")
     except Exception as e:
         logger.error(f"Sync error: {e}")
     return state
@@ -452,6 +460,24 @@ def run_cycle():
                             break
 
                 time.sleep(3)
+                
+                # Track mining failures
+                if atype == "mine_asteroid":
+                    # Check components for Mining Laser
+                    comp_resp = api_get("/api/components/inventory", token)
+                    if comp_resp.get("success"):
+                        components = comp_resp.get("components", [])
+                        has_laser = any("mining" in c.get("name","").lower() or "laser" in c.get("name","").lower() for c in components)
+                        if has_laser:
+                            state["has_mining_laser"] = True
+                            state["mining_failures"] = 0
+                            logger.info("✓ Mining Laser detected!")
+                        else:
+                            # Increment failure counter
+                            state["mining_failures"] = state.get("mining_failures", 0) + 1
+                            if state["mining_failures"] >= 3:
+                                logger.warning("Mining Laser missing — 3 failures. Blocking mining.")
+                
                 c.stop()
                 state = log_action(state, atype, str(payload), "ok")
 

@@ -49,10 +49,8 @@ def analyze_failures(log_text: str) -> list:
         issues.append({"severity": "HIGH", "issue": "WS auth timeout", "fix": "Token may be expired — run auth.py"})
     if "INVALID_TOKEN" in log_text:
         issues.append({"severity": "HIGH", "issue": "Token invalid", "fix": "Re-authenticate with auth.py"})
-    if "requires mining laser" in log_text.lower():
-        issues.append({"severity": "MED", "issue": "No Mining Laser component", "fix": "Combat → loot OR spend $1 on Mk1 laser"})
-    if "mining failed" in log_text.lower():
-        issues.append({"severity": "MED", "issue": "Mining action failed", "fix": "Check component + asteroid tier compatibility"})
+    if "requires mining laser" in log_text.lower() or "cannot extract" in log_text.lower() or "higher-tier mining" in log_text.lower():
+        issues.append({"severity": "HIGH", "issue": "Mining blocked — Basic Mining Array can't handle asteroid tier", "fix": "STOP mining attempts until Mining Laser Mk1 acquired"})
     if "error" in log_text.lower() and "server error" in log_text.lower():
         # Extract the last error
         errors = re.findall(r"error.*?[{}\":a-zA-Z0-9_\s]+", log_text, re.I)
@@ -74,6 +72,7 @@ def analyze_resource_trend(state: dict, log_text: str) -> str:
     sells = log_text.count('"sell"') + log_text.count("sell")
     combat_wins = log_text.count("mmo_unit_destroyed_notification")
     mining_yields = log_text.count("mmo_mine_result")
+    mining_fails = log_text.count("cannot extract") + log_text.count("higher-tier") + log_text.count("requires mining")
 
     trend = f"ISD={isd} credits={credits} minerals={total_minerals}"
     trend += f" | sells={sells} combat_wins={combat_wins} mining={mining_yields}"
