@@ -111,6 +111,9 @@ def decide_actions(state: dict, ws_state: dict) -> list:
     mining = [u for u in owned if u.get("miningAsteroidId")]
     idle = [u for u in owned if not u.get("miningAsteroidId") and not u.get("dockedAtPlanetId")]
 
+    pending = state.get("_pending_minerals", {})
+    all_minerals = {k: {"amount": v.get("amount", 0) + pending.get(k, 0)} for k, v in minerals.items()}
+
     # ── Tier-0 asteroids: miningLevel=0 AND no required component ──
     tier0_asteroids = [
         a for a in asteroids_in_world
@@ -155,7 +158,7 @@ def decide_actions(state: dict, ws_state: dict) -> list:
     sell_order = ["min_darkmat", "min_iridium", "min_rhodium", "min_palladium",
                   "min_platinum", "min_titanium", "min_copper", "min_iron"]
     for mid in sell_order:
-        amt = minerals.get(mid, {}).get("amount", 0)
+        amt = all_minerals.get(mid, {}).get("amount", 0)
         if amt >= MINERAL_SELL_THRESHOLDS.get(mid, 100):
             actions.append({"type": "sell", "payload": {"mineralTypeId": mid, "amount": amt}, "ws": False})
             break

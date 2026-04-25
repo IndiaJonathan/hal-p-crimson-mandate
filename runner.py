@@ -127,6 +127,12 @@ class MMOClient:
             minerals = payload.get("mineralsGained", {})
             if minerals:
                 logger.info(f"Mining yield: {minerals}")
+                state = load_state()
+                inv = state.get("_pending_minerals", {})
+                for mid, amt in minerals.items():
+                    inv[mid] = inv.get(mid, 0) + amt
+                state["_pending_minerals"] = inv
+                save_state(state)
 
         elif msg_type == "mmo_engagement_started":
             logger.info(f"⚔ Combat started: {payload.get('engagementId')}")

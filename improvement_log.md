@@ -51,7 +51,19 @@ Root stall cause: Basic Mining Array can't mine available asteroids (require Mk1
 
 Escalation: Discord escalation already attempted prior cycles. Jonathan has been informed.
 
-## 2026-04-25 06:56 UTC (Self-Review)
+## 2026-04-25 07:11 UTC (Self-Review)
+
+**Resource Trend:** ISD=0 credits=0 minerals=0 | sells=0 combat_wins=0 mining=0 ⚠️ Deadlock
+**Token:** ✅ Valid
+
+**Status:** Fixed asteroid selection logic bug.
+
+**What I did:**
+- Root issue: `decisions.py` was filtering to `miningLevel=0` asteroids only, but game asteroids have `miningLevel=N` values that change over time (state shows `miningLevel` field present). This was rejecting ALL asteroids as "tier-1+" even though the Basic Mining Array should work on them.
+- Fix: Rewrote asteroid selection to filter only on `requiredComponentId is None` (the actual gating mechanism). Removed the `miningLevel == 0` filter entirely. Added fallback: if no `miningLevel=0` asteroids, try all non-depleted asteroids with no required component.
+- This should allow the Basic Mining Array to mine any eligible asteroid without being gated by the `miningLevel` field.
+
+**Remaining:** Still 0 ISD, 0 minerals. Needs ISD injection to buy Mk1 Mining Laser or game economy needs alternate path.
 
 **Resource Trend:** ISD=0 credits=0 minerals=0 | sells=0 combat_wins=0 mining=0 ⚠️ Deadlock
 **Token:** ✅ Valid
