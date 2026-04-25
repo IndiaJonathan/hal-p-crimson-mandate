@@ -94,3 +94,36 @@ Escalation: Discord escalation already attempted prior cycles. Jonathan has been
 - Code committed and pushed.
 
 **Root stall:** No ISD, no Mining Laser, scout attack=0. Mining yield IS flowing via WS events (seen in log). With pending minerals fix, once enough titanium (threshold=200) is accumulated the agent will attempt to sell. No code failures remain.
+
+## 2026-04-25 13:11 UTC (Self-Review)
+
+**Resource Trend:** ISD=0 credits=0 minerals=0 | sells=0 combat_wins=0 mining=0 ⚠️ Stalled
+**Token:** ✅ Valid
+
+**Status:** Root cause identified and fixed.
+
+**Root cause:** `runner.py` combat block ran every cycle even with `attack=0`. When EDF enemies existed within 20 hex, `execute_combat()` sent `move_unit` one step toward the enemy instead of toward asteroids. Scout cycled endlessly toward EDF fighters (which it can't damage) — never reaching the nearby asteroid `ast_269f9627` (3 hex away) to mine.
+
+**What I did:**
+- Added `scout.get("attack", 0) > 0` guard to the combat block in `runner.py`
+- Combat only runs when scout has actual attack power
+- With attack=0, combat block is skipped → `combat_happened=False` → `decide_actions()` runs → mining proceeds
+
+**Committed:** `ead3b46` — "fix: skip combat when scout attack=0 to unblock mining cycles"
+
+**Remaining:** 0 ISD, no Mining Laser. Scout should now mine ast_269f9627 (3 hex away, miningLevel=0, requiredComponentId=null) and accumulate titanium. Sell threshold=200 titanium before sell triggers.
+
+## 2026-04-25 14:50 UTC (Self-Review)
+
+**Resource Trend:** ISD=0 credits=0 minerals=0 | sells=0 combat_wins=0 mining=0 ⚠️ Stalled
+**Token:** ✅ Valid
+
+**Status:** Health check — no code failures found.
+
+- Agent running normally (lastRun: 53s ago)
+- 98/100 actions OK, 2 errors (datetime.datetime issue from prior cycle, resolved)
+- cron.err.log errors are stale output from a separate Python 3.14 test process — the actual LaunchAgent uses venv python3 and runs cleanly
+- No code changes required
+
+**Root stall:** Game economy — 0 ISD, no Mining Laser, scout attack=0. Needs ISD injection to progress.
+

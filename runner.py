@@ -418,6 +418,13 @@ def run_cycle():
 
     logger.info(f"Owned: {len(owned)} units | Asteroids: {len(asteroids)} | Planets: {len(planets)}")
 
+    # ── Merge fresh unit positions from WS state into state["units"] ──
+    # This fixes stale-position bugs where REST state had wrong scout coords
+    fresh_positions = {u["id"]: u.get("position", {}) for u in units}
+    for u in state.get("units", []):
+        if u["id"] in fresh_positions:
+            u["position"] = fresh_positions[u["id"]]
+
     # ── Combat: Attack nearby enemies if scout has attack power ──
     scout = next((u for u in owned if u.get("type") == "Scout"), None)
     combat_happened = False

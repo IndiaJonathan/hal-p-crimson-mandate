@@ -101,8 +101,11 @@ def decide_actions(state: dict, ws_state: dict) -> list:
     if not scout:
         scout = owned[0] if owned else None
 
-    asteroids_in_world = ws_state.get("asteroids", [])
-    planets_in_world = ws_state.get("planets", [])
+    # Use WS asteroids if available; fall back to REST-synced state asteroids
+    asteroids_in_world = ws_state.get("asteroids", []) or state.get("asteroids", {}).values()
+    if isinstance(asteroids_in_world, dict):
+        asteroids_in_world = list(asteroids_in_world.values())
+    planets_in_world = ws_state.get("planets", []) or state.get("planets", [])
 
     mining_failures = state.get("mining_failures", 0)
     has_laser = state.get("has_mining_laser", False)
@@ -112,7 +115,12 @@ def decide_actions(state: dict, ws_state: dict) -> list:
     idle = [u for u in owned if not u.get("miningAsteroidId") and not u.get("dockedAtPlanetId")]
 
     pending = state.get("_pending_minerals", {})
-    all_minerals = {k: {"amount": v.get("amount", 0) + pending.get(k, 0)} for k, v in minerals.items()}
+    # Merge REST minerals + pending WS yields; handle empty REST minerals gracefully
+    if minerals:
+        all_minerals = {k: {"amount": v.get("amount", 0) + pending.get(k, 0)} for k, v in minerals.items()}
+    else:
+        # REST sync cleared minerals (or none yet) — use pending only
+        all_minerals = {k: {"amount": v} for k, v in pending.items()}
 
     # ── Tier-0 asteroids: miningLevel=0 AND no required component ──
     tier0_asteroids = [
@@ -149,7 +157,12 @@ def decide_actions(state: dict, ws_state: dict) -> list:
                     "ws": True
                 })
         elif not tier0_asteroids:
-            logger.warning("No mineable asteroids (Basic Mining Array compatible).")
+            # Prevent moving toward Earth (0,0) when already on/near an asteroid
+            scout_pos = scout.get("position", {})
+            if scout_pos and distance_hex(scout_pos, {"q": 0, "r": 0}) <= 20:
+                logger.warning("Scout near asteroid but none in range — staying put.")
+            else:
+                logger.warning("No mineable asteroids (Basic Mining Array compatible).")
 
     elif mining_blocked:
         logger.warning("Mining blocked: 5+ failures. Waiting for Mk1 Mining Laser.")
