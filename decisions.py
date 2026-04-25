@@ -115,10 +115,6 @@ def decide_actions(state: dict, ws_state: dict) -> list:
     mining = [u for u in owned if u.get("miningAsteroidId")]
     idle = [u for u in owned if not u.get("miningAsteroidId") and not u.get("dockedAtPlanetId")]
 
-    # ── Action: Move toward asteroid if not adjacent ──
-    mining = [u for u in owned if u.get("miningAsteroidId")]
-    idle = [u for u in owned if not u.get("miningAsteroidId") and not u.get("dockedAtPlanetId")]
-
     # Try mining regardless of laser status — let the server tell us if it fails.
     # Failure counter then drives the block after 5 attempts.
     mining_failures = state.get("mining_failures", 0)

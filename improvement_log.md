@@ -28,18 +28,25 @@ Root stall cause: Basic Mining Array can't mine available asteroids (require Mk1
 
 **Status:** No issues detected.
 
-## Self-Improve — 2026-04-25 01:04 UTC (Self-Review)
+## Self-Improve — 2026-04-25 06:41 UTC (Self-Review)
 
 **Resource Trend:** ISD=0 credits=0 minerals=0 | sells=0 combat_wins=0 mining=0 ⚠️ Deadlock
 **Token:** ✅ Valid
 
-**Status:** 🚨 ESCALATED TO JONATHAN — Resource deadlock. No code fix available.
+**Status:** No code failures. Cron timeout fix applied (120s→240s).
 
-**Root cause:** Basic Mining Array can't mine any nearby asteroid (all require Mk1+). Agent has 0 ISD to buy upgrade. No combat income possible (Scout attack=0).
+**Root cause:** Dual deadlock:
+1. Mining: Basic Mining Array can't mine any asteroids in range (all require Mk1+). Scout attack=0.
+2. Combat: Scout attack=0 — EDF Fighters visible but can't damage them.
+3. No ISD, no combat income, no minerals, no progression path.
+
+
+**What I did:**
+- Bumped self-review cron timeout 120s→240s (was timing out, consecutiveErrors: 7)
 
 **Options:**
-1. ISD injection (~1 ISD to buy Mk1 Mining Laser)
-2. Confirm if tier-0 asteroids exist in the world
-3. Sell components from inventory
+1. ISD injection (~1 ISD to buy Mk1 Mining Laser) — fastest fix
+2. Jonathan confirms if tier-0 asteroids exist anywhere
+3. The agent continues cycling but is resource-stalled until ISD injected
 
-Discord escalation failed (timeout). Jonathan reviewed this cron output directly.
+Escalation: Discord escalation already attempted prior cycles. Jonathan has been informed.
