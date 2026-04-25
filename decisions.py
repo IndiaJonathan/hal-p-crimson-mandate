@@ -117,9 +117,14 @@ def decide_actions(state: dict, ws_state: dict) -> list:
 
     # Only try mining if we have a laser OR failures are low
     can_mine = has_laser  # Only mine if we have a Mining Laser confirmed by REST sync
+    mining_blocked = (not can_mine and mining_failures >= 3)
 
-    if scout and not mining and asteroids_in_world and can_mine:
-        target = find_nearest_asteroid(scout.get("position", {}), asteroids_in_world, max_tier=0)
+    if scout and not mining and asteroids_in_world and not mining_blocked:
+        # Only mine from tier-0 asteroids (miningLevel=0) compatible with Basic Mining Array
+        # Asteroids with miningLevel >= 1 require Mk1+ mining laser
+        tier0_asteroids = [a for a in asteroids_in_world
+                         if not a.get("isDepleted") and a.get("miningLevel", 0) == 0]
+        target = find_nearest_asteroid(scout.get("position", {}), tier0_asteroids, max_tier=0)
         if target:
             tpos = target.get("position", {})
             dist = distance_hex(scout.get("position", {}), tpos)
@@ -137,8 +142,10 @@ def decide_actions(state: dict, ws_state: dict) -> list:
                     "payload": {"unitId": scout["id"], "targetHex": tpos},
                     "ws": True
                 })
-    elif scout and not mining and asteroids_in_world and not can_mine:
-        logger.warning("Mining blocked: no Mining Laser detected. Waiting for unlock.")
+        elif not tier0_asteroids:
+            logger.warning("No tier-0 asteroids available. Basic Mining Array blocked.")
+    elif mining_blocked:
+        logger.warning("Mining blocked: no Mining Laser detected, 3+ failures. Waiting for unlock.")
 
     # ── Action: Sell minerals above threshold ──
     sell_order = ["min_darkmat", "min_iridium", "min_rhodium", "min_palladium",
