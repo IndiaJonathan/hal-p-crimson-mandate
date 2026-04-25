@@ -18,6 +18,11 @@ MINERAL_SELL_THRESHOLDS = {
 # Asteroids near Earth tend to be common tier
 COMMON_MINERAL_IDS = ["min_copper", "min_iron"]
 
+def asteroid_has_common_minerals(a: dict) -> bool:
+    """Return True if asteroid has at least one common mineral the Basic Mining Array can extract."""
+    comp = a.get("mineralComposition", {})
+    return any(comp.get(mid, 0) > 0 for mid in COMMON_MINERAL_IDS)
+
 # Preferred asteroids by tier
 ASTEROID_MINERAL_TIER = {
     # tier 0: common only — Basic Mining Array works
@@ -122,20 +127,22 @@ def decide_actions(state: dict, ws_state: dict) -> list:
         # REST sync cleared minerals (or none yet) — use pending only
         all_minerals = {k: {"amount": v} for k, v in pending.items()}
 
-    # ── Tier-0 asteroids: miningLevel=0 AND no required component ──
+    # Tier-0 asteroids: miningLevel=0, no required component, AND has mineable common minerals
     tier0_asteroids = [
         a for a in asteroids_in_world
         if not a.get("isDepleted")
         and a.get("miningLevel", 0) == 0
         and a.get("requiredComponentId") is None
+        and asteroid_has_common_minerals(a)
     ]
 
-    # Fall back to any asteroid with no required component if none have miningLevel=0
+    # Fall back to any asteroid with no required component AND common minerals
     if not tier0_asteroids:
         tier0_asteroids = [
             a for a in asteroids_in_world
             if not a.get("isDepleted")
             and a.get("requiredComponentId") is None
+            and asteroid_has_common_minerals(a)
         ]
 
     # ── Mine or move to asteroid ──

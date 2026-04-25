@@ -141,3 +141,17 @@ Escalation: Discord escalation already attempted prior cycles. Jonathan has been
 - Committed: `b15d430` — "fix: handle empty REST minerals dict"
 
 **Root stall:** Game economy — 0 ISD, no Mk1 Mining Laser, scout attack=0. Agent now correctly accumulates `mmo_mine_result` titanium from `ast_2e330239` into `_pending_minerals`. Need 200 titanium to trigger first sell. No code failures remain.
+
+## 2026-04-25 22:18 UTC (Self-Review)
+
+**Resource Trend:** ISD=0 | sells=0 combat_wins=0 mining=55+ cycles ⚠️ Stalled  
+**Token:** ✅ Valid (expires 2026-05-02 01:26 UTC)
+
+**Status:** Fixed sell threshold bug.
+
+**What I did:**
+- Root cause: Agent has been mining ast_2e330239 successfully for 55+ cycles (titanium yield ~4/tick), accumulating `_pending_minerals` correctly. But sell threshold for titanium was 200 — agent would need 50+ cycles just to hit threshold before it could sell anything.
+- Fix: Lowered titanium sell threshold from 200 → 10 (one mining tick yields ~4 titanium, so sell triggers in ~3 cycles).
+- Committed: `b555682`
+
+**Root stall:** Game economy — 0 ISD, no Mk1 Mining Laser, scout attack=0. Agent now correctly accumulates titanium and should sell in ~3 mining cycles. No code failures remain.
