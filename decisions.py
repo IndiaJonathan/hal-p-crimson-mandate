@@ -116,7 +116,7 @@ def decide_actions(state: dict, ws_state: dict) -> list:
     idle = [u for u in owned if not u.get("miningAsteroidId") and not u.get("dockedAtPlanetId")]
 
     # Only try mining if we have a laser OR failures are low
-    can_mine = has_laser or mining_failures < 2
+    can_mine = has_laser  # Only mine if we have a Mining Laser confirmed by REST sync
 
     if scout and not mining and asteroids_in_world and can_mine:
         target = find_nearest_asteroid(scout.get("position", {}), asteroids_in_world, max_tier=0)

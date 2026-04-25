@@ -236,7 +236,11 @@ def action_sync(state: dict, token: str) -> dict:
             ("/api/research/board", "research_board"),
         ]:
             data = api_get(path, token)
-            if not isinstance(data, dict) or not data.get("success"):
+            # Only enforce success-check on endpoints that wrap in {"success": bool, "data": ...}
+            needs_success = key not in ("components",)
+            if not isinstance(data, dict):
+                continue
+            if needs_success and not data.get("success"):
                 continue
             if key == "commander_meta":
                 d = data.get("data", {})
@@ -251,11 +255,11 @@ def action_sync(state: dict, token: str) -> dict:
                 state["research_board"] = data if isinstance(data, list) else (data.get("data") or [])
             elif key == "components":
                 components = data.get("components", []) if isinstance(data, dict) else []
-                has_laser = any("mining" in c.get("name","").lower() or "laser" in c.get("name","").lower() for c in components)
+                has_laser = any("mining laser" in c.get("name","").lower() for c in components)
+                state["has_mining_laser"] = has_laser
                 if has_laser:
-                    state["has_mining_laser"] = True
                     state["mining_failures"] = 0
-                    logger.info(f"✓ Mining Laser detected ({len(components)} components)")
+                    logger.info(f"✓ Mining Laser detected!")
     except Exception as e:
         logger.error(f"Sync error: {e}")
     return state
@@ -467,7 +471,7 @@ def run_cycle():
                     comp_resp = api_get("/api/components/inventory", token)
                     if comp_resp.get("success"):
                         components = comp_resp.get("components", [])
-                        has_laser = any("mining" in c.get("name","").lower() or "laser" in c.get("name","").lower() for c in components)
+                        has_laser = any("mining laser" in c.get("name","").lower() for c in components)
                         if has_laser:
                             state["has_mining_laser"] = True
                             state["mining_failures"] = 0
