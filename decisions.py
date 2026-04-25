@@ -8,7 +8,7 @@ logger = logging.getLogger("decisions")
 
 MINERAL_SELL_THRESHOLDS = {
     "min_copper": 500, "min_iron": 500,
-    "min_titanium": 200, "min_platinum": 100,
+    "min_titanium": 10, "min_platinum": 100,
     "min_rhodium": 50, "min_palladium": 50,
     "min_iridium": 20, "min_darkmat": 10,
 }

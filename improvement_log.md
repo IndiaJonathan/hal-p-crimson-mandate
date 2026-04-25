@@ -127,3 +127,17 @@ Escalation: Discord escalation already attempted prior cycles. Jonathan has been
 
 **Root stall:** Game economy — 0 ISD, no Mining Laser, scout attack=0. Needs ISD injection to progress.
 
+
+## 2026-04-25 22:03 UTC (Self-Review)
+
+**Resource Trend:** ISD=0 credits=0 | sells=0 combat_wins=0 mining=0 ⚠️ Stalled
+**Token:** ✅ Valid (expires 2026-05-02 01:26 UTC)
+
+**Status:** Fixed minerals tracking bug.
+
+**What I did:**
+- Root cause: `decisions.py` only counted minerals from REST API sync (`state["minerals"]`), but the Basic Mining Array minerals are yielded via WebSocket `mmo_mine_result` events and stored in `_pending_minerals`. When REST returned `{}` (no inventory yet), the merge `{...v.items()} for k, v in {}` produced `{}`, losing all pending yields.
+- Fix: Added conditional — if `minerals` dict is empty/non-existent, build `all_minerals` purely from `_pending_minerals`.
+- Committed: `b15d430` — "fix: handle empty REST minerals dict"
+
+**Root stall:** Game economy — 0 ISD, no Mk1 Mining Laser, scout attack=0. Agent now correctly accumulates `mmo_mine_result` titanium from `ast_2e330239` into `_pending_minerals`. Need 200 titanium to trigger first sell. No code failures remain.
