@@ -50,3 +50,20 @@ Root stall cause: Basic Mining Array can't mine available asteroids (require Mk1
 3. The agent continues cycling but is resource-stalled until ISD injected
 
 Escalation: Discord escalation already attempted prior cycles. Jonathan has been informed.
+
+## 2026-04-25 06:56 UTC (Self-Review)
+
+**Resource Trend:** ISD=0 credits=0 minerals=0 | sells=0 combat_wins=0 mining=0 ⚠️ Deadlock
+**Token:** ✅ Valid
+
+**Status:** Code failures found and fixed.
+
+**What I did:**
+- Found root cause: `cron.err.log` showed repeated `ModuleNotFoundError: No module named 'requests'` — the launchd plist for `com.burk.crimson-mandate-agent` was using `/usr/bin/python3` instead of the venv python3
+- Fixed: Updated plist to use venv path `.../venv/bin/python3`
+- Restarted the LaunchAgent
+
+**Remaining deadlock:**
+- Scout attack=0, no Mining Laser, 0 ISD → no progression path without external ISD injection
+- This is a game economy stall, not a code failure
+- Token valid, code runs clean now that venv python is used
