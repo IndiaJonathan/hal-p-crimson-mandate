@@ -418,10 +418,10 @@ def run_cycle():
 
     logger.info(f"Owned: {len(owned)} units | Asteroids: {len(asteroids)} | Planets: {len(planets)}")
 
-    # ── Combat: Attack nearby enemies if scout is available ──
+    # ── Combat: Attack nearby enemies if scout has attack power ──
     scout = next((u for u in owned if u.get("type") == "Scout"), None)
     combat_happened = False
-    if scout:
+    if scout and scout.get("attack", 0) > 0:
         edf = [u for u in units if u.get("ownerName") == "Earth Defense Force"]
         scout_pos = scout.get("position", {})
         enemies = sorted(edf, key=lambda e: distance_hex(scout_pos, e.get("position", {})))

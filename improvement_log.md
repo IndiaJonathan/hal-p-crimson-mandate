@@ -79,3 +79,18 @@ Escalation: Discord escalation already attempted prior cycles. Jonathan has been
 - Scout attack=0, no Mining Laser, 0 ISD → no progression path without external ISD injection
 - This is a game economy stall, not a code failure
 - Token valid, code runs clean now that venv python is used
+
+## 2026-04-25 12:41 UTC (Self-Review)
+
+**Resource Trend:** ISD=0 credits=0 minerals=0 | sells=0 combat_wins=0 mining=0 ⚠️ Stalled
+**Token:** ✅ Valid
+
+**Status:** Fixed mineral accumulation bug.
+
+**What I did:**
+- `decisions.py` was reading minerals from REST API state (`minerals` dict) but the Basic Mining Array is actually yielding minerals via WebSocket `mmo_mine_result` events — they were never being counted toward the sell threshold.
+- Fixed: `runner.py` now accumulates `mmo_mine_result` yields into a `_pending_minerals` in-memory buffer.
+- Fixed: `decisions.py` `decide_actions()` now merges `_pending_minerals` into the minerals dict before the sell threshold check.
+- Code committed and pushed.
+
+**Root stall:** No ISD, no Mining Laser, scout attack=0. Mining yield IS flowing via WS events (seen in log). With pending minerals fix, once enough titanium (threshold=200) is accumulated the agent will attempt to sell. No code failures remain.
