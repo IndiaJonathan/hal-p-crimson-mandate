@@ -115,9 +115,15 @@ def decide_actions(state: dict, ws_state: dict) -> list:
     mining = [u for u in owned if u.get("miningAsteroidId")]
     idle = [u for u in owned if not u.get("miningAsteroidId") and not u.get("dockedAtPlanetId")]
 
-    # Only try mining if we have a laser OR failures are low
-    can_mine = has_laser  # Only mine if we have a Mining Laser confirmed by REST sync
-    mining_blocked = (not can_mine and mining_failures >= 3)
+    # ── Action: Move toward asteroid if not adjacent ──
+    mining = [u for u in owned if u.get("miningAsteroidId")]
+    idle = [u for u in owned if not u.get("miningAsteroidId") and not u.get("dockedAtPlanetId")]
+
+    # Try mining regardless of laser status — let the server tell us if it fails.
+    # Failure counter then drives the block after 5 attempts.
+    mining_failures = state.get("mining_failures", 0)
+    has_laser = state.get("has_mining_laser", False)
+    mining_blocked = (mining_failures >= 5)
 
     if scout and not mining and asteroids_in_world and not mining_blocked:
         # Only mine from tier-0 asteroids (miningLevel=0) compatible with Basic Mining Array
@@ -145,7 +151,7 @@ def decide_actions(state: dict, ws_state: dict) -> list:
         elif not tier0_asteroids:
             logger.warning("No tier-0 asteroids available. Basic Mining Array blocked.")
     elif mining_blocked:
-        logger.warning("Mining blocked: no Mining Laser detected, 3+ failures. Waiting for unlock.")
+        logger.warning("Mining blocked: 5 consecutive failures. Waiting for Mk1 Mining Laser.")
 
     # ── Action: Sell minerals above threshold ──
     sell_order = ["min_darkmat", "min_iridium", "min_rhodium", "min_palladium",
