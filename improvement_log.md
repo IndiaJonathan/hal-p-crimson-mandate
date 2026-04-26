@@ -1,3 +1,16 @@
+## Self-Improve — 2026-04-26 13:39 UTC (HAL-P Self-Review)
+
+**Token:** ✅ Valid (expires 2026-05-02 01:26 UTC)
+**Code:** Clean + 1 bug fix committed.
+
+**BUG FIX (runner.py, commit `e45dbcb`):** `mining_failures` counter was never incrementing because the components API path (`/api/components/inventory`) returns non-success responses — the entire laser-detection and failure-tracking block was silently skipped. `mining_failures` stayed at 0 across 100+ cycles, circuit breaker in decisions.py was wired but never armed.
+
+**Fix:** Track mining failures directly from the WebSocket `error` message ("Your Basic Mining Array cannot extract minerals from this asteroid. A higher-tier mining laser is required.") which fires reliably on every failed mining call. After 5 failures, decisions.py will correctly block mining.
+
+**Root cause unchanged:** TRUE GAME ECONOMY DEADLOCK — all 5 nearby asteroids are titanium/platinum/gold only. Basic Mining Array yields 0. No Mk1 Mining Laser. 0 ISD. No code fix available — game admin action required to break deadlock.
+
+---
+
 ## Self-Improve — 2026-04-26 06:39 UTC (Self-Review)
 
 **Resource Trend:** ISD=0 | sells=0 combat_wins=0 mining=100+ cycles ⚠️ True Deadlock
