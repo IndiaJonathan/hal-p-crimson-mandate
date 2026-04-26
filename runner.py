@@ -104,6 +104,15 @@ class MMOClient:
             self._events.setdefault(msg_type, []).append(payload)
             self._cv.notify_all()
 
+        # Track mining-failure warning directly from WS error messages
+        # (the components API check is unreliable — server returns non-success on that endpoint)
+        if msg_type == "error":
+            err_msg = payload.get("message", "")
+            if "Basic Mining Array cannot extract" in err_msg:
+                # Fire a custom event so run_cycle can pick it up without needing the components API
+                with self._cv:
+                    self._events.setdefault("mining_failure_warning", []).append(err_msg)
+
         if msg_type == "auth_success":
             self.authenticated = True
             self._send({"type": "mmo_join_world", "payload": {"worldId": 1}})
@@ -480,25 +489,24 @@ def run_cycle():
                             break
 
                 time.sleep(3)
-                
-                # Track mining failures
+
+                # Track mining failures: check WS error messages (not components API — that path is broken)
                 if atype == "mine_asteroid":
-                    # Check components for Mining Laser
-                    comp_resp = api_get("/api/components/inventory", token)
-                    if comp_resp.get("success"):
-                        components = comp_resp.get("components", [])
-                        has_laser = any("mining laser" in c.get("name","").lower() for c in components)
-                        if has_laser:
-                            state["has_mining_laser"] = True
+                    failure_msgs = c.wait_for("mining_failure_warning", timeout=1.0)
+                    if failure_msgs:
+                        # Mining Laser not present — server warned on this call
+                        state["has_mining_laser"] = False
+                        state["mining_failures"] = state.get("mining_failures", 0) + 1
+                        save_state(state)
+                        logger.warning(f"Mining Laser missing (failure #{state['mining_failures']}) — circuit breaker {'ARMED' if state['mining_failures'] >= 3 else 'counting'}."[:120])
+                    else:
+                        # No warning = laser detected or real yield
+                        state["has_mining_laser"] = True
+                        if state.get("mining_failures", 0) > 0:
                             state["mining_failures"] = 0
-                            logger.info("✓ Mining Laser detected!")
-                        else:
-                            # Increment failure counter
-                            state["mining_failures"] = state.get("mining_failures", 0) + 1
                             save_state(state)
-                            if state["mining_failures"] >= 3:
-                                logger.warning("Mining Laser missing — 3 consecutive failures. Circuit breaker armed.")
-                
+                            logger.info("✓ Mining Laser confirmed / yield received — circuit breaker reset.")
+
                 c.stop()
                 state = log_action(state, atype, str(payload), "ok")
 

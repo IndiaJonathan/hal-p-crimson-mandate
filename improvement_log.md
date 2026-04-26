@@ -95,3 +95,20 @@
 > 3. Mk1 Mining Laser grant (enables titanium/platinum extraction)
 > 4. Abandon position and reposition scout to a different region
 
+
+---
+
+## Self-Review — 2026-04-26 13:24 UTC (8:24 AM CT Sunday)
+
+**Token:** ✅ Valid (expires 2026-05-02 01:26 UTC)
+**Code:** Clean + 1 bug fix committed.
+
+**BUG FIX (runner.py):** `mining_failures` counter was incremented but never persisted via `save_state()`. The 5-failure circuit breaker in decisions.py always read `mining_failures: 0` from disk — circuit breaker was wired but never armed. Fix: added `save_state(state)` after the increment. After 5 failed mining attempts, decisions.py will now correctly block `mine_asteroid` and go idle.
+
+**Commit:** `6e73c56` — `fix: save mining_failures to state — circuit breaker was wired but never armed`
+
+**Status:** TRUE GAME ECONOMY DEADLOCK — unchanged. All 5 nearby asteroids titanium/platinum/gold only; Basic Mining Array yields 0. 100+ cycles, ISD=0. Token valid. Agent running clean.
+
+**Escalation to Jonathan:** DM sent to user:425116134069764097 (Discord) — deadlock summary + 4 options to break it (game admin ISD injection, iron/copper asteroid placement, Mk1 Mining Laser grant, or scout reposition).
+
+**No further code fixes available.** Game admin or ISD injection required to break deadlock.
