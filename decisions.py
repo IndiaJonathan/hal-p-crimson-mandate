@@ -13,24 +13,7 @@ MINERAL_SELL_THRESHOLDS = {
     "min_iridium": 20, "min_darkmat": 10,
 }
 
-# Tier 1 mining laser (Mk1) unlocks uncommon minerals
-# Tier 0 (Basic Mining Array) only handles COMMON minerals
-# Asteroids near Earth tend to be common tier
-COMMON_MINERAL_IDS = ["min_copper", "min_iron"]
 
-def asteroid_has_common_minerals(a: dict) -> bool:
-    """Return True if asteroid has at least one common mineral the Basic Mining Array can extract."""
-    comp = a.get("mineralComposition", {})
-    return any(comp.get(mid, 0) > 0 for mid in COMMON_MINERAL_IDS)
-
-# Preferred asteroids by tier
-ASTEROID_MINERAL_TIER = {
-    # tier 0: common only — Basic Mining Array works
-    # tier 1: uncommon — requires Mining Laser Mk1 ($1)
-    # tier 2: rare — requires Mining Laser Mk2 ($2)
-    # tier 3: epic — requires Mining Laser Mk3 ($4)
-    # tier 4: legendary — requires Mining Laser Mk4 ($6)
-}
 
 
 def parse_world_state(ws_payload: dict) -> dict:
@@ -127,22 +110,22 @@ def decide_actions(state: dict, ws_state: dict) -> list:
         # REST sync cleared minerals (or none yet) — use pending only
         all_minerals = {k: {"amount": v} for k, v in pending.items()}
 
-    # Tier-0 asteroids: miningLevel=0, no required component, AND has mineable common minerals
+    # Tier-0 asteroids: not depleted, no required component.
+    # Let the server tell us if Basic Mining Array can't extract —
+    # don't pre-filter on mineral composition (server is authoritative).
     tier0_asteroids = [
         a for a in asteroids_in_world
         if not a.get("isDepleted")
         and a.get("miningLevel", 0) == 0
         and a.get("requiredComponentId") is None
-        and asteroid_has_common_minerals(a)
     ]
 
-    # Fall back to any asteroid with no required component AND common minerals
+    # Fall back to any non-depleted asteroid with no required component
     if not tier0_asteroids:
         tier0_asteroids = [
             a for a in asteroids_in_world
             if not a.get("isDepleted")
             and a.get("requiredComponentId") is None
-            and asteroid_has_common_minerals(a)
         ]
 
     # ── Mine or move to asteroid ──
