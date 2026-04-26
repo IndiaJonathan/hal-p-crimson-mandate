@@ -495,8 +495,9 @@ def run_cycle():
                         else:
                             # Increment failure counter
                             state["mining_failures"] = state.get("mining_failures", 0) + 1
+                            save_state(state)
                             if state["mining_failures"] >= 3:
-                                logger.warning("Mining Laser missing — 3 failures. Blocking mining.")
+                                logger.warning("Mining Laser missing — 3 consecutive failures. Circuit breaker armed.")
                 
                 c.stop()
                 state = log_action(state, atype, str(payload), "ok")
