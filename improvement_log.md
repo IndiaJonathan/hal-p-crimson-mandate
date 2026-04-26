@@ -125,3 +125,19 @@
 **Escalation to Jonathan:** DM sent to user:425116134069764097 (Discord) — deadlock summary + 4 options to break it (game admin ISD injection, iron/copper asteroid placement, Mk1 Mining Laser grant, or scout reposition).
 
 **No further code fixes available.** Game admin or ISD injection required to break deadlock.
+
+---
+
+## Self-Improve — 2026-04-26 15:25 UTC (HAL-P Self-Review)
+
+**Token:** ✅ Valid (expires 2026-05-02 01:26 UTC)
+
+**BUG FIX (runner.py, commit `ecd7940`):** `wait_for("mining_failure_warning", timeout=1.0)` was called after a 3-second `time.sleep()`. The WebSocket `error` message containing "Basic Mining Array cannot extract" arrives during that sleep (in the background `on_message` thread). By the time `wait_for` checks at t+3s, the event has already been handled by `on_message` setting `mining_failure_warning` — but `wait_for` then pops that event, so a subsequent call returns `[]`. The run cycle saw no failure and reset the counter instead of incrementing it. Circuit breaker was never armed.
+
+**Fix:** Added `self._mining_failure_detected = True` set directly in `on_message` when the error fires. The run cycle checks this boolean instance flag after the sleep instead of calling `wait_for`. No race condition, no timeout dependency.
+
+**Status:** TRUE GAME ECONOMY DEADLOCK — unchanged. All 5 nearby asteroids titanium/platinum/gold only; Basic Mining Array yields 0. `mining_failures` in state.json was 16 from a prior run where timing happened to work — current execution was stuck at 0 due to this race. Circuit breaker should now arm correctly after 5 cycles.
+
+**Commit:** `ecd7940` — pushed to origin/main.
+
+**Escalation:** Discord escalation already sent at 08:24 AM CT Sunday per prior self-review. Deadlock requires game admin action — no further code fixes available.
