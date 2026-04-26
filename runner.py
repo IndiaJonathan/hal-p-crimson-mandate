@@ -436,9 +436,13 @@ def run_cycle():
 
     logger.info(f"Owned: {len(owned)} units | Asteroids: {len(asteroids)} | Planets: {len(planets)}")
 
-    # ── Merge fresh unit positions from WS state into state["units"] ──
-    # This fixes stale-position bugs where REST state had wrong scout coords
+    # ── Patch BOTH ws_state AND state with fresh unit positions from WebSocket ──
+    # ws_state["units"] is the source of truth for decide_actions — must patch it too
     fresh_positions = {u["id"]: u.get("position", {}) for u in units}
+    for u in ws_state.get("units", []):
+        if u["id"] in fresh_positions:
+            u["position"] = fresh_positions[u["id"]]
+    # Also keep state["units"] in sync for next cycle's REST fallback
     for u in state.get("units", []):
         if u["id"] in fresh_positions:
             u["position"] = fresh_positions[u["id"]]
