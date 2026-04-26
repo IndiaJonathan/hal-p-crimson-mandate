@@ -91,6 +91,7 @@ class MMOClient:
         self._send({"type": "auth", "payload": {"sessionId": self.token}})
 
     _golden_asteroid_spawned = None
+    _mining_failure_detected = False
 
     def _on_message(self, ws, msg):
         try:
@@ -112,6 +113,8 @@ class MMOClient:
                 # Fire a custom event so run_cycle can pick it up without needing the components API
                 with self._cv:
                     self._events.setdefault("mining_failure_warning", []).append(err_msg)
+                # Also set instance flag — wait_for may miss it if the message arrives during sleep
+                self._mining_failure_detected = True
 
         if msg_type == "auth_success":
             self.authenticated = True
@@ -492,8 +495,8 @@ def run_cycle():
 
                 # Track mining failures: check WS error messages (not components API — that path is broken)
                 if atype == "mine_asteroid":
-                    failure_msgs = c.wait_for("mining_failure_warning", timeout=1.0)
-                    if failure_msgs:
+                    if c._mining_failure_detected:
+                        c._mining_failure_detected = False  # reset for next cycle
                         # Mining Laser not present — server warned on this call
                         state["has_mining_laser"] = False
                         state["mining_failures"] = state.get("mining_failures", 0) + 1
