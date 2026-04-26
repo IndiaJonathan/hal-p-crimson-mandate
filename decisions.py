@@ -80,7 +80,9 @@ def decide_actions(state: dict, ws_state: dict) -> list:
     actions = []
     token = state.get("session", {}).get("token", "")
     user_id = state["commander"]["userId"]
-    units = state.get("units", [])
+    # Prefer freshly-patched ws_state units (with live positions) over state units.
+    # ws_state units are patched with live WS positions in runner.py before this runs.
+    units = ws_state.get("units") or state.get("units", [])
     minerals = state.get("minerals", {})
     balance = state.get("balance", {})
     owned = [u for u in units if u.get("ownerId") == user_id]

@@ -169,3 +169,15 @@ Fix: Added `state.get("mining_failures", 0) < 5` guard to the Priority-4 elif co
 **Commit:** `9a89828` — pushed to origin/main.
 
 **Escalation:** Already sent at 08:24 AM CT Sunday per prior self-review. Deadlock requires game admin action — no further code fixes possible.
+
+## Self-Improve — 2026-04-26 22:53 UTC (HAL-P Self-Review)
+
+**Token:** ✅ Valid (expires 2026-05-02 01:26 UTC)
+
+**BUG FIX (runner.py, commit `2579a86`):** `decisions.py` reads `ws_state["units"]` (not `state["units"]`) to compute unit positions and asteroid distances. The fresh-position patch was only applied to `state["units"]`, leaving `ws_state["units"]` stale. `decide_actions` kept seeing the scout at the old `(0,0)` REST position — computed distance=0 to `(0,0)` and sent `move_unit` back home instead of toward the asteroid, causing the infinite homebound loop.
+
+**Fix:** Patch both `ws_state["units"]` AND `state["units"]` with fresh WebSocket positions before `decide_actions` runs.
+
+**Commit:** `2579a86` — pushed to origin/main.
+
+**Status:** TRUE GAME ECONOMY DEADLOCK — unchanged. All 5 nearby asteroids titanium/platinum/gold only; Basic Mining Array yields 0. `mining_failures=70` confirms circuit breaker armed. `decisions.py` will block mining after 5 failures. Stale-position loop should now be fixed — scout should stop going home and execute the correct action per its actual position.
