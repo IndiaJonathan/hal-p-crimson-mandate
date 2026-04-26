@@ -281,6 +281,9 @@ def action_sync(state: dict, token: str) -> dict:
                 if has_laser:
                     state["mining_failures"] = 0
                     logger.info(f"✓ Mining Laser detected!")
+                # Do NOT reset mining_failures here when has_laser=False —
+                # that would defeat the circuit breaker by spuriously clearing the count.
+                # The WS-side failure tracker in the run loop is authoritative.
     except Exception as e:
         logger.error(f"Sync error: {e}")
     return state
@@ -490,6 +493,15 @@ def run_cycle():
                         if u.get("id") == payload.get("unitId"):
                             u["position"] = move_target
                             break
+
+                # ── Last-chance circuit breaker before sending mining action ──
+                # decisions.py may have returned this action before the failure count
+                # was incremented in the previous cycle. Guard here to ensure we
+                # never send mmo_mine_asteroid when mining_failures >= 5.
+                if atype == "mine_asteroid" and state.get("mining_failures", 0) >= 5:
+                    logger.warning(f"Circuit breaker triggered: mining_failures={state['mining_failures']} — blocking mine_asteroid.")
+                    c.stop()
+                    continue
 
                 time.sleep(3)
 
