@@ -1,3 +1,16 @@
+## Self-Improve — 2026-04-26 19:23 UTC (HAL-P Self-Review)
+
+**Token:** ✅ Valid (expires 2026-05-02 01:26 UTC)
+**Code:** 2 bugs fixed, committed `46b1b09`.
+
+**BUG FIX 1 (runner.py action_sync, commit `46b1b09`):** `action_sync` was resetting `mining_failures = 0` whenever the components API returned empty (has_laser=False). But `has_mining_laser` was only set when the API returned a result — it was NOT reset to False on empty results. So once the API returned a mining laser even once, `has_mining_laser = True` became sticky across cycles. The circuit breaker read `mining_failures` from state (which was being reset to 0) and never fired even at `mining_failures: 61`. Fix: removed the spurious reset, added comment explaining why the WS-side tracker is authoritative.
+
+**BUG FIX 2 (runner.py run_cycle, commit `46b1b09`):** Added last-chance circuit breaker guard at the execution layer, right before sending `mmo_mine_asteroid`. This guards against `decide_actions` returning a mining action in the same cycle the failure count was just incremented to 5. Now `mining_failures >= 5` blocks mining at both the decision layer AND the execution layer.
+
+**Root cause of 61 failures:** The two bugs together — spurious reset in `action_sync` kept clearing the counter, and the execution-layer guard was missing so even if `decisions.py` blocked, there was no hard stop before the WS call.
+
+**Status:** TRUE GAME ECONOMY DEADLOCK — unchanged. All 5 nearby asteroids titanium/platinum/gold only; Basic Mining Array yields 0. Circuit breaker now properly armed; agent will go idle after current failure count is processed. No further code fixes possible — game admin or ISD injection required.
+
 ## Self-Improve — 2026-04-26 13:39 UTC (HAL-P Self-Review)
 
 **Token:** ✅ Valid (expires 2026-05-02 01:26 UTC)
@@ -141,3 +154,18 @@
 **Commit:** `ecd7940` — pushed to origin/main.
 
 **Escalation:** Discord escalation already sent at 08:24 AM CT Sunday per prior self-review. Deadlock requires game admin action — no further code fixes available.
+
+## Self-Improve — 2026-04-26 20:08 UTC (HAL-P Self-Review)
+
+**Token:** ✅ Valid (expires 2026-05-02 01:26 UTC)
+
+**BUG FIX (job_crimson_mandate.py, commit `9a89828`):**
+The Priority-4 mining branch in job_crimson_mandate.py was not guarded by `mining_failures >= 5`. The circuit-breaker guard existed in the Priority-5 EDF branch (`elif not fighters and scout:`) but NOT in the mining branch. After the 5th failure the code was still executing `mmo_mine_asteroid` via Priority 4, which is why the agent kept mining even after the circuit breaker fired.
+
+Fix: Added `state.get("mining_failures", 0) < 5` guard to the Priority-4 elif condition. Also added a fallback `elif state.get("mining_failures", 0) >= 5` block at the end of the mining chain to catch cases where `best_dist > 1` and the circuit breaker has already fired.
+
+**Status:** TRUE GAME ECONOMY DEADLOCK — unchanged. All 5 nearby asteroids titanium/platinum/gold only; Basic Mining Array yields 0. Token valid. Circuit breaker now properly enforced at ALL execution paths in job_crimson_mandate.py.
+
+**Commit:** `9a89828` — pushed to origin/main.
+
+**Escalation:** Already sent at 08:24 AM CT Sunday per prior self-review. Deadlock requires game admin action — no further code fixes possible.
