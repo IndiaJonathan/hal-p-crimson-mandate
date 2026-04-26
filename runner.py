@@ -23,7 +23,10 @@ WS_URL = "wss://crimsonmandate.com/ws"
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-    handlers=[logging.StreamHandler(sys.stdout)]
+    handlers=[
+        logging.FileHandler(os.path.join(AGENT_DIR, "..", "reports", "crimson-mandate-agent.log")),
+        logging.StreamHandler(sys.stdout)
+    ]
 )
 logger = logging.getLogger("runner")
 
