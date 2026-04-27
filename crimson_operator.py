@@ -159,6 +159,8 @@ def run_cycle(cycle_num: int):
         # Don't move toward Earth while waiting for Mk1 Mining Laser.
         if state.get("mining_failures", 0) >= 5:
             action_taken = f"💤 Circuit breaker: {state['mining_failures']} mining failures — waiting for Mk1 Laser"
+            log(action_taken)
+            return True
         else:
             client2 = MMOClient(token, session_id)
             client2.start()
