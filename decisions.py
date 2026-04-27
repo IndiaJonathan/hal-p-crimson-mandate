@@ -157,7 +157,11 @@ def decide_actions(state: dict, ws_state: dict) -> list:
                 logger.warning("No mineable asteroids (Basic Mining Array compatible).")
 
     elif mining_blocked:
-        logger.warning("Mining blocked: 5+ failures. Waiting for Mk1 Mining Laser.")
+        logger.warning("Mining blocked: 5+ failures. Scout staying put — need Mk1 Mining Laser.")
+        # Ensure scout doesn't drift toward Earth while waiting for Mk1 Laser.
+        # Even though tier0 asteroids exist on disk, we can't extract from them
+        # (all nearby are titanium/platinum/gold only). Stay at current position.
+        pass  # No movement, no mining — wait for Mk1 Laser or admin intervention
 
     # ── Sell minerals above threshold ──
     sell_order = ["min_darkmat", "min_iridium", "min_rhodium", "min_palladium",
