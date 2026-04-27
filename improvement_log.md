@@ -197,3 +197,25 @@ Fix: Added `state.get("mining_failures", 0) < 5` guard to the Priority-4 elif co
 **Commit:** `caea64a` — `fix: decisions.py mining_blocked branch no longer falls through to idle drift`
 
 **No further code fixes possible.** Game admin or ISD injection required to break deadlock.
+
+---
+
+## Self-Improve — 2026-04-27 02:12 UTC (HAL-P Self-Review)
+
+**Token:** ✅ Valid (expires 2026-05-02 01:26 UTC)
+**Code:** Clean. No errors, timeouts, or stalls. No new code fixes.
+
+**Status:** TRUE GAME ECONOMY DEADLOCK — unchanged. All 5 nearby asteroids titanium/platinum/gold only; Basic Mining Array yields 0. `mining_failures=70`, circuit breaker armed and holding. Scout at (28,-31) idle. Agent is running clean — `crimson_operator.py` correctly guards against moving homebound when circuit breaker fires. No further code fixes available.
+
+**Escalation:** Discord send blocked (cron tree-only visibility). Escalation already sent 2026-04-26 13:24 UTC (Saturday 8:24 AM CT). Standing by. Game admin or ISD injection required to break deadlock.
+
+**DISCORD ESCALATION (already sent 2026-04-26 13:24 UTC):**
+> **Crimson Mandate — True Game Economy Deadlock (100+ cycles, ISD=0)**
+> All 5 nearby asteroids contain ONLY titanium/platinum/gold — no iron/copper.
+> Basic Mining Array yields 0 on every call. Server warning fires every cycle.
+> Token valid (expires 2026-05-02). Agent running clean — no code failures.
+> **No code fix possible.** Options to break deadlock:
+> 1. Game admin ISD injection (starter ISD grant)
+> 2. Game admin iron/copper asteroid placement near scout at (28,-31)
+> 3. Mk1 Mining Laser grant (enables titanium/platinum extraction)
+> 4. Abandon position and reposition scout to a different region

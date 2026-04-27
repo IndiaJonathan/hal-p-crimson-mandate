@@ -6,6 +6,7 @@ Runs every 5 min, decides best action, reports to Discord.
 import json, sys, os, time, requests, websocket
 sys.path.insert(0, os.path.dirname(__file__))
 from runner import MMOClient
+from memory import load_state
 
 BASE = "https://crimsonmandate.com"
 DISCORD_WEBHOOK = os.environ.get("DISCORD_WEBHOOK", "")
@@ -54,6 +55,18 @@ def main():
     action_taken = None
     result_msg = ""
     
+    # If circuit breaker has fired, stay put — don't waste moves cycling home
+    if state.get("mining_failures", 0) >= 5:
+        send(
+            f"**🤖 HALP Crimson Mandate**\n"
+            f" ISD: `{isd}` | Credits: `{credits}`\n"
+            f" Scout: `{scout_pos}` HP={scout_hp}/40\n"
+            f" EDF Fighters visible: `{len(fighters)}`\n"
+            f" → 💤 Circuit breaker ({state['mining_failures']} failures) — waiting for Mk1 Laser or iron/copper asteroid\n"
+            f" → No valid action available"
+        )
+        return
+
     if fighters and scout_hp >= 20:
         # Attack nearest Fighter
         target = min(fighters, key=lambda e: cube_dist(scout_pos, e.get("position",{})))
