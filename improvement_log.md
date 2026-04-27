@@ -200,6 +200,55 @@ Fix: Added `state.get("mining_failures", 0) < 5` guard to the Priority-4 elif co
 
 ---
 
+## Self-Improve — 2026-04-27 19:22 UTC (HAL-P Self-Review)
+
+**Token:** ✅ Valid (expires 2026-05-02 01:26 UTC)
+**Code:** 1 operational fix — operator LaunchAgent was running stale code (no circuit breaker guard).
+
+**ROOT CAUSE — Code Drift:**
+`com.burk.crimson-mandate-operator` was started on **2026-04-25 03:56 UTC** and never restarted. It was running `crimson_operator.py` from the pre-circuit-breaker era. All fixes committed Apr 26-27 (`17c9d5b`, `8745e0b`, `a9b20e4`) were never loaded by the running process.
+
+**FIX:** Restarted `com.burk.crimson-mandate-operator` via `launchctl load`. Operator now runs latest code.
+
+**Verification:** Cycle 1 (19:25 UTC) correctly reads `Failures=70` and goes idle:
+`💤 Circuit breaker: 70 mining failures — waiting for Mk1 Laser`
+
+**Status:** TRUE GAME ECONOMY DEADLOCK unchanged. Circuit breaker now properly holding. Scout stays at current position. No further code fixes available — game admin or ISD injection required to break deadlock.
+
+---
+
+## Self-Improve — 2026-04-27 21:24 UTC (HAL-P Self-Review)
+
+**Token:** ✅ Valid (expires 2026-05-02 01:26 UTC)
+**Code:** Clean. No errors, timeouts, or stalls. No code fixes.
+
+**Confirmation:** Operator (PID 44092) is healthy. Circuit breaker firing correctly — every cycle since 21:02 UTC logs `💤 Circuit breaker: 70 mining failures — waiting for Mk1 Laser`. Scout stays idle.
+
+**Minor cosmetic note:** `state.json` actionLog is stale (last entry 10:38 UTC) because circuit breaker returns `True` before `action_sync` writes new entries. This is harmless — the operator IS cycling and IS staying idle correctly.
+
+**Status:** TRUE GAME ECONOMY DEADLOCK unchanged. Circuit breaker holding. Scout idle. 70 failures. ISD=500. No further code fixes available. Game admin or ISD injection required.
+
+---
+
+## Self-Improve — 2026-04-27 22:24 UTC (HAL-P Self-Review)
+
+**Token:** ✅ Valid (expires 2026-05-02 01:26 UTC)
+**Code:** Clean. Operator healthy, cycling every 5 min (Cycle 36 confirmed in `operator.log`). Circuit breaker holding at 70 failures. No errors, timeouts, or stalls.
+
+**Live operator.log confirmed:**
+- PID 44092 started 19:25 UTC — cycling clean with WebSocket connects every cycle
+- Every cycle: `💤 Circuit breaker: 70 mining failures — waiting for Mk1 Laser`
+- ISD=500, Laser=False, Failures=70 — stable across all cycles
+- No disconnects, no auth failures, no exceptions
+
+**state.json actionLog staleness explained:** Circuit breaker path (`crimson_operator.py` ~line 163) returns `True` immediately without calling `save_state`. No new entries written — expected behavior when holding. Operator IS running and staying idle correctly.
+
+**Status:** TRUE GAME ECONOMY DEADLOCK unchanged. Circuit breaker armed and holding. Scout idle. No further code fixes available — game admin or ISD injection required to break deadlock.
+
+**Escalation:** Discord escalation already sent 2026-04-26 13:24 UTC. Operator running clean. Holding for direction.
+
+---
+
 ## Self-Improve — 2026-04-27 02:12 UTC (HAL-P Self-Review)
 
 **Token:** ✅ Valid (expires 2026-05-02 01:26 UTC)
