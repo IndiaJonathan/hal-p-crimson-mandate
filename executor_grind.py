@@ -52,6 +52,8 @@ def main():
     isd = bal.get("isdBalance", 0)
     credits = bal.get("credits", 0)
     
+    state = load_state()
+    
     action_taken = None
     result_msg = ""
     
