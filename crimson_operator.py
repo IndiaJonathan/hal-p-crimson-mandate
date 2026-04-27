@@ -155,18 +155,23 @@ def run_cycle(cycle_num: int):
             action_taken = "⚔️ Approaching Fighter"
 
     elif not fighters and scout:
-        client2 = MMOClient(token, session_id)
-        client2.start()
-        if client2.wait_for_auth(timeout=8):
-            _ = client2.get_world_state(timeout=10)
-            client2._send({"type": "mmo_move_unit", "payload": {
-                "unitId": scout["id"],
-                "targetHex": {"q": 0, "r": 0}
-            }})
-            client2.wait_for("mmo_unit_moved", timeout=15)
-        client2.stop()
-        action_taken = f"🚀 Seeking EDF — moved toward Earth"
-        state = log_action(state, "move_unit", f"to (0,0) from {scout_pos}", "ok")
+        # Guard: if circuit breaker has fired (5+ mining failures), stay put.
+        # Don't move toward Earth while waiting for Mk1 Mining Laser.
+        if state.get("mining_failures", 0) >= 5:
+            action_taken = f"💤 Circuit breaker: {state['mining_failures']} mining failures — waiting for Mk1 Laser"
+        else:
+            client2 = MMOClient(token, session_id)
+            client2.start()
+            if client2.wait_for_auth(timeout=8):
+                _ = client2.get_world_state(timeout=10)
+                client2._send({"type": "mmo_move_unit", "payload": {
+                    "unitId": scout["id"],
+                    "targetHex": {"q": 0, "r": 0}
+                }})
+                client2.wait_for("mmo_unit_moved", timeout=15)
+            client2.stop()
+            action_taken = f"🚀 Seeking EDF — moved toward Earth"
+            state = log_action(state, "move_unit", f"to (0,0) from {scout_pos}", "ok")
 
     elif has_laser and asteroids:
         tier1 = [a for a in asteroids if not a.get("isDepleted") and a.get("miningLevel", 0) >= 1]
