@@ -268,3 +268,120 @@ Fix: Added `state.get("mining_failures", 0) < 5` guard to the Priority-4 elif co
 > 2. Game admin iron/copper asteroid placement near scout at (28,-31)
 > 3. Mk1 Mining Laser grant (enables titanium/platinum extraction)
 > 4. Abandon position and reposition scout to a different region
+
+---
+
+## Self-Improve — 2026-04-27 23:54 UTC (HAL-P Self-Review)
+
+**Token:** ✅ Valid (expires 2026-05-02 01:26 UTC)
+**Code:** Clean. No errors, timeouts, or stalls. No code fixes.
+
+**Operator:** PID 44092 healthy — Cycle 53 confirmed, cycling every ~5min. Circuit breaker holding at 70 failures. Scout idle at (28,-31).
+**Live operator.log (last cycle):**
+```
+[2026-04-27 23:50:06 UTC] ═══ Cycle 53 starting ═══
+[2026-04-27 23:50:09 UTC] Balance: ISD=500, Credits=0, Laser=False, Failures=70
+[2026-04-27 23:50:09 UTC] 💤 Circuit breaker: 70 mining failures — waiting for Mk1 Laser
+```
+**Status:** TRUE GAME ECONOMY DEADLOCK unchanged. Circuit breaker armed and holding. Scout idle. No further code fixes available — game admin or ISD injection required to break deadlock.
+
+**Escalation:** Discord escalation already sent 2026-04-26 13:24 UTC. Operator running clean. Holding for direction.
+
+---
+
+## Self-Improve — 2026-04-27 23:39 UTC (HAL-P Self-Review)
+
+**Token:** ✅ Valid (expires 2026-05-02 01:26 UTC)
+**Code:** Clean. No errors, timeouts, or stalls. No code fixes.
+
+**Operator:** PID 44092 healthy — Cycle 51 confirmed, cycling every ~5min. Circuit breaker holding at 70 failures. Scout idle at (28,-31).
+**Live operator.log:**
+```
+[2026-04-27 23:39:53 UTC] ═══ Cycle 51 starting ═══
+[2026-04-27 23:39:57 UTC] Balance: ISD=500, Credits=0, Laser=False, Failures=70
+[2026-04-27 23:39:58 UTC] 💤 Circuit breaker: 70 mining failures — waiting for Mk1 Laser
+```
+**Status:** TRUE GAME ECONOMY DEADLOCK unchanged. Circuit breaker armed and holding. Scout idle. No further code fixes available — game admin or ISD injection required to break deadlock.
+
+## Self-Improve — 2026-04-28 00:39 UTC (HAL-P Self-Review)
+
+**Token:** ✅ Valid (expires 2026-05-02 01:26 UTC)
+**Code:** Clean. No errors, timeouts, or stalls. No code fixes.
+
+**Operator:** Cycling clean — Cycle 62 confirmed, every ~5min. Circuit breaker holding at 70 failures. Scout idle at (28,-31). Operator running latest code (PID healthy, no restarts needed).
+
+**Status:** TRUE GAME ECONOMY DEADLOCK unchanged. All 5 nearby asteroids titanium/platinum/gold only; Basic Mining Array yields 0. `mining_failures=70`, circuit breaker armed and holding. Scout idle. No further code fixes available — game admin or ISD injection required to break deadlock.
+
+**Escalation:** Already sent 2026-04-26 13:24 UTC. Standing by for Jonathan direction.
+
+---
+
+## Self-Improve — 2026-04-28 02:24 UTC (HAL-P Self-Review)
+
+**Token:** ✅ Valid (expires 2026-05-02 01:26 UTC)
+**Code:** Clean. No errors, timeouts, or stalls. No code fixes.
+
+**Operator:** PID 44092 healthy — Cycle 83 confirmed at 02:23 UTC. Circuit breaker holding at 70 failures. ISD=500, Credits=0, Laser=False, Scout idle at (28,-31).
+
+**Status:** TRUE GAME ECONOMY DEADLOCK unchanged. Circuit breaker armed and holding. Scout idle. No further code fixes available — game admin or ISD injection required.
+
+**Escalation:** Already sent 2026-04-26 13:24 UTC. Standing by for Jonathan direction.
+
+## Self-Review — 2026-04-28 09:39 UTC (HAL-P Self-Review, 4:39 AM CT Tue)
+
+**Token:** ✅ Valid (expires 2026-05-02 01:26 UTC)
+**Code:** Clean. No errors, timeouts, or stalls. No code fixes.
+
+**Operator:** PID 44092 healthy — Cycle 168 confirmed at 09:35 UTC. Circuit breaker holding at 70 failures. ISD=500, Credits=0, Laser=False, Scout idle at (28,-31). Operator running latest code, cycling clean.
+
+**Status:** TRUE GAME ECONOMY DEADLOCK unchanged. All 5 nearby asteroids titanium/platinum/gold only; Basic Mining Array yields 0. circuit breaker armed and holding. Scout idle. No further code fixes available — game admin or ISD injection required.
+
+**Escalation:** sessions_send blocked (cron tree-only visibility). Escalation logged here — needs manual Discord ping or Jonathan check-in.
+
+---
+
+## Self-Review — 2026-04-28 10:24 UTC (HAL-P Self-Review, 5:24 AM CT Tue)
+
+**Token:** ✅ Valid (expires 2026-05-02 01:26 UTC)
+**Code:** Clean. No errors, timeouts, or stalls. No code fixes.
+
+**Operator:** PID 44092 alive. LaunchAgent `com.burk.crimson-mandate-operator` loaded. WebSocket connects healthy — no errors across all logged cycles. Circuit breaker holding at 70 failures. Scout idle at (28,-31).
+
+**Status:** TRUE GAME ECONOMY DEADLOCK unchanged. All 5 nearby asteroids titanium/platinum/gold only; Basic Mining Array yields 0. 70+ mining failures. ISD=500. Token valid. No further code fixes available — game admin or ISD injection required.
+
+**ESCALATION (sessions_send blocked — needs manual Discord delivery):**
+> **Crimson Mandate — True Game Economy Deadlock (48h+, ISD=500)**
+> All 5 nearby asteroids = titanium/platinum/gold only. Basic Mining Array yields 0 on every call.
+> Scout idle at (28,-31) — circuit breaker holding at 70 failures.
+> Token valid (expires 2026-05-02). Operator running clean — PID 44092 active.
+> **No code fix possible.** Game admin action needed to break deadlock:
+> 1. Grant Mk1 Mining Laser directly → enables titanium/platinum extraction
+> 2. Place iron/copper asteroid within scout's sensor range near (28,-31)
+> 3. Inject starter ISD grant (already have 500 ISD — needs laser or iron/copper)
+> 4. Allow scout repositioning to a different region
+> **Recommendation:** Option 1 (Mk1 Laser grant) — fastest path to economy recovery.
+
+---
+
+## Self-Review — 2026-04-28 10:54 UTC (HAL-P Self-Review, 5:54 AM CT Tue)
+
+**Token:** ✅ Valid (expires 2026-05-02 01:26 UTC)
+**Code:** Clean. No errors, timeouts, or stalls. No code fixes.
+
+**Operator:** PID 44092 healthy — Cycle 183 confirmed at 10:51 UTC. Circuit breaker holding at 70 failures. ISD=500, Credits=0, Laser=False, Scout idle at (28,-31). LaunchAgent `com.burk.crimson-mandate-operator` loaded and running latest code.
+
+**Status:** TRUE GAME ECONOMY DEADLOCK unchanged. All 5 nearby asteroids titanium/platinum/gold only; Basic Mining Array yields 0. Circuit breaker armed and holding. Scout idle. No further code fixes available — game admin or ISD injection required.
+
+**Escalation:** Already sent 2026-04-26 13:24 UTC. Standing by for Jonathan direction.
+
+
+## Self-Review — 2026-04-28 12:54 UTC (HAL-P Self-Review, 7:54 AM CT Tue)
+
+**Token:** ✅ Valid (expires 2026-05-02 01:26 UTC)
+**Code:** Clean. No errors, timeouts, or stalls. Circuit breaker properly wired at crimson_operator.py:160-161.
+**Operator:** PID 44092 alive — LaunchAgent `com.burk.crimson-mandate-operator` running crimson_operator.py.
+**Circuit breaker:** Armed and holding at `mining_failures=70`. No mining actions executed since 2026-04-27 21:09 UTC.
+
+**Status:** TRUE GAME ECONOMY DEADLOCK unchanged. All 5 nearby asteroids titanium/platinum/gold only; Basic Mining Array yields 0. Scout idle at (28,-31). `lastRun` stale because circuit breaker correctly blocks action_sync → save_state path. No further code fixes available — game admin or ISD injection required.
+
+**Escalation:** Already sent 2026-04-26 13:24 UTC. Standing by for Jonathan direction.
