@@ -173,21 +173,22 @@ def decide_actions(state: dict, ws_state: dict) -> list:
             break
 
     # ── Contribute to research if ISD available ──
-    isd = balance.get("isdBalance", 0)
-    if isd >= 100:
-        board = state.get("research_board", [])
-        for item in board:
-            if item.get("status") == "funding" and not item.get("isFullyFunded"):
-                isd_funded = item.get("isdFunded", 0)
-                isd_req = item.get("isdCostRequired", 0)
-                remaining = isd_req - isd_funded
-                if remaining > 0 and isd >= 50:
-                    contrib = min(float(isd), float(remaining))
-                    actions.append({
-                        "type": "contribute_research",
-                        "payload": {"boardId": item["id"], "isdAmount": contrib},
-                        "ws": False
-                    })
-                    break
+    # DISABLED — Research is an ISD sink. We need 1000 ISD for Mk1 Laser.
+    # has_laser check re-enables once laser is owned.
+    # if isd >= 100 and has_laser:
+    #    board = state.get("research_board", [])
+    #    for item in board:
+    #        if item.get("status") == "funding" and not item.get("isFullyFunded"):
+    #            isd_funded = item.get("isdFunded", 0)
+    #            isd_req = item.get("isdCostRequired", 0)
+    #            remaining = isd_req - isd_funded
+    #            if remaining > 0 and isd >= 50:
+    #                contrib = min(float(isd), float(remaining))
+    #                actions.append({
+    #                    "type": "contribute_research",
+    #                    "payload": {"boardId": item["id"], "isdAmount": contrib},
+    #                    "ws": False
+    #                })
+    #                break
 
     return actions
