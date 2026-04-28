@@ -10,6 +10,7 @@ AGENT_DIR = "/Users/jonathan/.openclaw/workspace/crimson-mandate-agent"
 STATE_FILE = os.path.join(AGENT_DIR, "state.json")
 LOG_FILE = os.path.join(AGENT_DIR, "operator.log")
 ALERT_FILE = "/tmp/crimson_mandate_alerts.json"
+STATUS_FILE = "/tmp/crimson_last_status.txt"
 SESSION_KEY = "agent:main:discord:direct:148191845040652288"
 OPENCLAW_BASE = "http://localhost:18789"
 
@@ -27,9 +28,20 @@ def log(msg):
     print(line)
     Path(LOG_FILE).open("a").write(line + "\n")
 
+def _last_status_time() -> float:
+    """Read last status epoch from tracking file; returns 0 if missing/empty."""
+    try:
+        return float(Path(STATUS_FILE).read_text().strip())
+    except Exception:
+        return 0.0
+
+def _write_last_status_time(ts: float):
+    """Write current epoch to tracking file."""
+    Path(STATUS_FILE).write_text(str(ts))
+
+
 def message_halp(text: str):
     """Message HAL-P directly on Discord via sessions_send."""
-    # Get the main session key
     try:
         import urllib.request
         req = urllib.request.Request(
@@ -69,7 +81,7 @@ def run_cycle(cycle_num: int):
     session_id = state.get("session", {}).get("sessionId", "")
 
     if not token:
-        msg = "🤖 **Crimson Mandate** — No session token. Run auth.py first."
+        msg = "Crimson Mandate — No session token. Run auth.py first."
         log(msg)
         message_halp(msg)
         return False
@@ -121,15 +133,16 @@ def run_cycle(cycle_num: int):
 
     # ── Decision ──
     if not scout:
-        action_taken = "⏳ Scout dead — waiting for respawn"
+        action_taken = "Scout dead — waiting for respawn"
         significant = True
 
     elif isd >= 1000 and not has_laser:
-        action_taken = f"🎯 1000 ISD reached — READY TO BUY LASER"
+        action_taken = f"1000 ISD reached — READY TO BUY LASER"
         significant = True
-        message_halp(f"🤖 **Crimson Mandate** — 1000 ISD reached! Ready to purchase Mining Laser Mk1. Shop API not yet confirmed — need to investigate purchase endpoint.")
+        message_halp(f"Crimson Mandate — 1000 ISD reached! Ready to purchase Mining Laser Mk1.")
 
     elif fighters and scout_hp >= 20:
+        # ── Priority 3: Attack EDF Fighters ──
         target = min(fighters, key=lambda e: distance_hex(scout_pos, e.get("position", {})))
         log(f"Attacking Fighter at {target.get('position')} HP={target.get('currentHp')}")
         attacked, events = execute_combat(token, session_id, scout, [target])
@@ -143,26 +156,71 @@ def run_cycle(cycle_num: int):
                     loot_detail = f" → Loot: {p.get('type','?')} x{p.get('quantity','?')}"
                     significant = True
 
-            action_taken = f"⚔️ Fighter → destroyed={destroyed} loot={loot}{loot_detail}"
+            action_taken = f"Fighter → destroyed={destroyed} loot={loot}{loot_detail}"
             log(action_taken)
 
             for ev_type, ev_payload in events:
                 state = log_action(state, ev_type, str(ev_payload), "ok")
 
             if destroyed:
-                message_halp(f"⚔️ **Crimson** — Fighter destroyed! ISD={isd} Credits={credits}. {loot_detail}")
+                message_halp(f"Crimson — Fighter destroyed! ISD={isd} Credits={credits}. {loot_detail}")
         else:
-            action_taken = "⚔️ Approaching Fighter"
+            action_taken = "Approaching Fighter"
 
     elif not fighters and scout:
-        # Guard: if circuit breaker has fired (5+ mining failures), stay put.
-        # Don't move toward Earth while waiting for Mk1 Mining Laser.
+        # ── Priority 4: Scout idle — check golden asteroid, then stay ──
+        # Highest-value ISD opportunity: golden asteroid spawns
+        golden = MMOClient._golden_asteroid_spawned
+        if golden:
+            gpos = golden.get("position", {})
+            if gpos:
+                dist = distance_hex(scout_pos, gpos)
+                log(f"Golden asteroid at {gpos}, dist={dist}")
+                if dist <= 1:
+                    # Claim it
+                    client2 = MMOClient(token, session_id)
+                    client2.start()
+                    if client2.wait_for_auth(timeout=8):
+                        _ = client2.get_world_state(timeout=10)
+                        client2._send({"type": "mmo_claim_golden_asteroid", "payload": {"asteroidId": golden["id"]}})
+                        result = client2.wait_for("mmo_golden_asteroid_claimed", timeout=15)
+                        log(f"Golden claim result: {result}")
+                        if result:
+                            for r in result:
+                                if isinstance(r, dict) and r.get("cryptoRewarded"):
+                                    amt = r.get("cryptoRewarded", 0)
+                                    significant = True
+                                    message_halp(f"Crimson — Golden asteroid claimed! ~{amt} ISD earned!")
+                                    state = action_sync(state, token)
+                                    isd = state.get("balance", {}).get("isdBalance", isd)
+                    client2.stop()
+                elif dist <= 20:
+                    # Move toward golden asteroid
+                    client2 = MMOClient(token, session_id)
+                    client2.start()
+                    if client2.wait_for_auth(timeout=8):
+                        _ = client2.get_world_state(timeout=10)
+                        client2._send({"type": "mmo_move_unit", "payload": {
+                            "unitId": scout["id"],
+                            "targetHex": gpos
+                        }})
+                        client2.wait_for("mmo_unit_moved", timeout=15)
+                    client2.stop()
+                    action_taken = f"Moving to golden asteroid (dist={dist})"
+                    log(action_taken)
+                    state = action_sync(state, token)
+                    state["lastRun"] = dt.datetime.now(dt.timezone.utc).isoformat()
+                    save_state(state)
+                    return True
+
+        # Guard: circuit breaker has fired — stay put waiting for Mk1 Laser
         if state.get("mining_failures", 0) >= 5:
-            action_taken = f"💤 Circuit breaker: {state['mining_failures']} mining failures — waiting for Mk1 Laser"
+            action_taken = f"Circuit breaker: {state['mining_failures']} mining failures — waiting for Mk1 Laser"
             log(action_taken)
             return True
 
     elif has_laser and asteroids:
+        # ── Priority 5: Mine tier-1 asteroids ──
         tier1 = [a for a in asteroids if not a.get("isDepleted") and a.get("miningLevel", 0) >= 1]
         if tier1:
             target = min(tier1, key=lambda a: distance_hex(scout_pos, a.get("position", {})))
@@ -177,7 +235,7 @@ def run_cycle(cycle_num: int):
                         "asteroidId": target["id"]
                     }})
                 client3.stop()
-                action_taken = f"⛏️ Mining tier-1 asteroid"
+                action_taken = f"Mining tier-1 asteroid"
                 state = log_action(state, "mine_asteroid", f"asteroid {target['id']}", "ok")
             else:
                 client3 = MMOClient(token, session_id)
@@ -190,12 +248,12 @@ def run_cycle(cycle_num: int):
                     }})
                     client3.wait_for("mmo_unit_moved", timeout=15)
                 client3.stop()
-                action_taken = "⛏️ Moving to tier-1 asteroid"
+                action_taken = "Moving to tier-1 asteroid"
         else:
-            action_taken = "⛏️ No tier-1 asteroids visible"
+            action_taken = "No tier-1 asteroids visible"
 
     else:
-        action_taken = f"💤 Idle — HP={scout_hp} Fighters={len(fighters)} Laser={has_laser}"
+        action_taken = f"Idle — HP={scout_hp} Fighters={len(fighters)} Laser={has_laser}"
 
     # ── Final sync ──
     state = action_sync(state, token)
@@ -203,6 +261,18 @@ def run_cycle(cycle_num: int):
     save_state(state)
 
     log(f"═══ Cycle {cycle_num} done: {action_taken} ═══")
+
+    # ── 5-minute status update to HAL-P ──
+    fighters = [e for e in edf if "Fighter" in e.get("type", "")]
+    now = time.time()
+    if now - _last_status_time() >= 300:
+        status_msg = (
+            f"[Crimson Status] Cycle {cycle_num} | ISD={isd} | Credits={credits} | "
+            f"Laser={has_laser} | Failures={mining_failures} | Fighters={len(fighters)}"
+        )
+        message_halp(status_msg)
+        _write_last_status_time(now)
+
     return True
 
 # ─── Main Loop ────────────────────────────────────────────────────────────────
@@ -224,20 +294,13 @@ if __name__ == "__main__":
                 consecutive_errors += 1
         except Exception as e:
             log(f"CYCLE ERROR: {e}")
-            message_halp(f"🤖 **Crimson Mandate** — Cycle {cycle_num} crashed: {e}")
+            message_halp(f"Crimson Mandate — Cycle {cycle_num} crashed: {e}")
             consecutive_errors += 1
 
         if consecutive_errors >= 3:
-            msg = f"🤖 **Crimson Mandate** — 3 consecutive errors — stopping and escalating."
+            msg = f"Crimson Mandate — 3 consecutive errors — stopping and escalating."
             log(msg)
             message_halp(msg)
             break
-
-        # Heartbeat every 5th cycle even if nothing happened
-        if cycle_num % 5 == 0:
-            state = load_state()
-            isd = state.get("balance", {}).get("isdBalance", 0)
-            credits = state.get("balance", {}).get("credits", 0)
-            log(f"[HEARTBEAT] Cycle {cycle_num} | ISD={isd} Credits={credits}")
 
         time.sleep(300)  # 5 minutes
