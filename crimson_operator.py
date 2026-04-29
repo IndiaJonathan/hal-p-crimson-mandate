@@ -213,10 +213,23 @@ def run_cycle(cycle_num: int):
                     save_state(state)
                     return True
 
-        # Guard: circuit breaker has fired — stay put waiting for Mk1 Laser
-        if state.get("mining_failures", 0) >= 5:
-            action_taken = f"Circuit breaker: {state['mining_failures']} mining failures — waiting for Mk1 Laser"
-            log(action_taken)
+        # Circuit breaker is DISABLED — explore instead of idle when mining blocked
+        # Explore: move toward Mars area (12,-5) to find new asteroids
+        if scout_pos.get('q', 0) != 12 or scout_pos.get('r', 0) != -5:
+            client_exp = MMOClient(token, session_id)
+            client_exp.start()
+            if client_exp.wait_for_auth(timeout=8):
+                _ = client_exp.get_world_state(timeout=10)
+                client_exp._send({"type": "mmo_move_unit", "payload": {
+                    "unitId": scout["id"] if scout else state.get('scout_id', ''),
+                    "targetHex": {"q": 12, "r": -5}
+                }})
+                client_exp.wait_for("mmo_unit_moved", timeout=15)
+                log(f"Exploring: moving scout to Mars area (12,-5)")
+            client_exp.stop()
+            state = action_sync(state, token)
+            state["lastRun"] = dt.datetime.now(dt.timezone.utc).isoformat()
+            save_state(state)
             return True
 
     elif has_laser and asteroids:

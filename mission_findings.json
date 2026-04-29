@@ -1,0 +1,10 @@
+{
+  "iron_near_mars": [],
+  "copper_near_mars": [],
+  "edf_units": [],
+  "total_asteroids": 0,
+  "mars_position": {
+    "q": 12,
+    "r": -5
+  }
+}
