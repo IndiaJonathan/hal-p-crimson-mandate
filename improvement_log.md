@@ -671,3 +671,29 @@ DISCORD ESCALATION (sessions_send blocked — needs manual delivery):
 **Status:** TRUE GAME ECONOMY DEADLOCK unchanged. All 5 nearby asteroids iron=0/copper=0 (titanium/platinum/gold only). Basic Mining Array yields 0. No Mk1 Mining Laser. No code fix available.
 
 **Escalation:** sessions_send blocked (cron tree-only visibility). Escalation already sent 2026-04-26 13:24 UTC and written to `/reports/crimson-mandate-escalation.md`. Standing by for Jonathan direction.
+
+## Self-Review — 2026-04-30 08:18 UTC (HAL-P Self-Review, 3:18 AM CT Thu)
+
+**Token:** ✅ Valid (expires 2026-05-02 01:26 UTC)
+**Code:** Clean. No errors, timeouts, or stalls. Operator cycling every ~5min.
+
+**Operator:** WebSocket confirmed active — lastRun `2026-04-30T08:14:04 UTC`. Circuit breaker holding at `mining_failures=70`. Scout idle at (28,-31). ISD=490.
+
+**Log note:** `mmo_use_ability` WARNING fires occasionally — game server doesn't support that ability type. Non-critical, no ISD impact, no action needed.
+
+**Status:** TRUE GAME ECONOMY DEADLOCK unchanged. All 5 nearby asteroids iron=0/copper=0 (titanium/platinum/gold only). Basic Mining Array yields 0. Circuit breaker armed and holding. Scout idle. No code fixes available — game admin action required.
+
+**Escalation:** sessions_send blocked (cron tree-only). Discord ping needed from main session.
+
+---
+
+## Self-Review — 2026-04-30 09:56 UTC (HAL-P Self-Review, 4:56 AM CT Thu)
+
+**Token:** ✅ Valid (expires 2026-05-02 01:26 UTC)
+**Code:** Clean. No errors, timeouts, or stalls.
+
+**Operator:** WebSocket cycling every ~5min confirmed. `lastRun: 2026-04-30T09:52:19 UTC` (4 min ago). Circuit breaker armed at `mining_failures=70`. Scout idle at (28,-31). ISD=490.
+
+**Status:** TRUE GAME ECONOMY DEADLOCK unchanged. All 5 nearby asteroids iron=0/copper=0 (titanium/platinum/gold only). Basic Mining Array yields 0. Circuit breaker armed and holding. Scout idle. No further code fixes available — game admin or ISD injection required.
+
+**Escalation:** sessions_send blocked (cron tree-only visibility). Escalation already sent 2026-04-26 13:24 UTC and written to `/reports/crimson-mandate-escalation.md`. Standing by for Jonathan direction.
