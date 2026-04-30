@@ -1,0 +1,17 @@
+{
+  "scout_id": "unit_scout_0a8a2ff5-1b93-44c3-994c-6891e0076d72_respawn_f696459e",
+  "scout_position_before": {
+    "q": 11,
+    "r": -5
+  },
+  "scout_position_after": {
+    "q": 11,
+    "r": -5
+  },
+  "total_asteroids": 0,
+  "edf_count": 0,
+  "mars": {
+    "q": 12,
+    "r": -5
+  }
+}
