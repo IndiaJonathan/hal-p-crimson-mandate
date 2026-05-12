@@ -150,13 +150,13 @@ class MMOClient:
                 save_state(state)
 
         elif msg_type == "mmo_engagement_started":
-            logger.info(f"⚔ Combat started: {payload.get('engagementId')}")
+            logger.debug(f"⚔ Combat started: {payload.get('engagementId')}")
 
         elif msg_type == "mmo_combat_result":
-            logger.info(f"⚔ Combat result: {payload}")
+            logger.debug(f"⚔ Combat result: {payload}")
 
         elif msg_type == "mmo_unit_destroyed_notification":
-            logger.info(f"💀 Unit destroyed: {payload.get('unitId')} by {payload.get('killedBy')}")
+            logger.debug(f"💀 Unit destroyed: {payload.get('unitId')} by {payload.get('killedBy')}")
 
         elif msg_type == "mmo_loot_claimed":
             logger.info(f"🎁 Loot: {payload}")
