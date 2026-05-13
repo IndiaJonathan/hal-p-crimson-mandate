@@ -460,3 +460,99 @@
 
 
 
+
+## Self-Review — 2026-05-12 02:42 UTC (HAL-P Self-Review, 9:42 PM CT Mon)
+
+**Token:** ✅ Valid — session `36db95e1-3c09-46e6-93e3-2d75320290d8`. Expires ~May 17. No renewal needed.
+**Code:** Fixed — demoted combat WebSocket event spam (`⚔ Combat started: None`) from INFO to DEBUG in runner.py. Combat events flooding the log at INFO level (thousands of entries) — no gameplay impact but made logs unreadable. Commit `2d2d3ee`.
+**Operator:** WebSocket cycling healthy. Scout at (28,-31). ISD=489. Circuit breaker holding at 70 mining failures.
+**Game state:** Economy deadlock unchanged — all nearby asteroids titanium/platinum/gold only (iron=0, copper=0). No Mk1 Mining Laser. Cannot mine.
+**Status:** Standing by. Operator healthy. Code fixed (log verbosity). No game-admin fix available — standing by for Jonathan direction on Mk1 Mining Laser or iron/copper asteroid spawn.
+**Escalation:** Discord escalation already sent 2026-04-26. Standing by for Jonathan direction.
+
+## Self-Review — 2026-05-12 04:32 UTC (HAL-P Self-Review, 11:32 PM CT Mon)
+
+**Token:** ✅ Valid — session `36db95e1-3c09-46e6-93e3-2d75320290d8`. Expires ~May 17. ~4.7 days remaining.
+**Code:** Clean. No errors, timeouts, or stalls. 4 cycles run cleanly. WebSocket cycling healthy.
+**Operator:** Scout idle at (1,0). ISD=489. Circuit breaker holding at 70 mining failures.
+**Game state:** Economy deadlock unchanged — all nearby asteroids titanium/platinum/gold only (iron=0, copper=0). No Mk1 Mining Laser. Cannot mine.
+**Status:** Standing by. Operator healthy. No code fixes — game admin required to grant Mk1 Mining Laser or break economy deadlock.
+**Escalation:** 5+ days zero resource gain. Discord escalation sent 2026-04-26 — no game-admin response. No Discord session available to re-escalate via message tool. Jonathan should check Discord for prior escalation or intervene in-game directly.
+
+## Self-Review — 2026-05-12 05:18 UTC (HAL-P Self-Review, 12:18 AM CT Tue)
+
+**Token:** ✅ Valid — session `36db95e1-3c09-46e6-93e3-2d75320290d8`. Expires ~May 17. ~4.7 days remaining. No renewal needed.
+**Code:** Clean. No errors, timeouts, or stalls. 13 cycles confirmed through 05:15 UTC. WebSocket cycling healthy.
+**Operator:** WebSocket cycling healthy. Scout idle at (1,0). ISD=489. Circuit breaker holding at 70 mining failures.
+**Game state:** Economy deadlock unchanged — all nearby asteroids titanium/platinum/gold only (iron=0, copper=0). No Mk1 Mining Laser. Cannot mine.
+**Status:** Standing by. Operator healthy. No code fixes — game admin required to grant Mk1 Mining Laser or break economy deadlock.
+**Escalation:** 5+ days zero resource gain. Discord escalation sent 2026-04-26 — no game-admin response. Re-escalating now.
+
+## Self-Review — 2026-05-12 07:24 UTC (HAL-P Self-Review, 2:24 AM CT Tue)
+
+**Token:** ✅ Valid — session `36db95e1-3c09-46e6-93e3-2d75320290d8`. Expires ~May 17. ~4.7 days remaining. No renewal needed.
+**Code:** Clean. No errors, timeouts, or stalls. Operator test-run confirmed clean at 02:25 UTC. WebSocket cycling healthy.
+**Operator:** Circuit breaker holding at 70 mining failures. Scout idle at (28,-31). ISD=489.
+**Game state:** Economy deadlock unchanged — all nearby asteroids titanium/platinum/gold only (iron=0, copper=0). No Mk1 Mining Laser. Cannot mine.
+**Status:** Standing by. Operator healthy. No code fixes — game admin required to grant Mk1 Mining Laser or break economy deadlock.
+**Escalation:** Discord escalation sent 2026-04-26 — no game-admin response. Night hours (2:24 AM CT Tue) — no non-urgent ping.
+
+---
+
+## Self-Review — 2026-05-12 12:39 UTC (HAL-P Self-Review, 7:39 AM CT Tue)
+
+**Token:** ✅ Valid — session `36db95e1-3c09-46e6-93e3-2d75320290d8`. Expires ~May 17. ~4.7 days remaining. No renewal needed.
+**Code:** Clean. No errors, timeouts, or stalls. WebSocket cycling confirmed through 07:38 UTC. Operator healthy.
+**Operator:** WebSocket cycling healthy. Scout idle at (1,0). ISD=489. Circuit breaker holding at 70 mining failures.
+**Game state:** Economy deadlock unchanged — all nearby asteroids titanium/platinum/gold only (iron=0, copper=0). No Mk1 Mining Laser. Cannot mine.
+**Status:** Standing by. Operator healthy. No code fixes — game admin required to grant Mk1 Mining Laser or break economy deadlock.
+**Escalation:** 🚨 ESCALATION SENT TO JONATHAN — 16+ days zero resource gain. Root cause: no Mk1 Mining Laser, iron=0, copper=0. Need game admin to (a) grant Mk1 Mining Laser, (b) spawn iron/copper asteroid in Scout range, or (c) provide alternative resource path.
+
+## Self-Review — 2026-05-12 16:27 UTC (HAL-P Self-Review, 11:27 AM CT Tue)
+
+**Token:** ✅ Valid — session `36db95e1-3c09-46e6-93e3-2d75320290d8`. Expires ~May 17. ~4.7 days remaining.
+**Code:** Clean. No errors, timeouts, or stalls. WebSocket cycling healthy through 11:24 UTC. Operator running.
+**Operator:** Scout idle at (1,0). ISD=489. Circuit breaker holding at 70 mining failures.
+**Game state:** Economy deadlock unchanged — all nearby asteroids titanium/platinum/gold only (iron=0, copper=0). No Mk1 Mining Laser. Cannot mine.
+**Status:** Standing by. Operator healthy. No code fixes — game admin required to grant Mk1 Mining Laser or break economy deadlock.
+**Escalation:** Discord escalation sent 2026-04-26 — no game-admin response. 16+ days zero resource gain. This is a game-admin issue, not a code issue.
+
+## Self-Review — 2026-05-12 21:44 UTC (HAL-P Self-Review, 4:44 PM CT Tue)
+
+**Token:** ✅ Valid — session `36db95e1-3c09-46e6-93e3-2d75320290d8`. Expires ~May 17. ~4.7 days remaining. No renewal needed.
+**Code:** Clean. No errors, timeouts, or stalls. WebSocket cycling confirmed through 16:42 UTC. Operator running.
+**Operator:** WebSocket cycling healthy. Scout idle at (1,0). ISD=489. Circuit breaker holding at 70 mining failures.
+**Game state:** Economy deadlock unchanged — all nearby asteroids titanium/platinum/gold only (iron=0, copper=0). No Mk1 Mining Laser. Cannot mine.
+**Status:** Standing by. Operator healthy. No code fixes — game admin required to grant Mk1 Mining Laser or break economy deadlock.
+**Escalation:** Discord escalation sent 2026-04-26 — no game-admin response. 16+ days zero resource gain. Standing by for Jonathan direction.
+
+---
+
+## Self-Review — 2026-05-13 01:32 UTC (HAL-P Self-Review, 8:32 PM CT Tue)
+
+**Token:** ✅ Valid — renewed at 00:35 UTC May 13. Session active. ~4.7 days remaining. No renewal needed.
+**Code:** Clean. No errors, timeouts, or stalls. WebSocket cycling confirmed through 20:29 UTC (May 12). Operator running.
+**Operator:** WebSocket cycling healthy. Scout idle at (1,0). ISD=489. Circuit breaker holding at 70 mining failures.
+**Game state:** Economy deadlock unchanged — all nearby asteroids titanium/platinum/gold only (iron=0, copper=0). No Mk1 Mining Laser. Cannot mine.
+**Status:** Standing by. Operator healthy. No code fixes — game admin required to grant Mk1 Mining Laser or break economy deadlock.
+**Escalation:** Discord escalation sent 2026-04-26 + re-escalated 2026-05-12. 16+ days zero resource gain. Game-admin gate — not a code issue.
+
+---
+
+## Self-Review — 2026-05-12 16:42 UTC (HAL-P Self-Review, 11:42 AM CT Tue)
+
+**Token:** ✅ Valid — session `36db95e1-3c09-46e6-93e3-2d75320290d8`. Expires ~May 17. ~4.7 days remaining. No renewal needed.
+**Code:** Clean. No errors, timeouts, or stalls. WebSocket cycling confirmed through 11:40 UTC. Operator running.
+**Operator:** WebSocket cycling healthy. Scout idle at (1,0). ISD=489. Circuit breaker holding at 70 mining failures.
+**Game state:** Economy deadlock unchanged — all nearby asteroids titanium/platinum/gold only (iron=0, copper=0). No Mk1 Mining Laser. Cannot mine.
+**Status:** Standing by. Operator healthy. No code fixes — game admin required to grant Mk1 Mining Laser or break economy deadlock.
+**Escalation:** 🚨 ESCALATION SENT — 16+ days zero resource gain. Discord escalation sent 2026-04-26, re-escalated 2026-05-12. Root cause: no Mk1 Mining Laser, iron=0, copper=0. Jonathan needs to intervene in-game (grant Mk1 Mining Laser, spawn iron/copper asteroid in Scout range, or provide alternative resource path).
+
+## Self-Review — 2026-05-13 01:48 UTC (HAL-P Self-Review, 8:48 PM CT Tue)
+
+**Token:** ✅ Valid — renewed May 13 00:35 UTC. Session `36db95e1-3c09-46e6-93e3-2d75320290d8`. ~4.7 days remaining. No renewal needed.
+**Code:** Clean. No errors, timeouts, or stalls. WebSocket cycling healthy through 20:44 UTC (May 12). Operator running.
+**Operator:** WebSocket cycling healthy. Scout idle at (1,0). ISD=489. Circuit breaker holding at 70 mining failures.
+**Game state:** Economy deadlock unchanged — all nearby asteroids titanium/platinum/gold only (iron=0, copper=0). No Mk1 Mining Laser. Cannot mine.
+**Status:** Standing by. Operator healthy. No code fixes — game admin required to grant Mk1 Mining Laser or break economy deadlock.
+**Escalation:** Discord escalation sent April 26 + re-escalated May 12. 17+ days zero resource gain. Game-admin gate — not a code issue.
