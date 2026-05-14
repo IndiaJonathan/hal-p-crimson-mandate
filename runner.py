@@ -85,7 +85,9 @@ class MMOClient:
             except Exception:
                 pass
             if self.running and not self._die.is_set():
-                time.sleep(2)
+                backoff = min(30, 2 * (getattr(self, '_reconnect_count', 1)))
+                self._reconnect_count = getattr(self, '_reconnect_count', 1) + 1
+                time.sleep(backoff)
 
     def _on_open(self, ws):
         self._send({"type": "auth", "payload": {"sessionId": self.token}})
