@@ -7,7 +7,6 @@ EMAIL = "halp@burk-dashboards.com"
 PASSWORD = "Test1234!"
 STATE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "state.json")
 LOG_FILE = "/Users/jonathan/.openclaw/workspace/reports/crimson-token-renewal.log"
-
 USER_AGENT = "curl/8.1.2"
 
 def login(email, password):
@@ -15,20 +14,20 @@ def login(email, password):
     req = urllib.request.Request(
         f"{BASE}/api/auth/login",
         data=data,
-        headers={
-            "Content-Type": "application/json",
-            "User-Agent": USER_AGENT,
-        },
+        headers={"Content-Type": "application/json", "User-Agent": USER_AGENT},
         method="POST",
     )
     try:
         with urllib.request.urlopen(req, timeout=10) as resp:
             result = json.loads(resp.read())
             if result.get("success"):
-                return result["data"]
+                return result["data"], None
+            return None, "login returned success=false"
+    except urllib.error.HTTPError as e:
+        body = e.read().decode()[:200]
+        return None, f"HTTP {e.code}: {body}"
     except Exception as e:
         return None, str(e)
-    return None, "unknown error"
 
 def main():
     result, err = login(EMAIL, PASSWORD)
