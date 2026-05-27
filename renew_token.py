@@ -1,19 +1,24 @@
-#!/usr/bin/env python3
-"""Standalone token renewal for Crimson Mandate — no venv deps needed."""
-import json, urllib.request, urllib.error, os
+#!/opt/homebrew/bin/python3
+"""Crimson Mandate token renewer — stdlib only, no venv, no agent overhead."""
+import json, urllib.request, urllib.error, os, datetime as dt
 
 BASE = "https://crimsonmandate.com"
-STATE_FILE = os.path.join(os.path.dirname(__file__), "state.json")
 EMAIL = "halp@burk-dashboards.com"
 PASSWORD = "Test1234!"
+STATE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "state.json")
 LOG_FILE = "/Users/jonathan/.openclaw/workspace/reports/crimson-token-renewal.log"
+
+USER_AGENT = "curl/8.1.2"
 
 def login(email, password):
     data = json.dumps({"email": email, "password": password}).encode()
     req = urllib.request.Request(
         f"{BASE}/api/auth/login",
         data=data,
-        headers={"Content-Type": "application/json"},
+        headers={
+            "Content-Type": "application/json",
+            "User-Agent": USER_AGENT,
+        },
         method="POST",
     )
     try:
@@ -22,19 +27,21 @@ def login(email, password):
             if result.get("success"):
                 return result["data"]
     except Exception as e:
-        print(f"Login error: {e}")
-    return None
+        return None, str(e)
+    return None, "unknown error"
 
 def main():
-    result = login(EMAIL, PASSWORD)
-    if not result:
-        print("FAILED: login call unsuccessful")
+    result, err = login(EMAIL, PASSWORD)
+    if err or not result:
+        ts = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        with open(LOG_FILE, "a") as f:
+            f.write(f"[{ts}] FAILED: {err}\n")
+        print(f"FAILED: {err}")
         exit(1)
 
     token = result["token"]
     session_id = result["sessionId"]
 
-    # Load existing state, preserve everything except session
     try:
         with open(STATE_FILE) as f:
             state = json.load(f)
@@ -46,11 +53,11 @@ def main():
     with open(STATE_FILE, "w") as f:
         json.dump(state, f, indent=2)
 
-    ts = __import__("datetime").datetime.now(__import__("datetime").timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    ts = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     with open(LOG_FILE, "a") as f:
-        f.write(f"Token renewed at {ts}\n")
+        f.write(f"Token renewed at {ts} session={session_id[:8]}\n")
 
-    print(f"OK: session={session_id[:8]}..., state updated")
+    print(f"OK: session={session_id[:8]}...")
 
 if __name__ == "__main__":
     main()
