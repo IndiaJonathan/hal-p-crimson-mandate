@@ -81,10 +81,18 @@ def decide_top_priority(state):
     has_laser = state.get("has_mining_laser", False)
     failures = state.get("mining_failures", 0)
     units = state.get("units", [])
-    scout = next((u for u in units if "Scout" in u.get("type", "")), None)
-
-    if not scout:
-        return ("⏳ WAIT", "Scout destroyed — waiting for auto-respawn (~60s)")
+    
+    # Use same action-log fallback as check_stale_position to detect true scout loss
+    # when units are empty (REST doesn't always sync units, WS does).
+    scout_in_units = next((u for u in units if "Scout" in u.get("type", "")), None)
+    if not scout_in_units:
+        action_log = state.get("actionLog", [])
+        recent_actions = [e for e in action_log
+                        if e.get("action") in ("move_unit", "mine_asteroid")
+                        and e.get("result") == "ok"]
+        if len(recent_actions) < 3:
+            return ("⏳ WAIT", "Scout destroyed — waiting for auto-respawn (~60s)")
+        # Units empty but recent actions confirm scout alive — proceed normally
 
     if isd >= 1000 and not has_laser:
         return ("🎯 BUY LASER", "1000 ISD reached — purchase Mining Laser Mk1 to unlock tier-1 mining")
