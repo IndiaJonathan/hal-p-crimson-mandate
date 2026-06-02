@@ -86,18 +86,17 @@ def run_cycle(cycle_num: int):
         message_halp(msg)
         return False
 
-    # REST sync
+    # REST sync — action_sync resets mining_failures on ok results
     state = action_sync(state, token)
-    save_state(state)
+    save_state(state)  # save after action_sync (resets mining_failures on ok)
 
     balance = state.get("balance", {})
     prev_isd = state.get("balance", {}).get("isdBalance", 0)
     isd = balance.get("isdBalance", 0)
     credits = balance.get("credits", 0)
     has_laser = state.get("has_mining_laser", False)
-    mining_failures = state.get("mining_failures", 0)
 
-    log(f"Balance: ISD={isd}, Credits={credits}, Laser={has_laser}, Failures={mining_failures}")
+    log(f"Balance: ISD={isd}, Credits={credits}, Laser={has_laser}, Failures={state.get('mining_failures', 0)}")
 
     # WebSocket world state
     client = MMOClient(token, session_id)
@@ -213,7 +212,7 @@ def run_cycle(cycle_num: int):
                     save_state(state)
                     return True
 
-        if mining_failures >= 5:
+        if state.get("mining_failures", 0) >= 5:
             # Circuit breaker: stop burning ISD when Basic Mining Array can't extract anything
             log(f"Circuit breaker: {mining_failures} mining failures — scout staying idle at ({scout_pos.get('q')},{scout_pos.get('r')})")
             state["lastRun"] = dt.datetime.now(dt.timezone.utc).isoformat()
