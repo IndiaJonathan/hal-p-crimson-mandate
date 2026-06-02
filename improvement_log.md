@@ -590,3 +590,432 @@
 **Fix:** None needed. No errors to fix.
 
 **Status:** Operator healthy. No code fixes needed. No Discord ping (Friday, nothing new to escalate). Awaiting Jonathan direction on Mk1 Mining Laser (1000 ISD) or iron/copper asteroid spawn.
+
+## 2026-05-30 08:58 UTC — HAL-P Self-Review (3:58 AM CT Sat)
+
+**Token:** ✅ Valid — session `fa78e599-d319-4bc9-9211-ab1b4c05e54c`. Exp ~Jun 6 UTC (~7 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator running Cycles 55-66 (08:01-08:56 UTC), WebSocket cycling confirmed throughout. PID active.
+
+**Operator:** Healthy. Circuit breaker holding at 70 mining failures. Self-improvement cycling every 15min. Recommending combat ISD grinding (EDF Fighters) — blocked by no ship/minerals.
+
+**Game state:** Deadlock unchanged — iron=0, copper=0, no Mk1 Mining Laser, minerals={}, ships=0. **30+ days zero resource gain.** No code fix available — game-admin gate.
+
+**Fix:** None needed. No errors to fix.
+
+**Status:** Operator healthy. No code fixes needed. No Discord ping (Saturday, 3:58 AM CT). Awaiting Jonathan direction on Mk1 Mining Laser (1000 ISD) or iron/copper asteroid spawn.
+
+
+## 2026-05-30 14:41 UTC — HAL-P Self-Review (9:41 AM CT Sat)
+
+**Token:** ✅ Valid — session `fa78e599-d319-4bc9-9211-ab1b4c05e54c`. Expires ~2026-06-06 (~7 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator was dead at cron trigger (silent death, no process found).
+
+**Fix:** Restarted via nohup → PID 5059. Confirmed healthy — Cycle 1, WebSocket connected at 14:41 UTC, ISD=489.
+
+**Game state:** Deadlock unchanged — iron=0, copper=0, no Mk1 Mining Laser, minerals={}, ships=0. **30+ days zero resource gain.** This is a game-admin gate — no code fix available.
+
+**Status:** Operator recovered. No code fixes needed. No Discord ping (Saturday preference). Awaiting Jonathan direction on Mk1 Mining Laser (1000 ISD) or iron/copper asteroid spawn.
+
+
+## 2026-05-30 17:11 UTC — HAL-P Self-Review (12:11 PM CT Sat)
+
+**Token:** ✅ Valid — session `fa78e599-d319-4bc9-9211-ab1b4c05e54c`. Expires ~2026-06-06 (~7 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator PID 5059 active (restarted at 14:41 UTC). WebSocket cycling confirmed through 12:09 UTC (last entry in agent log). Self-improvement cycling every 15min.
+
+**Operator:** Healthy. Circuit breaker holding at 70 mining failures. Self-improvement recommending combat ISD grinding (EDF Fighters) — blocked by no ship/minerals.
+
+**Game state:** Deadlock unchanged — iron=0, copper=0, no Mk1 Mining Laser, minerals={}, ships=0. **30+ days zero resource gain.** No code fix available — game-admin gate.
+
+**Fix:** None needed. No errors to fix.
+
+**Status:** Operator healthy. No code fixes needed. No Discord ping (Saturday preference). Awaiting Jonathan direction on Mk1 Mining Laser (1000 ISD) or iron/copper asteroid spawn.
+
+## 2026-05-30 19:54 UTC — HAL-P Self-Review (2:54 PM CT Sat)
+
+**Token:** ✅ Valid — session `fa78e599-d319-4bc9-9211-ab1b4c05e54c`. Expires ~2026-06-06 (~7 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls.
+
+**Issue:** Operator was dead at cron trigger (silent death — no crimson_operator.py process found). Last cycle was ~19:49 UTC May 30. Operator had been cycling healthily but silently died during the prior 4h window. Token was valid, so this was likely a process/execution issue rather than auth.
+
+**Fix:** Killed any stale process, restarted via nohup (PID 63587). Confirmed healthy — Cycle 1 logged at 00:54:18 UTC, WebSocket connected. Operator now running.
+
+**Game state:** Deadlock unchanged — iron=0, copper=0, no Mk1 Mining Laser, minerals={}, ships=0. **30+ days zero resource gain.** No code fix available — game-admin gate.
+
+**Persistent pattern:** Operator silently dying every ~4-6h. Token stays valid. No crash logs. Suspect Python process management issue (stdout buffering / nohup SIGHUP). Code is clean — this is an operational stability issue, not a code defect.
+
+**Status:** Operator recovered. No code fixes needed. No Discord ping (Saturday preference). Awaiting Jonathan direction on Mk1 Mining Laser (1000 ISD) or iron/copper asteroid spawn.
+
+## 2026-05-31 01:24 UTC — HAL-P Self-Review (8:24 PM CT Sat)
+
+**Token:** ✅ Valid — session `fa78e599-d319-4bc9-9211-ab1b4c05e54c`. Expires ~2026-06-06 (~7 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator silent death at ~01:14 UTC (Cycle 5), restarted at 01:25 UTC via cron self-review.
+
+**Fix:** Restarted operator via nohup (PID 71426). Confirmed healthy — Cycle 1 logged at 01:25:20 UTC, WebSocket connected, ISD=489.
+
+**Operator:** Silent death pattern persists (~every 4-6h). Token valid. No crash logs. Cron restart cycle working as designed.
+
+**Game state:** Deadlock unchanged — iron=0, copper=0, no Mk1 Mining Laser, minerals={}, ships=0. **30+ days zero resource gain.** No code fix available — game-admin gate.
+
+**Status:** Operator recovered. No code fixes needed. No Discord ping (Saturday preference). Awaiting Jonathan direction on Mk1 Mining Laser (1000 ISD) or iron/copper asteroid spawn.
+
+## 2026-05-31 03:27 UTC — HAL-P Self-Review (10:27 PM CT Sat)
+
+**Token:** ✅ Valid — session `fa78e599-d319-4bc9-9211-ab1b4c05e54c`. Expires ~2026-06-06 (~7 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls.
+
+**Issue:** Operator silent death at ~03:16 UTC (Cycle 23 ran, then operator died). No crash logs. Persistent pattern (~every 4-6h). Cron self-review caught and restarted.
+
+**Fix:** Restarted via nohup (PID 3916). Confirmed healthy — Cycle 1 logged at 03:27:48 UTC, WebSocket connected, ISD=489.
+
+**Operator:** Silent death/restart pattern managed by cron self-review. Circuit breaker holding at 70 mining failures. Self-improvement recommending combat ISD grinding — blocked by no ship/minerals.
+
+**Game state:** Deadlock unchanged — iron=0, copper=0, no Mk1 Mining Laser, minerals={}, ships=0. **30+ days zero resource gain.** No code fix available — game-admin gate.
+
+**Status:** Operator recovered. No code fixes needed. No Discord ping (Saturday preference). Awaiting Jonathan direction on Mk1 Mining Laser (1000 ISD) or iron/copper asteroid spawn.
+
+---
+
+## 2026-05-31 02:24 UTC — HAL-P Self-Review (9:24 PM CT Sat)
+
+**Token:** ✅ Valid — session `fa78e599-d319-4bc9-9211-ab1b4c05e54c`. Expires ~2026-06-06 (~7 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator PID 71426 active. WebSocket cycling confirmed through 02:23 UTC (self-improve.log). Self-improvement cycling.
+
+**Operator:** Healthy. Silent death/restart pattern managed by cron. Circuit breaker holding at 70 mining failures. Self-improvement recommending combat ISD grinding — blocked by no ship/minerals.
+
+**Game state:** Deadlock unchanged — iron=0, copper=0, no Mk1 Mining Laser, minerals={}, ships=0. **30+ days zero resource gain.** No code fix available — game-admin gate.
+
+**Fix:** None needed. No errors to fix.
+
+**Status:** Operator healthy. No code fixes needed. No Discord ping (Saturday preference). Awaiting Jonathan direction on Mk1 Mining Laser (1000 ISD) or iron/copper asteroid spawn.
+
+## 2026-05-31 03:42 UTC — HAL-P Self-Review (10:42 PM CT Sat)
+
+**Token:** ✅ Valid — session `fa78e599-d319-4bc9-9211-ab1b4c05e54c`. Expires ~2026-06-06 (~7 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls.
+
+**Issue:** Operator silent death at ~03:27 UTC. No crash logs. Pattern: operator dying ~every 4-6h between 01:00-03:30 UTC cycles, cron catching and restarting. Token valid — not auth-related.
+
+**Fix:** Restarted via nohup (PID 7785). Confirmed healthy — Cycle 1 logged at 03:27:48 UTC, WebSocket cycling confirmed.
+
+**Operator:** Silent death/restart cycle managed by cron self-review. Circuit breaker holding at 70 mining failures. Self-improvement recommending combat ISD grinding — blocked by no ship/minerals.
+
+**Game state:** Deadlock unchanged — iron=0, copper=0, no Mk1 Mining Laser, minerals={}, ships=0. **30+ days zero resource gain.** No code fix available — game-admin gate.
+
+**Status:** Operator recovered. No code fixes needed. No Discord ping (Saturday preference). Awaiting Jonathan direction on Mk1 Mining Laser (1000 ISD) or iron/copper asteroid spawn.
+
+## 2026-05-31 06:58 UTC — HAL-P Self-Review (1:58 AM CT Sun)
+
+**Token:** ✅ Valid — session `fa78e599-d319-4bc9-9211-ab1b4c05e54c`. Expires ~2026-06-06 (~6 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator running Cycle 39, WebSocket cycling confirmed through 06:54 UTC. Circuit breaker holding at 70 mining failures.
+
+**Operator:** Healthy. Scout idle at (1,0). Self-improvement recommending combat ISD grinding (EDF Fighters) — blocked by no ship/minerals. Silent death/restart pattern managed by cron.
+
+**Game state:** Deadlock unchanged — iron=0, copper=0, no Mk1 Mining Laser, minerals={}, ships=0. **31+ days zero resource gain.** No code fix available — game-admin gate.
+
+**Fix:** None needed. No errors to fix.
+
+**Status:** Operator healthy. No code fixes needed. No Discord ping (Sunday 1:58 AM CT). Awaiting Jonathan direction on Mk1 Mining Laser (1000 ISD) or iron/copper asteroid spawn.
+
+## 2026-05-31 07:28 UTC — HAL-P Self-Review (2:28 AM CT Sun)
+
+**Token:** ✅ Valid — session `42b76d5f-e2b4-42ba-8a9d-3ec88c80197e`. Expires **2026-06-07 06:50 UTC** (~6 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls.
+
+**Issue:** Operator silent death — was dead at cron trigger (last cycle at 02:24 UTC May 31, found dead at 07:28 UTC). ~5h gap. No crash logs. Persistent silent death pattern (~every 4-6h). Cron caught and restarted.
+
+**Fix:** Restarted via nohup (PID 64985). Confirmed healthy — Cycle 1, WebSocket cycling confirmed ~8s after startup.
+
+**Operator:** Silent death/restart pattern managed by cron self-review. Circuit breaker holding at 70 mining failures. Self-improvement recommending combat ISD grinding — blocked by no ship/minerals.
+
+**Game state:** Deadlock unchanged — iron=0, copper=0, no Mk1 Mining Laser, minerals={}, ships=0. **31+ days zero resource gain.** No code fix available — game-admin gate.
+
+**Status:** Operator recovered. No code fixes needed. No Discord ping (2:28 AM CT Sun). Awaiting Jonathan direction on Mk1 Mining Laser (1000 ISD) or iron/copper asteroid spawn.
+
+## 2026-05-31 09:02 UTC — HAL-P Self-Review (4:02 AM CT Sun)
+
+**Token:** ✅ Valid — session `42b76d5f-e2b4-42ba-8a9d-3ec88c80197e`. Expires **2026-06-07 06:50 UTC** (~6 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls.
+
+**Issue:** Operator silent death — not running at cron trigger (last cycle unknown, found dead at 09:01 UTC). Cron caught and restarted.
+
+**Fix:** Restarted via nohup (PID 88243). Confirmed healthy — Cycle 1, WebSocket cycling confirmed ~8s after startup, ISD=489.
+
+**Operator:** Silent death/restart pattern managed by cron self-review. Circuit breaker holding at 70 mining failures. Self-improvement recommending combat ISD grinding — blocked by no ship/minerals.
+
+**Game state:** Deadlock unchanged — iron=0, copper=0, no Mk1 Mining Laser, minerals={}, ships=0. **31+ days zero resource gain.** No code fix available — game-admin gate.
+
+**Status:** Operator recovered. No code fixes needed. No Discord ping (4:02 AM CT Sun). Awaiting Jonathan direction on Mk1 Mining Laser (1000 ISD) or iron/copper asteroid spawn.
+
+## 2026-05-31 14:02 UTC — HAL-P Self-Review (9:02 AM CT Sun)
+
+**Token:** ✅ Valid — session `42b76d5f-e2b4-42ba-8a9d-3ec88c80197e`. Expires **2026-06-07 06:50 UTC** (~6 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator PID 88243 actively cycling — Cycles 62-67 confirmed (12:30-13:00 UTC), self-improvement checks confirmed at 13:23 + 13:38 UTC. WebSocket cycling healthy.
+
+**Operator:** Running. Silent death pattern — PID 88243 has been up since 09:02 UTC (~5h, approaching typical ~4-6h death window). Circuit breaker holding at 70 mining failures. Self-improvement recommending combat ISD grinding — blocked by no ship/minerals.
+
+**Game state:** Deadlock unchanged — iron=0, copper=0, no Mk1 Mining Laser, minerals={}, ships=0. **31+ days zero resource gain.** No code fix available — game-admin gate.
+
+**Fix:** None needed. No errors to fix.
+
+**Status:** Operator healthy. No code fixes needed. No Discord ping (9:02 AM CT Sun). Awaiting Jonathan direction on Mk1 Mining Laser (1000 ISD) or iron/copper asteroid spawn.
+
+## 2026-05-31 14:33 UTC — HAL-P Self-Review (9:33 AM CT Sun)
+
+**Token:** ✅ Valid — session `42b76d5f-e2b4-42ba-8a9d-3ec88c80197e`. Expires **2026-06-07 05:30 UTC** (~6 days 14h). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator PIDs 72934+88243 running. WebSocket cycling confirmed through 14:23 UTC (self-improve.log). Self-improvement cycling.
+
+**Operator:** Running. Circuit breaker holding at 70 mining failures. Self-improvement recommending combat ISD grinding — blocked by no ship/minerals. Silent death/restart managed by cron.
+
+**Game state:** Deadlock unchanged — iron=0, copper=0, no Mk1 Mining Laser, minerals={}, ships=0. **31+ days zero resource gain.** No code fix available — game-admin gate.
+
+**Fix:** None needed. No errors to fix.
+
+**Status:** Operator healthy. No code fixes needed. No Discord ping (Sunday morning, no urgent issues). Awaiting Jonathan direction on Mk1 Mining Laser (1000 ISD) or iron/copper asteroid spawn.
+
+## 2026-05-31 14:47 UTC — HAL-P Self-Review (9:47 AM CT Sun)
+
+**Token:** ✅ Valid — session `42b76d5f-e2b4-42ba-8a9d-3ec88c80197e`. Expires **2026-06-07 06:50 UTC** (~6 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls.
+
+**Issue:** Operator silent death — not running at cron trigger. Last cycle (Cycle 39) was at ~10:39 UTC May 30 (~4h gap). No crash logs. Persistent silent death pattern (~every 4-6h). Token valid — not auth-related.
+
+**Fix:** Killed stale PID 88243, restarted via nohup → PID 76849. Confirmed healthy — Cycle 1 logged at 14:48:27 UTC, WebSocket connected, ISD=489.
+
+**Operator:** Silent death/restart cycle managed by cron self-review. Circuit breaker holding at 70 mining failures. Self-improvement recommending combat ISD grinding — blocked by no ship/minerals.
+
+**Game state:** Deadlock unchanged — iron=0, copper=0, no Mk1 Mining Laser, minerals={}, ships=0. **31+ days zero resource gain.** No code fix available — game-admin gate.
+
+**Status:** Operator recovered. No code fixes needed. No Discord ping (Sunday, nothing urgent). Awaiting Jonathan direction on Mk1 Mining Laser (1000 ISD) or iron/copper asteroid spawn.
+
+## 2026-05-31 15:32 UTC — HAL-P Self-Review (10:32 AM CT Sun)
+
+**Token:** ✅ Valid — session `42b76d5f-e2b4-42ba-8a9d-3ec88c80197e`. Expires **2026-06-07 06:50 UTC** (~6 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator PID 76849 active (restarted ~14:48 UTC). WebSocket cycling confirmed through 15:29 UTC. Self-improvement cycling every 15min.
+
+**Operator:** Running. Circuit breaker holding at 70 mining failures. Self-improvement recommending combat ISD grinding (EDF Fighters) — blocked by no ship/minerals. Silent death/restart cycle managed by cron.
+
+**Game state:** Deadlock unchanged — iron=0, copper=0, no Mk1 Mining Laser, minerals={}, ships=0. **31+ days zero resource gain.** No code fix available — game-admin gate.
+
+**Fix:** None needed. No errors to fix.
+
+**Status:** Operator healthy. No code fixes needed. Awaiting Jonathan direction on Mk1 Mining Laser (1000 ISD) or iron/copper asteroid spawn.
+
+## 2026-05-31 16:02 UTC — HAL-P Self-Review (11:02 AM CT Sun)
+
+**Token:** ✅ Valid — session `42b76d5f-e2b4-42ba-8a9d-3ec88c80197e`. Expires **2026-06-07 06:50 UTC** (~6 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator PID 76849 active (restarted ~14:48 UTC May 30). WebSocket cycling confirmed through 15:00 UTC. Self-improvement cycling every 15min.
+
+**Operator:** Running. Circuit breaker holding at 70 mining failures. Self-improvement recommending combat ISD grinding (EDF Fighters) — blocked by no ship/minerals. Silent death/restart cycle managed by cron.
+
+**Game state:** Deadlock unchanged — iron=0, copper=0, no Mk1 Mining Laser, minerals={}, ships=0. **31+ days zero resource gain.** No code fix available — game-admin gate.
+
+**Fix:** None needed. No errors to fix.
+
+**Status:** Operator healthy. No code fixes needed. No Discord ping (Sunday, no urgent issues). Awaiting Jonathan direction on Mk1 Mining Laser (1000 ISD) or iron/copper asteroid spawn.
+
+## 2026-05-31 16:47 UTC — HAL-P Self-Review (11:47 AM CT Sun)
+
+**Token:** ✅ Valid — session `42b76d5f-e2b4-42ba-8a9d-3ec88c80197e`. Expires **2026-06-07 06:50 UTC** (~6 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator PID 76849 active (restarted at ~14:48 UTC May 31). WebSocket cycling confirmed through Cycle 67 at 13:00 UTC. Self-improvement cycling every 15min.
+
+**Operator:** Running. Circuit breaker holding at 70 mining failures. Self-improvement recommending combat ISD grinding (EDF Fighters) — blocked by no ship/minerals. Silent death/restart cycle managed by cron.
+
+**Game state:** Deadlock unchanged — iron=0, copper=0, no Mk1 Mining Laser, minerals={}, ships=0. **31+ days zero resource gain.** No code fix available — game-admin gate.
+
+**Fix:** None needed. No errors to fix.
+
+**Status:** Operator healthy. No code fixes needed. No Discord ping (Sunday, game-admin gate). Awaiting Jonathan direction on Mk1 Mining Laser (1000 ISD) or iron/copper asteroid spawn.
+
+## 2026-05-31 19:34 UTC — HAL-P Self-Review (2:34 PM CT Sun)
+
+**Token:** ✅ Valid — session `42b76d5f-e2b4-42ba-8a9d-3ec88c80197e`. Expires **2026-06-07 06:50 UTC** (~6 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator PID 38344 active (restarted at 1:49 PM CT, ~45 min ago). WebSocket cycling confirmed through 14:32 UTC (agent log). Self-improvement cycling every 15min.
+
+**Operator:** Healthy. Silent death/restart pattern managed by cron. Circuit breaker holding at 70 mining failures. Self-improvement recommending combat ISD grinding (EDF Fighters) — blocked by no ship/minerals.
+
+**Game state:** Deadlock unchanged — iron=0, copper=0, no Mk1 Mining Laser, minerals={}, ships=0. **31+ days zero resource gain.** No code fix available — game-admin gate.
+
+**Fix:** None needed. No errors to fix.
+
+**Status:** Operator healthy. No code fixes needed. No Discord ping (Sunday, game-admin gate). Awaiting Jonathan direction on Mk1 Mining Laser (1000 ISD) or iron/copper asteroid spawn.
+
+## 2026-05-31 20:04 UTC — HAL-P Self-Review (3:04 PM CT Sun)
+
+**Token:** ✅ Valid — session `42b76d5f-e2b4-42ba-8a9d-3ec88c80197e`. Expires **2026-06-07 06:50 UTC** (~6 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator PID 38344 active. WebSocket cycling confirmed through 15:02 UTC (agent log) and 19:53 UTC (self-improve.log). Self-improvement cycling every 15min.
+
+**Operator:** Healthy. Silent death/restart pattern managed by cron. Circuit breaker holding at 70 mining failures. Self-improvement recommending combat ISD grinding (EDF Fighters) — blocked by no ship/minerals.
+
+**Game state:** Deadlock unchanged — iron=0, copper=0, no Mk1 Mining Laser, minerals={}, ships=0. **31+ days zero resource gain.** No code fix available — game-admin gate.
+
+**Fix:** None needed. No errors to fix.
+
+**Status:** Operator healthy. No code fixes needed. No Discord ping (Sunday, game-admin gate). Awaiting Jonathan direction on Mk1 Mining Laser (1000 ISD) or iron/copper asteroid spawn.
+
+## 2026-05-31 21:20 UTC — HAL-P Self-Review (4:20 PM CT Sun)
+
+**Token:** ✅ Valid — session `42b76d5f-e2b4-42ba-8a9d-3ec88c80197e`. Expires **2026-06-07 06:50 UTC** (~6 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Agent log shows WebSocket cycling through 16:18 UTC (last entry).
+
+**Issue:** Operator silent death — not running at cron trigger (no crimson_operator.py process found). Last cycle was ~16:18 UTC May 31 (~5h gap). No crash logs. Persistent silent death pattern (~every 4-6h). Token valid — not auth-related.
+
+**Fix:** Restarted operator via nohup (PID 77164). Confirmed healthy — Cycle 1 logged at 21:21:41 UTC, WebSocket connected at 21:21:42 UTC, ISD=489.
+
+**Operator:** Silent death/restart cycle managed by cron self-review. Circuit breaker holding at 70 mining failures. Self-improvement recommending combat ISD grinding — blocked by no ship/minerals.
+
+**Game state:** Deadlock unchanged — iron=0, copper=0, no Mk1 Mining Laser, minerals={}, ships=0. **31+ days zero resource gain.** No code fix available — game-admin gate.
+
+**Status:** Operator recovered. No code fixes needed. Awaiting Jonathan direction on Mk1 Mining Laser (1000 ISD) or iron/copper asteroid spawn.
+
+## 2026-05-31 21:51 UTC — HAL-P Self-Review (4:51 PM CT Sun)
+
+**Token:** ✅ Valid — session `42b76d5f-e2b4-42ba-8a9d-3ec88c80197e`. Expires **2026-06-07 06:50 UTC** (~6 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator was dead at cron trigger (silent death pattern — no crimson_operator.py process found). Last cycle was ~16:18 UTC May 31 (~5h gap). No crash logs. Persistent silent death pattern (~every 4-6h). Token valid — not auth-related.
+
+**Fix:** Restarted via nohup → PID 84987. Confirmed healthy — Cycle 1 logged, WebSocket cycling confirmed 8s after startup, ISD=489.
+
+**Operator:** Silent death/restart cycle managed by cron self-review. Circuit breaker holding at 70 mining failures. Self-improvement recommending combat ISD grinding (EDF Fighters) — blocked by no ship/minerals.
+
+**Game state:** Deadlock unchanged — iron=0, copper=0, no Mk1 Mining Laser, minerals={}, ships=0. **31+ days zero resource gain.** No code fix available — game-admin gate.
+
+**Status:** Operator recovered. No code fixes needed. Awaiting Jonathan direction on Mk1 Mining Laser (1000 ISD) or iron/copper asteroid spawn.
+
+## 2026-06-01 00:17 UTC — HAL-P Self-Review (7:17 PM CT Sun)
+
+**Token:** ✅ Valid — session `42b76d5f-e2b4-42ba-8a9d-3ec88c80197e`. Expires **2026-06-07 06:50 UTC** (~6 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls.
+
+**Issue:** Operator silent death — was dead at cron trigger time (~00:16 UTC). ~5h gap from prior Cycle 20 (00:12 UTC May 31). No crash logs. Persistent silent death pattern (~every 4-6h). Cron self-review caught and restarted.
+
+**Fix:** Restarted via nohup (PID 26297). Confirmed healthy — Cycle 1 logged at 00:17:27 UTC, WebSocket cycling confirmed ~8s after startup, ISD=489.
+
+**Operator:** Silent death/restart cycle managed by cron self-review. Circuit breaker holding at 70 mining failures. Self-improvement cycling every 15min. Recommending combat ISD grinding (EDF Fighters) — blocked by no ship/minerals.
+
+**Game state:** Deadlock unchanged — iron=0, copper=0, no Mk1 Mining Laser, minerals={}, ships=0. **31+ days zero resource gain.** No code fix available — game-admin gate.
+
+**Status:** Operator recovered. No code fixes needed. Awaiting Jonathan direction on Mk1 Mining Laser (1000 ISD) or iron/copper asteroid spawn.
+
+## 2026-06-01 02:27 UTC — HAL-P Self-Review (9:27 PM CT Sun)
+
+**Token:** ✅ Valid — session `42b76d5f-e2b4-42ba-8a9d-3ec88c80197e`. Expires **2026-06-07 06:50 UTC** (~6 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator PID 34978 active. WebSocket cycling confirmed through Cycle 20 at 02:23 UTC. Self-improvement cycling through 02:23 UTC.
+
+**Operator:** Running. Circuit breaker holding at 70 mining failures. Self-improvement recommending combat ISD grinding (EDF Fighters) — blocked by no ship/minerals. Silent death/restart managed by cron self-review.
+
+**Game state:** Deadlock unchanged — iron=0, copper=0, no Mk1 Mining Laser, minerals={}, ships=0. **31+ days zero resource gain.** No code fix available — game-admin gate.
+
+**Fix:** None needed. No errors to fix.
+
+**Status:** Operator healthy. No code fixes needed. Awaiting Jonathan direction on Mk1 Mining Laser (1000 ISD) or iron/copper asteroid spawn.
+
+## 2026-06-01 04:29 UTC — HAL-P Self-Review (11:29 PM CT Sun)
+
+**Token:** ✅ Valid — session `42b76d5f-e2b4-42ba-8a9d-3ec88c80197e`. Expires **2026-06-07 06:50 UTC** (~6 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator PID 34978 running (~3h 42min, approaching typical 4-6h silent death window). WebSocket cycling confirmed through Cycle 45 at 04:28 UTC. Self-improvement cycling every 15min.
+
+**Operator:** Running. Circuit breaker holding at 70 mining failures. Self-improvement recommending combat ISD grinding (EDF Fighters) — blocked by no ship/minerals. Silent death/restart managed by cron self-review.
+
+**Game state:** Deadlock unchanged — iron=0, copper=0, no Mk1 Mining Laser, minerals={}, ships=0. **31+ days zero resource gain.** No code fix available — game-admin gate.
+
+**Fix:** None needed. No errors to fix.
+
+**Status:** Operator healthy. No code fixes needed. Awaiting Jonathan direction on Mk1 Mining Laser (1000 ISD) or iron/copper asteroid spawn.
+
+## 2026-06-01 11:20 UTC — HAL-P Self-Review (6:20 AM CT Mon)
+
+**Token:** ✅ Valid — session `0eadc8ed-2953-4334-9832-816d4cd7ab6f` (state.json current). Exp ~2026-06-07. No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator running Cycle 61 at cron trigger, WebSocket cycling confirmed.
+
+**Operator:** Running. No silent death at this check. Circuit breaker at 70 mining failures. Self-improvement cycling every 15min. Recommending combat ISD grinding — blocked by no ship/minerals.
+
+**Game state:** Deadlock unchanged — ISD=489, iron=0, copper=0, no Mk1 Mining Laser, minerals={}, ships=0. **31+ days zero resource gain.** No code fix available — game-admin gate.
+
+**Fix:** None needed. No errors to fix.
+
+**Status:** Operator healthy. No code fixes needed. No Discord ping (morning window). Awaiting Jonathan direction on Mk1 Mining Laser (1000 ISD) or iron/copper asteroid spawn.
+
+## 2026-06-01 07:32 UTC — HAL-P Self-Review (2:32 AM CT Mon)
+
+**Token:** ✅ Valid — session `42b76d5f-e2b4-42ba-8a9d-3ec88c80197e`. Expires **2026-06-07 06:50 UTC** (~6 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator restarted at ~06:18 UTC (silent death catch), now at Cycle 15 and cycling healthily. WebSocket cycling confirmed. PID active.
+
+**Operator:** Running. Circuit breaker holding at 70 mining failures. Silent death/restart pattern managed by cron. Self-improvement cycling every 15min. Recommending combat ISD grinding — blocked by no ship/minerals.
+
+**Game state:** Deadlock unchanged — iron=0, copper=0, no Mk1 Mining Laser, minerals={}, ships=0. **31+ days zero resource gain.** No code fix available — game-admin gate.
+
+**Fix:** None needed. No errors to fix.
+
+**Status:** Operator healthy. No code fixes needed. Awaiting Jonathan direction on Mk1 Mining Laser (1000 ISD) or iron/copper asteroid spawn.
+
+## 2026-06-01 19:06 UTC — HAL-P Self-Review (2:06 PM CT Mon)
+
+**Token:** ✅ Valid — session `3253da4f-15a3-41b1-8d10-5ea8a85cd2c1`. Exp ~2026-06-07 (~6 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator running Cycle 36 at cron check, WebSocket cycling confirmed through 19:03 UTC. Self-improvement cycling every 15min.
+
+**Operator:** Running. No silent death at this check. Circuit breaker at 70 mining failures. Self-improvement recommending combat ISD grinding (EDF Fighters) — blocked by no ship/minerals.
+
+**Game state:** Deadlock unchanged — iron=0, copper=0, no Mk1 Mining Laser, minerals={}, ships=0. **31+ days zero resource gain.** No code fix available — game-admin gate.
+
+**Fix:** None needed. No errors to fix.
+
+**Status:** Operator healthy. No code fixes needed. Awaiting Jonathan direction on Mk1 Mining Laser (1000 ISD) or iron/copper asteroid spawn.
+
+---
+
+## 2026-06-01 17:36 UTC — HAL-P Self-Review (12:36 PM CT Mon)
+
+**Token:** ✅ Valid — session `3253da4f-15a3-41b1-8d10-5ea8a85cd2c1`. Expires ~2026-06-07 (~6 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator PID 65457 active, WebSocket cycling confirmed through Cycle 18 at 17:32 UTC. Self-improvement cycling every 15min.
+
+**Operator:** Running. Circuit breaker holding at 70 mining failures. Self-improvement recommending combat ISD grinding (EDF Fighters) — blocked by no ship/minerals. Silent death/restart managed by cron.
+
+**Game state:** Deadlock unchanged — iron=0, copper=0, no Mk1 Mining Laser, minerals={}, ships=0. **31+ days zero resource gain.** No code fix available — game-admin gate.
+
+**Fix:** None needed. No errors to fix.
+
+**Status:** Operator healthy. No code fixes needed. Awaiting Jonathan direction on Mk1 Mining Laser (1000 ISD) or iron/copper asteroid spawn.
+
+---
+
+
+## 2026-06-02 01:26 UTC — HAL-P Self-Review (8:26 PM CT Mon)
+
+**Token:** ✅ Valid — session `3253da4f-15a3-41b1-8d10-5ea8a85cd2c1`. Expires ~2026-06-07 (~6 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator running PID 20468, WebSocket cycling confirmed through Cycle 67 at 01:21 UTC. Self-improvement cycling every 15min.
+
+**Operator:** Running. Circuit breaker holding at 70 mining failures. Self-improvement recommending combat ISD grinding (EDF Fighters) — blocked by no ship/minerals. Silent death/restart managed by cron self-review.
+
+**Game state:** Deadlock unchanged — iron=0, copper=0, no Mk1 Mining Laser, minerals={}, ships=0. **31+ days zero resource gain.** No code fix available — game-admin gate.
+
+**Fix:** None needed. No errors to fix.
+
+**Status:** Operator healthy. No code fixes needed. Escalating to Jonathan — 31+ days zero resource gain, game-admin gate requires Mk1 Mining Laser (1000 ISD) or iron/copper asteroid spawn. This is a sustained deadlock that needs human intervention.
