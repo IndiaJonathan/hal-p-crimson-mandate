@@ -47,10 +47,24 @@ def check_missing_mining_laser(state, log_text):
         return "⚠️ Mining blocked — no Mining Laser Mk1 (costs 1000 ISD). Prioritize combat ISD grinding."
     return None
 
-def check_stale_position(state):
-    """If scout has been at the same position for many cycles, it may be stuck."""
-    units = state.get("units", [])
-    scout = next((u for u in units if "Scout" in u.get("type", "")), None)
+def check_stale_position(state, ws_units=None):
+    """
+    Check if scout is missing. Uses ws_units if provided (live WS data).
+    When state['units'] is empty (normal for cron-triggered improve.py runs during
+    active operator cycles — operator gets units via WS, not REST), fall back to
+    checking the action log to confirm the scout was active recently.
+    """
+    units = ws_units if ws_units is not None else state.get("units", [])
+    # If units are empty (operator active but REST didn't sync units), check action log
+    # to confirm scout was recently alive — don't flag false positives.
+    if not units:
+        action_log = state.get("actionLog", [])
+        recent_moves = [e for e in action_log if e.get("action") == "move_unit" and 
+                        "scout" in e.get("detail", "").lower()]
+        if len(recent_moves) >= 3:
+            return None  # Scout alive recently — no issue
+        return "⚠️ No Scout found — may have been destroyed and is respawning."
+    scout = next((u for u in units if u.get("type") == "Scout"), None)
     if not scout:
         return "⚠️ No Scout found — may have been destroyed and is respawning."
     return None
@@ -99,7 +113,7 @@ if __name__ == "__main__":
     if laser_warning:
         print(f"\n{laser_warning}")
 
-    scout_warning = check_stale_position(state)
+    scout_warning = check_stale_position(state, ws_units=state.get("_ws_units"))
     if scout_warning:
         print(f"\n{scout_warning}")
 
