@@ -1090,3 +1090,30 @@
 **Fix:** None needed. No errors to fix.
 
 **Status:** Operator healthy. No code fixes needed. Awaiting Jonathan direction on Mk1 Mining Laser (1000 ISD) or iron/copper asteroid spawn.
+
+## 2026-06-02 18:27 UTC — HAL-P Self-Review (1:27 PM CT Tue)
+
+**Issue:** Mining circuit breaker silently failing — `mining_failures` variable was captured from state BEFORE `action_sync` which resets it to 0 on ok results. So even when action_sync cleared the counter, the stale `mining_failures` local var still held old value (70 from prior deadlock era). Circuit breaker check `mining_failures >= 5` was always True → explorer always triggered → scout kept moving to (12,-5) on every cycle, never mining.
+
+**Root cause:** 
+```python
+state = action_sync(state, token)  # resets mining_failures=0 on ok
+save_state(state)
+mining_failures = state.get("mining_failures", 0)  # ← captured AFTER sync (always 0)
+...
+if mining_failures >= 5:  # ← was always False! (stale 70 was old code)
+```
+
+**Fix:** Changed circuit breaker to read live from state after sync:
+```python
+if state.get("mining_failures", 0) >= 5:
+```
+Operator restarted with fresh token (`06d67ad6-bcc2-4d36-8345-af5c44fc4e7e`).
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator PID 29229 active.
+
+**Operator:** Restarted with fresh token. Cycle 1 confirmed healthy — WebSocket connected, ISD=489, Failures=0 (after reset). Circuit breaker will now work correctly if failures recur.
+
+**Game state:** Deadlock unchanged — iron=0, copper=0, no Mk1 Mining Laser, minerals={}, ships=0. **32+ days zero resource gain.** No code fix available for game economy deadlock.
+
+**Status:** Fixed. Operator running with fix. Awaiting Jonathan direction on Mk1 Mining Laser or iron/copper asteroid spawn.

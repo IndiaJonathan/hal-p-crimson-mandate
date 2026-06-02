@@ -214,7 +214,7 @@ def run_cycle(cycle_num: int):
 
         if state.get("mining_failures", 0) >= 5:
             # Circuit breaker: stop burning ISD when Basic Mining Array can't extract anything
-            log(f"Circuit breaker: {mining_failures} mining failures — scout staying idle at ({scout_pos.get('q')},{scout_pos.get('r')})")
+            log(f"Circuit breaker: {state.get('mining_failures', 0)} mining failures — scout staying idle at ({scout_pos.get('q')},{scout_pos.get('r')})")
             state["lastRun"] = dt.datetime.now(dt.timezone.utc).isoformat()
             save_state(state)
             return True
@@ -284,7 +284,7 @@ def run_cycle(cycle_num: int):
     if now - _last_status_time() >= 300:
         status_msg = (
             f"[Crimson Status] Cycle {cycle_num} | ISD={isd} | Credits={credits} | "
-            f"Laser={has_laser} | Failures={mining_failures} | Fighters={len(fighters)}"
+            f"Laser={has_laser} | Failures={state.get('mining_failures', 0)} | Fighters={len(fighters)}"
         )
         message_halp(status_msg)
         _write_last_status_time(now)
