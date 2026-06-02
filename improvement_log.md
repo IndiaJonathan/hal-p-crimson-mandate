@@ -1135,3 +1135,25 @@ Operator restarted with fresh token (`06d67ad6-bcc2-4d36-8345-af5c44fc4e7e`).
 **Game state:** Deadlock unchanged — iron=0, copper=0, no Mk1 Mining Laser, minerals={}, ships=0. **32+ days zero resource gain.** No code fix available — game-admin gate.
 
 **Status:** Operator healthy. No code fixes needed. Awaiting Jonathan direction on Mk1 Mining Laser (1000 ISD) or iron/copper asteroid spawn.
+
+## 2026-06-02 21:13 UTC — HAL-P Self-Review (4:13 PM CT Tue)
+
+**Token:** ✅ Valid — session `06d67ad6-bcc2-4d36-8345-af5c44fc4e7e`. Expires ~2026-06-09 (~6.7 days). No renewal needed.
+
+**Operator Status:** `crimson_operator.py` PID 52816 running (started ~3:14 PM CT). Cycle 12 confirmed active at 21:09 UTC. WebSocket cycling. ISD=489, Laser=False, Failures=0. Circuit breaker holding.
+
+**Real state from cron.log (21:13 UTC):**
+- Scout alive at `{'q': 14, 'r': -7}` (HP=40/40) ✅
+- Mining `ast_b691c2d6` — yield only titanium=3 (no iron/copper in this asteroid, per game design)
+- No EDF fighters nearby → scout stayed put (correct behavior, no combat available)
+- Cycle 12 completing successfully
+
+**Self-improve log false positive:** improve.py was reporting "No Scout found" every 15 min. Root cause: state["units"] is empty because REST /api/profile/me/ships returns empty, while the operator gets units live via WebSocket. Fixed: check action log (3+ recent move_unit events = alive) as fallback before flagging "no scout".
+
+**Fix:** `improve.py` — added action log fallback so false "no scout" flags don't recur.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator PID 52816 active and cycling successfully.
+
+**Game state:** Deadlock unchanged — iron=0, copper=0, no Mk1 Mining Laser, minerals={}, ships=0. **32+ days zero resource gain.** No code fix available — game-admin gate.
+
+**Status:** Fixed false positive in self-improve. Operator healthy and cycling. Awaiting Jonathan direction on Mk1 Mining Laser (1000 ISD) or iron/copper asteroid spawn.

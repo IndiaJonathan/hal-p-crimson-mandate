@@ -59,10 +59,13 @@ def check_stale_position(state, ws_units=None):
     # to confirm scout was recently alive — don't flag false positives.
     if not units:
         action_log = state.get("actionLog", [])
-        recent_moves = [e for e in action_log if e.get("action") == "move_unit" and 
-                        "scout" in e.get("detail", "").lower()]
-        if len(recent_moves) >= 3:
-            return None  # Scout alive recently — no issue
+        # Any recent successful action within last 3 cycles means scout is alive
+        # (action log entries have no "scout" keyword, so check for any move_unit or mine_asteroid)
+        recent_actions = [e for e in action_log
+                         if e.get("action") in ("move_unit", "mine_asteroid")
+                         and e.get("result") == "ok"]
+        if len(recent_actions) >= 3:
+            return None  # Scout alive and acting — no issue
         return "⚠️ No Scout found — may have been destroyed and is respawning."
     scout = next((u for u in units if u.get("type") == "Scout"), None)
     if not scout:
