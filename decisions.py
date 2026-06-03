@@ -144,7 +144,6 @@ def decide_actions(state: dict, ws_state: dict) -> list:
                 })
             elif dist <= 20:
                 # Only issue move if we're not already in transit to another target
-                # (avoid re-issuing a move while scout is en route)
                 in_transit = any(
                     a["type"] == "move_unit"
                     and a.get("payload", {}).get("targetHex", {}).get("q") == tpos.get("q")
@@ -157,9 +156,6 @@ def decide_actions(state: dict, ws_state: dict) -> list:
                         "payload": {"unitId": scout["id"], "targetHex": tpos},
                         "ws": True
                     })
-            # Only mine if scout is already at the asteroid (dist <= 1).
-            # If scout is in transit, mine_asteroid will fail with
-            # "Unit must be within 1 hex of the asteroid" — wait for arrival.
         elif not tier0_asteroids:
             # Prevent moving toward Earth (0,0) when already on/near an asteroid
             scout_pos = scout.get("position", {})
