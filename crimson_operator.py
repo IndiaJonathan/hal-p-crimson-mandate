@@ -213,9 +213,12 @@ def run_cycle(cycle_num: int):
                     return True
 
         if state.get("mining_failures", 0) >= 5:
-            # Circuit breaker: move to Mars to explore — don't burn ISD on failed mining
-            log(f"Circuit breaker: {state.get('mining_failures', 0)} mining failures — moving to Mars (12,-5) to explore")
-        elif scout_pos.get('q', 0) != 12 or scout_pos.get('r', 0) != -5:
+            # Circuit breaker: stay at current position — don't waste ISD moving to Mars
+            # (the old bug: this block fell through to the Mars move below, wasting ISD)
+            log(f"Circuit breaker: {state.get('mining_failures', 0)} mining failures — staying put")
+            return True
+
+        if scout_pos.get('q', 0) != 12 or scout_pos.get('r', 0) != -5:
             client_exp = MMOClient(token, session_id)
             client_exp.start()
             if client_exp.wait_for_auth(timeout=8):
