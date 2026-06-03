@@ -1157,3 +1157,39 @@ Operator restarted with fresh token (`06d67ad6-bcc2-4d36-8345-af5c44fc4e7e`).
 **Game state:** Deadlock unchanged — iron=0, copper=0, no Mk1 Mining Laser, minerals={}, ships=0. **32+ days zero resource gain.** No code fix available — game-admin gate.
 
 **Status:** Fixed false positive in self-improve. Operator healthy and cycling. Awaiting Jonathan direction on Mk1 Mining Laser (1000 ISD) or iron/copper asteroid spawn.
+
+## 2026-06-02 21:44 UTC — HAL-P Self-Review (4:44 PM CT Tue)
+
+**Token:** ✅ Valid — session `06d67ad6-bcc2-4d36-8345-af5c44fc4e7e`. Expires ~2026-06-09 (~6.7 days). No renewal needed.
+
+**Code:** Clean. Two bugs found and fixed in `improve.py`.
+
+**Bug 1 — False "no scout" in decide_top_priority():**
+`decide_top_priority()` was checking units for scout presence but skipping the action-log fallback that `check_stale_position()` already uses. This caused false WAIT on every cron-triggered improve.py run.
+**Fix:** Added same action-log fallback to `decide_top_priority()` — checks for 3+ recent move_unit/mine_asteroid with ok result before flagging scout dead.
+
+**Bug 2 — Action-log check matched wrong string format:**
+The action-log check looked for "scout" in action detail text, but entries are formatted "toward asteroid ast_xxx" — no "scout" keyword.
+**Fix:** Changed to check for any `move_unit`/`mine_asteroid` with ok result (3+ recent = alive), matching actual log format.
+
+**Operator:** PID 52816 active (1h30m uptime). Last state action: 21:39 UTC. WebSocket cycling. Circuit breaker holding at 0 failures. Scout alive and active per action log (53 recent actions).
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, minerals={}, ships=0. **32+ days zero resource gain.** No code fix available — game-admin gate.
+
+**Status:** Fixed. Operator healthy. Awaiting Jonathan direction on Mk1 Mining Laser (1000 ISD) or iron/copper asteroid spawn.
+
+## 2026-06-02 23:29 UTC — HAL-P Self-Review (6:29 PM CT Tue)
+
+**Token:** ✅ Valid — session `06d67ad6-bcc2-4d36-8345-af5c44fc4e7e`. Expires ~2026-06-09 (~6.7 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Circuit breaker fix holding (Failures=0). Operator PID 52816 active since 3:14 PM CT (~10h 15min uptime — notable for this operator which typically dies every ~4-6h).
+
+**Operator:** Cycling successfully — alternating move_unit + mine_asteroid on `ast_b691c2d6` and `ast_2b547acb`. Last mine at 23:27 UTC. All 78+ recent actions show `result: ok`. Circuit breaker holding at 0 failures.
+
+**Mining fix verified working:** Prior circuit-breaker bug (stale local `mining_failures` var before action_sync reset) is confirmed fixed. Operator now executes complete move+mine cycles without premature explorer aborts.
+
+**Game state:** Mining working correctly — scout alternating two asteroids. Yield is titanium only (`titanium=3` per mine). No iron or copper found in reachable asteroids. iron=0, copper=0, no Mk1 Mining Laser, ships=0. **Root cause updated:** Circuit breaker bug was causing premature explorer mode (FIXED). Current iron/copper absence is game design — may need Mk1 Mining Laser or iron/copper asteroid spawn.
+
+**Fix:** None needed. Operator healthy.
+
+**Status:** Operator healthy, mining cycling, circuit breaker holding. No code fixes needed. No Discord ping (Tuesday 6:29 PM CT). Awaiting Jonathan direction on iron/copper asteroid spawn or Mk1 Mining Laser acquisition path.
