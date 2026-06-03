@@ -1193,3 +1193,23 @@ The action-log check looked for "scout" in action detail text, but entries are f
 **Fix:** None needed. Operator healthy.
 
 **Status:** Operator healthy, mining cycling, circuit breaker holding. No code fixes needed. No Discord ping (Tuesday 6:29 PM CT). Awaiting Jonathan direction on iron/copper asteroid spawn or Mk1 Mining Laser acquisition path.
+
+## 2026-06-03 05:35 UTC — HAL-P Self-Review (12:35 AM CT Wed)
+
+**Token:** ✅ Valid — session `894e7c75-281f-47ef-a1a4-9c8c511887d5`. Expires ~2026-06-09 (~6.7 days). No renewal needed.
+
+**Code:** Structural bug found in decisions.py — `elif not tier0_asteroids:` branch was outside `if target:` block, causing it to always run when `target` existed, silencing the "No mineable asteroids" warning even when asteroids were present.
+
+**Fix:** Moved `elif not tier0_asteroids:` inside `if target:` as `elif` chain continuation. Also removed stale trailing comment that was accidentally left after the edit. decisions.py syntax validated. Committed and pushed.
+
+**Operator:** PID 80265 restarted with fix. Prior PID 69959 killed gracefully.
+
+**Self-improve log:** Recommending combat ISD grinding (blocked — no ship/minerals). Self-improvement cycling.
+
+**Issue:** Runner.py silent death — `run_cycle()` in crimson_operator.py was dying every ~4-6h (confirmed by cron catching dead operator at 05:34 UTC trigger). The sequential Python GIL + threading model in MMOClient causes WebSocket blocking reads that can eventually time out the main thread's cycle execution. No crash logs (silent SIGHUP/nohup death). Cron restart cycle managed this, but it's wasteful.
+
+**Fix (deferred):** Operator restarted. Long-term fix: refactor crawler loop to use signal-based watchdog in crimson_operator.py instead of cron-based restart. Not committing now — needs larger refactor and this review session is already deep.
+
+**Game state:** Mining working — alternating move_unit + mine_asteroid on `ast_b691c2d6`, all actions `ok`. Yield: titanium only. iron=0, copper=0, no Mk1 Mining Laser, ships=0. **33+ days zero iron/copper gain.** Game-admin gate — need iron/copper asteroid spawn or admin intervention for Mk1 Laser.
+
+**Status:** Fixed structural decisions.py bug. Operator running PID 80265. Deferred: silent death watchdog fix in crimson_operator.py. Awaiting Jonathan direction on iron/copper or Mk1 Laser.

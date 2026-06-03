@@ -511,6 +511,18 @@ def run_cycle():
 
                 time.sleep(3)
 
+                # ── Circuit breaker: suppress move AND mine when armed ──
+                # Moving when mining is blocked wastes cycles and triggers "not within 1 hex"
+                # errors, re-arming the circuit breaker each cycle (no recovery path).
+                # Keep scout stationary until circuit breaker resets or admin intervenes.
+                if state.get("mining_failures", 0) >= 5:
+                    if atype in ("mine_asteroid", "move_unit"):
+                        if atype == "move_unit":
+                            logger.warning(f"Circuit breaker armed: blocking move_unit to avoid re-triggering "
+                                          f"'not within 1 hex' errors. Scout staying put.")
+                        c.stop()
+                        continue
+
                 # Track mining failures: check WS error messages (not components API — that path is broken)
                 if atype == "mine_asteroid":
                     if c._mining_failure_detected:
