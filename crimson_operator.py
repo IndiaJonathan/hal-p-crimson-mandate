@@ -213,11 +213,8 @@ def run_cycle(cycle_num: int):
                     return True
 
         if state.get("mining_failures", 0) >= 5:
-            # Circuit breaker: stop burning ISD when Basic Mining Array can't extract anything
-            log(f"Circuit breaker: {state.get('mining_failures', 0)} mining failures — scout staying idle at ({scout_pos.get('q')},{scout_pos.get('r')})")
-            state["lastRun"] = dt.datetime.now(dt.timezone.utc).isoformat()
-            save_state(state)
-            return True
+            # Circuit breaker: move to Mars to explore — don't burn ISD on failed mining
+            log(f"Circuit breaker: {state.get('mining_failures', 0)} mining failures — moving to Mars (12,-5) to explore")
         elif scout_pos.get('q', 0) != 12 or scout_pos.get('r', 0) != -5:
             client_exp = MMOClient(token, session_id)
             client_exp.start()
