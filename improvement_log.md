@@ -1371,3 +1371,38 @@ The action-log check looked for "scout" in action detail text, but entries are f
 **Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0. **34+ days zero iron/copper gain.** "Your Basic Mining Array cannot extract minerals from this asteroid. A higher-tier mining laser is required." — server error confirmed: the Basic Mining Array can mine titanium but the game requires a Mk1 Mining Laser (1000 ISD) for iron/copper. No code fix available — game-admin gate.
 
 **Status:** Token renewed. Operator alive and cycling. No code fixes needed. Awaiting Jonathan direction on iron/copper asteroid spawn or Mk1 Mining Laser (1000 ISD) acquisition path.
+
+## 2026-06-04 11:11 UTC — HAL-P Self-Review (6:11 AM CT Thu)
+
+**Issue:** Operator stopped — `NameError: name 'mining' is not defined` on every cycle where no EDF fighters present. Root cause: `elif not fighters and scout:` block referenced undefined variable `mining` in circuit-breaker guard condition.
+
+**Fix:** Defined `mining = bool(tier0_near)` before the `if scout and not mining` guard in crimson_operator.py. Committed and pushed (bae4b0d).
+
+**Operator:** Restarted PID 78287. Cycle 1 confirmed clean — no Python errors, WebSocket cycling, expected "Basic Mining Array cannot extract" warning only. Token valid (`c347d654-bedf-44e7-81da-6280f4286d72`, expires 2026-06-10 10:31 UTC).
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0. **34+ days zero iron/copper gain.** No code fix available — game-admin gate. Escalations sent 2026-04-26 + 2026-05-12. Awaiting Jonathan direction on Mk1 Mining Laser (1000 ISD) or iron/copper asteroid spawn.
+
+**Status:** Fixed and recovered. No Discord ping (6:11 AM CT Thu).
+
+## 2026-06-04 13:46 UTC — HAL-P Self-Review (8:46 AM CT Thu)
+
+**Token:** ✅ Valid — session `07d1b487-9379-4834-8f81-64ccd1e0f461`. Expires **2026-06-10** (~7 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator PID 84919 active (~6h43min uptime). WebSocket cycling confirmed. Circuit breaker holding at mining_failures=5 (threshold=25). No silent death at this check.
+
+**Operator:** Running. Action log shows active mining cycle (last mine at 11:25 UTC). Alternating move_unit + mine_asteroid confirmed through 11:25 UTC. Circuit breaker correctly keeps scout in place when failures < 25. Self-improvement correctly recommends combat ISD grinding (blocked — no ship/minerals).
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0. **34+ days zero iron/copper gain.** "Basic Mining Array cannot extract" warning confirmed from server — requires Mk1 Laser for iron/copper. This is a game-admin gate — no code fix available.
+
+**Fix:** None needed. No code defects. Operator healthy and cycling correctly.
+
+**Status:** Operator healthy. No code fixes needed. Escalating — 34+ days zero iron/copper gain, game-admin gate requires Mk1 Mining Laser (1000 ISD) or iron/copper asteroid spawn. Combat ISD grinding path blocked by zero ship/minerals.
+
+**Escalation to Jonathan:** Crimson Mandate has been cycling 34+ days with zero iron/copper gain. Root cause: Mk1 Mining Laser (1000 ISD) is required to mine iron/copper — Basic Mining Array cannot extract these. Current ISD=489. Even at 1000 ISD we need a ship for combat grinding. Deadlock requires one of:
+1. Admin spawn of iron/copper asteroid accessible with Basic Mining Array
+2. Admin grant of Mk1 Mining Laser
+3. Admin grant of combat-capable ship to grind EDF Fighters for ISD
+
+Please advise on next steps for Crimson Mandate.
+
+---
