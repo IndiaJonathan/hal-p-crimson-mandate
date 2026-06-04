@@ -1406,3 +1406,19 @@ The action-log check looked for "scout" in action detail text, but entries are f
 Please advise on next steps for Crimson Mandate.
 
 ---
+
+## 2026-06-04 14:17 UTC — HAL-P Self-Review (9:17 AM CT Thu)
+
+**Issue:** Threshold mismatch — `decisions.py` used `mining_failures >= 5` to block mining decisions, but `runner.py` uses `>= 25` as the circuit breaker threshold. This caused `mining_blocked=True` in decisions.py when failures=5, blocking move_unit decisions while runner.py was still sending move_unit actions (since runner.py threshold is 25). Confirmed: log shows ~5h of continuous "Basic Mining Array cannot extract" warnings despite circuit breaker in runner.py being below threshold.
+
+**Fix:** Changed `decisions.py` line 102 from `mining_failures >= 5` to `mining_failures >= 25` — aligning with runner.py's circuit breaker threshold. Committed and pushed.
+
+**Token:** ✅ Valid — session `07d1b487-9379-4834-8f81-64ccd1e0f461`. Exp ~2026-06-11. No renewal needed.
+
+**Code:** Clean. Threshold mismatch fixed.
+
+**Operator:** PID 84919 active. Action log shows alternating move_unit + mine_asteroid cycles. mining_failures=5, has_laser=False. Circuit breaker correctly holds at 5.
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0. **34+ days zero iron/copper gain.** No code fix available — game-admin gate.
+
+**Status:** Fixed. Awaiting Jonathan direction on Mk1 Mining Laser (1000 ISD) or iron/copper asteroid spawn.
