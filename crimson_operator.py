@@ -212,9 +212,9 @@ def run_cycle(cycle_num: int):
                     save_state(state)
                     return True
 
-        if state.get("mining_failures", 0) >= 25:
+        if state.get("mining_failures", 0) >= 5:
             # Circuit breaker: stay at current position — don't waste ISD moving to Mars
-            # Threshold raised to 25 to avoid trapping scout mid-journey (was 5, too tight)
+            # Threshold = 5 matches runner.py circuit breaker (blocks mine_asteroid at >= 5)
             log(f"Circuit breaker: {state.get('mining_failures', 0)} mining failures — staying put")
             return True
 
@@ -229,7 +229,7 @@ def run_cycle(cycle_num: int):
 
         # Stay at current asteroid if already in range and circuit breaker is clear
         # (prevents Mars drift when scout is productively positioned at tier-0 asteroid)
-        if scout and state.get('mining_failures', 0) < 25:
+        if scout and state.get('mining_failures', 0) < 5:
             if tier0_near:
                 # Mine tier-0 asteroid with Basic Mining Array
                 target = tier0_near[0]
