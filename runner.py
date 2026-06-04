@@ -503,25 +503,24 @@ def run_cycle():
                 # ── Last-chance circuit breaker before sending mining action ──
                 # decisions.py may have returned this action before the failure count
                 # was incremented in the previous cycle. Guard here to ensure we
-                # never send mmo_mine_asteroid when mining_failures >= 5.
-                if atype == "mine_asteroid" and state.get("mining_failures", 0) >= 5:
+                # never send mmo_mine_asteroid when mining_failures >= 25.
+                # Threshold is high (25) to avoid trapping the scout mid-journey —
+                # the circuit breaker should only fire on persistent, unrelenting failures.
+                if atype == "mine_asteroid" and state.get("mining_failures", 0) >= 25:
                     logger.warning(f"Circuit breaker triggered: mining_failures={state['mining_failures']} — blocking mine_asteroid.")
                     c.stop()
                     continue
 
                 time.sleep(3)
 
-                # ── Circuit breaker: suppress move AND mine when armed ──
-                # Moving when mining is blocked wastes cycles and triggers "not within 1 hex"
-                # errors, re-arming the circuit breaker each cycle (no recovery path).
-                # Keep scout stationary until circuit breaker resets or admin intervenes.
-                if state.get("mining_failures", 0) >= 5:
-                    if atype in ("mine_asteroid", "move_unit"):
-                        if atype == "move_unit":
-                            logger.warning(f"Circuit breaker armed: blocking move_unit to avoid re-triggering "
-                                          f"'not within 1 hex' errors. Scout staying put.")
-                        c.stop()
-                        continue
+                # ── Circuit breaker: suppress mining (not movement) when armed ──
+                # Allow move_unit through so the scout can keep progressing toward asteroids.
+                # Only block mine_asteroid to prevent wasted cycles on hopeless targets.
+                # Threshold: 25 (high — Basic Mining Array fails frequently without Mk1 Laser).
+                if atype == "mine_asteroid" and state.get("mining_failures", 0) >= 25:
+                    logger.warning(f"Circuit breaker armed: blocking mine_asteroid. Scout stays mobile.")
+                    c.stop()
+                    continue
 
                 # Track mining failures: check WS error messages (not components API — that path is broken)
                 if atype == "mine_asteroid":
@@ -531,7 +530,7 @@ def run_cycle():
                         state["has_mining_laser"] = False
                         state["mining_failures"] = state.get("mining_failures", 0) + 1
                         save_state(state)
-                        logger.warning(f"Mining Laser missing (failure #{state['mining_failures']}) — circuit breaker {'ARMED' if state['mining_failures'] >= 3 else 'counting'}."[:120])
+                        logger.warning(f"Mining Laser missing (failure #{state['mining_failures']}) — circuit breaker {'ARMED' if state['mining_failures'] >= 20 else 'counting'}."[:120])
                     else:
                         # No warning = laser detected or real yield
                         state["has_mining_laser"] = True

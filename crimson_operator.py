@@ -212,15 +212,15 @@ def run_cycle(cycle_num: int):
                     save_state(state)
                     return True
 
-        if state.get("mining_failures", 0) >= 5:
+        if state.get("mining_failures", 0) >= 25:
             # Circuit breaker: stay at current position — don't waste ISD moving to Mars
-            # (the old bug: this block fell through to the Mars move below, wasting ISD)
+            # Threshold raised to 25 to avoid trapping scout mid-journey (was 5, too tight)
             log(f"Circuit breaker: {state.get('mining_failures', 0)} mining failures — staying put")
             return True
 
         # Stay at current asteroid if already in range and circuit breaker is clear
         # (prevents Mars drift when scout is productively positioned at tier-0 asteroid)
-        if scout and not mining and state.get('mining_failures', 0) < 5:
+        if scout and not mining and state.get('mining_failures', 0) < 25:
             # Re-check: is scout already near a tier-0 asteroid they could mine?
             tier0_near = [
                 a for a in (ws_state.get('asteroids') or [])
