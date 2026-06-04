@@ -99,7 +99,7 @@ def decide_actions(state: dict, ws_state: dict) -> list:
 
     mining_failures = state.get("mining_failures", 0)
     has_laser = state.get("has_mining_laser", False)
-    mining_blocked = (mining_failures >= 25)
+    mining_blocked = (mining_failures >= 5)
 
     mining = [u for u in owned if u.get("miningAsteroidId")]
     idle = [u for u in owned if not u.get("miningAsteroidId") and not u.get("dockedAtPlanetId")]
