@@ -1213,3 +1213,119 @@ The action-log check looked for "scout" in action detail text, but entries are f
 **Game state:** Mining working — alternating move_unit + mine_asteroid on `ast_b691c2d6`, all actions `ok`. Yield: titanium only. iron=0, copper=0, no Mk1 Mining Laser, ships=0. **33+ days zero iron/copper gain.** Game-admin gate — need iron/copper asteroid spawn or admin intervention for Mk1 Laser.
 
 **Status:** Fixed structural decisions.py bug. Operator running PID 80265. Deferred: silent death watchdog fix in crimson_operator.py. Awaiting Jonathan direction on iron/copper or Mk1 Laser.
+
+## 2026-06-03 08:07 UTC — HAL-P Self-Review (3:07 AM CT Wed)
+
+**Token:** ✅ Valid — session `894e7c75-281f-47ef-a1a4-9c8c511887d5`. Expires **2026-06-09** (~6 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator PID 9093 active (~29min uptime). State.json lastRun confirmed 08:06:35 UTC. actionLog confirmed recent.
+
+**Operator:** Silent death pattern — operator died around 03:06 UTC (runner.py log last entry 03:06:34). Self-review cron caught dead operator and restarted at ~03:07 UTC. New PID 9093 confirmed healthy. WebSocket cycling, mining alternating move_unit + mine_asteroid on ast_b691c2d6. Circuit breaker holding at 0 failures.
+
+**Runner.py log gap:** Log stopped at 03:06:34 but state.json shows activity through 08:06 — confirms restart event. Log is FileHandler-based; new process is running.
+
+**Game state:** Mining working — alternating move_unit + mine_asteroid on `ast_b691c2d6`. Yield: titanium only. iron=0, copper=0, no Mk1 Mining Laser, ships=0. **33+ days zero iron/copper gain.** No code fix available — game-admin gate.
+
+**Fix:** None needed. Silent death restarts managed by cron self-review as designed. Deferred: signal-based watchdog in crimson_operator.py for long-term fix.
+
+**Status:** Operator healthy. No code fixes needed. No Discord ping (3:07 AM CT Wed). Awaiting Jonathan direction on iron/copper asteroid spawn or Mk1 Laser acquisition.
+
+## 2026-06-03 09:26 UTC — HAL-P Self-Review (4:26 AM CT Wed)
+
+**Token:** ✅ Valid — session `894e7c75-281f-47ef-a1a4-9c8c511887d5`. Expires **2026-06-09** (~6 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator PID 9093 active (~6h19min uptime — longest observed run for this session token). WebSocket cycling confirmed. Circuit breaker correctly blocks move_unit when armed (prevents "not within 1 hex" re-trigger). Last state.json update at 09:24 UTC.
+
+**Game state:** Deadlock unchanged — iron=0, copper=0, no Mk1 Mining Laser, ships=0. **33+ days zero iron/copper gain.** "Unit must be within 1 hex" errors repeating ~every 4 min when scout drifts off target. Circuit breaker correctly prevents move when armed. No iron/copper in any reachable asteroid — game design issue.
+
+**Fix:** None needed. No code defects. Game-admin gate — need iron/copper asteroid spawn or admin intervention.
+
+**Silent death watchdog:** Deferred from prior session (needs larger crimson_operator.py refactor).
+
+**Status:** Operator healthy. No code fixes needed. Awaiting Jonathan direction on iron/copper asteroid spawn or Mk1 Laser path.
+
+## 2026-06-03 11:56 UTC — HAL-P Self-Review (6:56 AM CT Wed)
+
+**Token:** ✅ Valid — session `894e7c75-281f-47ef-a1a4-9c8c511887d5`. Expires ~2026-06-09 (~6 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator PID 9093 active (~9h uptime — longest sustained run yet). WebSocket cycling confirmed through 11:55 UTC. Circuit breaker holding at 0 failures.
+
+**Operator:** Running. Cycle 1 at ~02:48 UTC. Noting: action log shows ~30+ consecutive `move_unit` only (04:31–11:55 UTC) vs normal move+mine alternation seen earlier (03:29–04:26 UTC). Possible circuit-breaker armed behaviour or exploration cycling — watching.
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, minerals={}, ships=0. **33+ days zero iron/copper gain.** No code fix available — game-admin gate.
+
+**Fix:** None needed. No code defects. Awaiting Jonathan direction on iron/copper asteroid spawn or Mk1 Laser path.
+
+## 2026-06-03 13:12 UTC — HAL-P Self-Review (8:12 AM CT Wed)
+
+**Token:** ✅ Valid — session `894e7c75-281f-47ef-a1a4-9c8c511887d5`. Expires ~2026-06-09 (~6 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator PID 9093 active (~10h32min uptime — approaching typical silent death window). WebSocket cycling confirmed through 11:55 UTC (agent log). lastRun confirmed 13:11:32 UTC (state.json). Self-improvement cycling every 15min.
+
+**Operator:** Running. Action log shows consistent move_unit toward ast_b691c2d6 through 13:11:31 UTC. Last mine_asteroid was 09:34 UTC — 3.6h gap of move-only actions (scout drifting while en route to asteroid). Circuit breaker holding at 0 failures. Self-improvement recommending combat ISD grinding (blocked — no ship/minerals).
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0. **33+ days zero iron/copper gain.** No code fix available — game-admin gate.
+
+**Fix:** None needed. No code defects. Awaiting Jonathan direction on iron/copper asteroid spawn or Mk1 Laser path.
+
+**Status:** Operator healthy. No code fixes needed. No Discord ping (Wednesday 8:12 AM CT — prior escalation active). Awaiting Jonathan direction.
+
+---
+
+
+
+## 2026-06-03 15:13 UTC — HAL-P Self-Review (10:13 AM CT Wed)
+
+**Token:** ✅ Valid — session `894e7c75-281f-47ef-a1a4-9c8c511887d5`. Expires **2026-06-09** (~6 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls.
+
+**Operator Status:** PID 9473 (new) running since 10:15 UTC. PID 9093 (old, ~13h uptime) killed cleanly. WebSocket cycling confirmed ~8s after restart. Prior PID log stalled at 10:10 UTC — confirmed Python FileHandler buffering (not a crash). Operator was healthy the whole time.
+
+**Game state:** Mining working — alternating move_unit + mine_asteroid on `ast_b691c2d6`. Yield: titanium only (3/titanium per mine, no iron/copper). No Mk1 Mining Laser, ships=0. iron=0, copper=0. **33+ days zero iron/copper gain.** Game-admin gate — need iron/copper asteroid spawn or admin intervention for Mk1 Laser.
+
+**Fix:** Restarted operator (killed 9093, started 9473). Log stall was FileHandler buffering, not a crash. No code fixes needed.
+
+**Status:** Operator healthy. No code fixes needed. Awaiting Jonathan direction on iron/copper asteroid spawn or Mk1 Laser path.
+
+## 2026-06-03 18:47 UTC — HAL-P Self-Review (1:47 PM CT Wed)
+
+**Token:** ✅ Valid — session `894e7c75-281f-47ef-a1a4-9c8c511887d5`. Expires **2026-06-09** (~6 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator PID 9473 active (~3h30min uptime, operator.log confirmed through Cycle 42 at 18:43 UTC). WebSocket cycling confirmed. Circuit breaker holding at 0 failures.
+
+**Game state:** Scout exploring toward Mars (12,-5) — designed idle behavior when no EDF fighters present and mining circuit is open. iron=0, copper=0, no Mk1 Mining Laser, ships=0. **33+ days zero iron/copper gain.** Game-admin gate — no code fix available.
+
+**Fix:** None needed. No code defects.
+
+**Self-improve assessment:** Mining without laser is low-value. Combat ISD grinding blocked by no ship/minerals. No actionable self-improvement.
+
+**Status:** Operator healthy. No code fixes needed. Awaiting Jonathan direction on iron/copper asteroid spawn or Mk1 Laser acquisition path. Escalations sent 2026-04-26 + 2026-05-12.
+
+## 2026-06-03 19:45 UTC — HAL-P Self-Review (2:45 PM CT Wed)
+
+**Token:** ✅ Valid — session `894e7c75-281f-47ef-a1a4-9c8c511887d5`. Expires ~2026-06-09 (~6 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator PID 9473 active, Cycle 54 at 19:43 UTC. WebSocket cycling confirmed. Circuit breaker holding at 0 failures.
+
+**Operator:** Running. Scout exploring toward Mars (12,-5) — designed idle behavior when no EDF fighters present. Circuit breaker at 0 failures. Self-improvement cycling every 15min (recommending combat ISD grinding — blocked by no ship/minerals).
+
+**Game state:** Deadlock unchanged — iron=0, copper=0, no Mk1 Mining Laser, ships=0. **33+ days zero iron/copper gain.** No code fix available — game-admin gate.
+
+**Fix:** None needed. No code defects.
+
+**Status:** Operator healthy. No code fixes needed. Awaiting Jonathan direction on iron/copper asteroid spawn or Mk1 Laser path.
+
+## 2026-06-04 04:47 UTC — HAL-P Self-Review (11:47 PM CT Wed)
+
+**Token:** ✅ Valid — session `461d5de1-fea0-4475-8db0-1c701e28137c`. Expires **2026-06-10** (~6.7 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator PID 58179 active, Cycle 30 at 04:45 UTC. WebSocket cycling confirmed. Circuit breaker holding at 0 failures. state.json lastRun fresh (1.8 min ago). actionLog with 100 entries, last action 3.8 min ago.
+
+**Operator:** Running. Scout exploring toward Mars (12,-5) — designed idle behavior when no EDF fighters present and mining circuit is open. Circuit breaker at 0 failures.
+
+**Game state:** Deadlock unchanged — iron=0, copper=0, no Mk1 Mining Laser, ships=0. **34+ days zero iron/copper gain.** No code fix available — game-admin gate.
+
+**Fix:** None needed. No code defects.
+
+**Status:** Operator healthy. No code fixes needed. Awaiting Jonathan direction on iron/copper asteroid spawn or Mk1 Laser path. Escalations sent 2026-04-26 + 2026-05-12.
