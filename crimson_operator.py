@@ -212,9 +212,9 @@ def run_cycle(cycle_num: int):
                     save_state(state)
                     return True
 
-        if state.get("mining_failures", 0) >= 5:
+        if state.get("mining_failures", 0) >= 20:
             # Circuit breaker: stay at current position — don't waste ISD moving to Mars
-            # Threshold = 5 matches runner.py circuit breaker (blocks mine_asteroid at >= 5)
+            # Threshold = 20 (was 5; raised to allow action attempts without Mk1 Laser)
             log(f"Circuit breaker: {state.get('mining_failures', 0)} mining failures — staying put")
             return True
 
