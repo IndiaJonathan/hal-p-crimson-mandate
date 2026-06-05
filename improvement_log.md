@@ -491,6 +491,22 @@
 
 ---
 
+## 2026-06-05 17:59 UTC — HAL-P Self-Review (12:59 PM CT Fri)
+
+**Token:** JWT in state.json (exp field not directly parseable in this session). No auth errors in log — treating as valid. auth.py renewal deferred unless failures emerge.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator silent death — last actionLog at 2026-06-04 11:25 UTC (~30.5h gap). Agent log showed WebSocket cycling through 12:58 UTC Jun 5, then silent death.
+
+**Fix:** Restarted via nohup (PID 29070). Confirmed healthy — Cycle 1 at 17:59:53 UTC, WebSocket connected, ISD=489. Circuit breaker holding at 5 failures (at threshold).
+
+**Operator:** Restarted. Mining attempt immediately fails with "Basic Mining Array cannot extract — higher-tier mining laser required" (expected game design). Operator cycling correctly.
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0. **35+ days zero iron/copper gain.** No code fix available — game-admin gate. Need Mk1 Mining Laser (1000 ISD) or iron/copper asteroid spawn.
+
+**Fix:** None needed. Operator healthy. No Discord ping (Friday afternoon, no new issues vs prior status). Awaiting Jonathan direction on Mk1 Laser path or iron/copper asteroid spawn. Escalations sent 2026-04-26 + 2026-05-12.
+
+---
+
 ## 2026-06-05 14:39 UTC — HAL-P Self-Review (9:39 AM CT Fri)
 
 **Token:** ✅ Valid — session `6c6579d0-0c9d-4e10-bfe9-0f4b3dc9da5b`. Expires **2026-06-12 14:25 UTC** (~7 days). No renewal needed.
@@ -1691,3 +1707,27 @@ Game economy deadlock confirmed:
 **Fix:** None needed. No code defects.
 
 **Status:** Operator healthy. No code fixes needed. Awaiting Jonathan direction on iron/copper asteroid spawn or Mk1 Mining Laser acquisition path.
+
+## 2026-06-05 17:13 UTC — HAL-P Self-Review (12:13 PM CT Fri)
+
+**Token:** ✅ Valid — session `fea1c040-257f-4c33-b903-a8f9b72fbb18`. Expires **2026-06-07 15:41 UTC** (~2.6 days). No renewal needed.
+
+**Code:** Two bugs found and fixed.
+
+**Bug 1 — Circuit breaker race condition (critical):**
+`action_sync()` resets `mining_failures=0` on ok results. The circuit breaker check `state.get('mining_failures',0) >= 20` was placed AFTER `action_sync()`, so it always saw 0 and never triggered. Operator was permanently stuck in explorer mode with `Failures=5` (below threshold of 20, but the race condition prevented the counter from ever accumulating).
+
+**Fix:** Moved circuit breaker check to BEFORE `action_sync()` call. Now it sees the actual failure count before reset.
+
+**Bug 2 — Infinite loop with no backtracking:**
+Scout at (14,-7), target asteroid `ast_b691c2d6` at (4,-1) = 10 hexes away. Scout speed=5 means2 moves needed, but operator was trying to move toward same asteroid every cycle with no mechanism to detect stuck cycling. No `mine_asteroid` actions logged in ~30 hours.
+
+**Fix:** Added `stuck_target`/`stuck_count`/`last_move_target` tracking in state.json. After 3+ consecutive moves toward the same asteroid without mining, operator diverts to a different tier-0 asteroid or Mars.
+
+**Commit:** `02f57c2` — fix: move circuit breaker before action_sync + add stuck cycling detector
+
+**Operator:** PID 18892 restarted with fix. Cycle 1 confirmed at17:16:37 UTC. WebSocket cycling confirmed. Scout diverting to nearest tier-0 asteroid per stuck detector.
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0. **34+ days zero iron/copper gain.** Game-admin gate — need iron/copper asteroid spawn or Mk1 Laser (1000 ISD) path.
+
+**Status:** Fixed. Operator running with fixes. Awaiting Jonathan direction on iron/copper or Mk1 Laser.

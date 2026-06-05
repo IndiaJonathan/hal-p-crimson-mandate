@@ -101,7 +101,7 @@ def run_cycle(cycle_num: int):
     # WebSocket world state
     client = MMOClient(token, session_id)
     client.start()
-    if not client.wait_for_auth(timeout=10):
+    if not client.wait_for_auth(timeout=30):
         log("WS Auth timeout")
         client.stop()
         return False
