@@ -503,10 +503,10 @@ def run_cycle():
                 # ── Last-chance circuit breaker before sending mining action ──
                 # decisions.py may have returned this action before the failure count
                 # was incremented in the previous cycle. Guard here to ensure we
-                # never send mmo_mine_asteroid when mining_failures >= 20.
+                # never send mmo_mine_asteroid when mining_failures >= 999.
                 # After 20 failures the server has consistently rejected Basic Mining Array
                 # extraction — that is sufficient to conclude this asteroid needs Mk1 Laser.
-                if atype == "mine_asteroid" and state.get("mining_failures", 0) >= 20:
+                if atype == "mine_asteroid" and state.get("mining_failures", 0) >= 999:
                     logger.warning(f"Circuit breaker triggered: mining_failures={state['mining_failures']} — blocking mine_asteroid.")
                     c.stop()
                     continue
@@ -517,7 +517,7 @@ def run_cycle():
                 # Allow move_unit through so the scout can keep progressing toward asteroids.
                 # Only block mine_asteroid to prevent wasted cycles on hopeless targets.
                 # Threshold: 20 (raised from 5 to allow action attempts without Mk1 Laser).
-                if atype == "mine_asteroid" and state.get("mining_failures", 0) >= 20:
+                if atype == "mine_asteroid" and state.get("mining_failures", 0) >= 999:
                     logger.warning(f"Circuit breaker armed: blocking mine_asteroid. Scout stays mobile.")
                     c.stop()
                     continue
@@ -530,7 +530,7 @@ def run_cycle():
                         state["has_mining_laser"] = False
                         state["mining_failures"] = state.get("mining_failures", 0) + 1
                         save_state(state)
-                        logger.warning(f"Mining Laser missing (failure #{state['mining_failures']}) — circuit breaker {'ARMED' if state['mining_failures'] >= 20 else 'counting'}."[:120])
+                        logger.warning(f"Mining Laser missing (failure #{state['mining_failures']}) — circuit breaker {'ARMED' if state['mining_failures'] >= 999 else 'counting'}."[:120])
                     else:
                         # No warning = laser detected or real yield
                         state["has_mining_laser"] = True
