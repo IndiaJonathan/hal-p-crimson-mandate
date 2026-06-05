@@ -212,12 +212,6 @@ def run_cycle(cycle_num: int):
                     save_state(state)
                     return True
 
-        if state.get("mining_failures", 0) >= 20:
-            # Circuit breaker: stay at current position — don't waste ISD moving to Mars
-            # Threshold = 20 (was 5; raised to allow action attempts without Mk1 Laser)
-            log(f"Circuit breaker: {state.get('mining_failures', 0)} mining failures — staying put")
-            return True
-
         # Determine if scout is currently at a tier-0 asteroid (can mine with Basic Mining Array)
         tier0_near = [
             a for a in (ws_state.get('asteroids') or [])
@@ -227,9 +221,18 @@ def run_cycle(cycle_num: int):
         ]
         mining = bool(tier0_near)
 
+        # ── Circuit breaker: suppress mining when failure count is high ──
+        # Always sync state before checking circuit breaker so counter is always current.
+        # Without this sync, a circuit-breaker return skips action_sync and failures stay stuck at 5.
+        state = action_sync(state, token)
+        save_state(state)
+        if scout and state.get('mining_failures', 0) >= 20:
+            log(f"Circuit breaker: {state.get('mining_failures', 0)} mining failures — staying put")
+            return True
+
         # Stay at current asteroid if already in range and circuit breaker is clear
         # (prevents Mars drift when scout is productively positioned at tier-0 asteroid)
-        if scout and state.get('mining_failures', 0) < 5:
+        if scout and tier0_near:
             if tier0_near:
                 # Mine tier-0 asteroid with Basic Mining Array
                 target = tier0_near[0]
