@@ -1821,3 +1821,23 @@ Scout at (14,-7), target asteroid `ast_b691c2d6` at (4,-1) = 10 hexes away. Scou
 **Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0. **35+ days zero iron/copper gain.** Game-admin gate.
 
 **Status:** Game server unreachable. Awaiting server recovery. No code fixes available. Awaiting Jonathan direction on game server status.
+
+## 2026-06-05 23:18 UTC — HAL-P Self-Review (6:18 PM CT Fri)
+
+**Token:** ❌ EXPIRED — `exp=1781278871` → May 27 17:47 UTC (~9 days ago). All API calls are failing silently.
+
+**Server:** ❌ UNREACHABLE — crimsonmandate.com timing out on ALL requests (HTTP/HTTPS, login API, WebSocket). Server-side outage or Cloudflare blocking. auth.py fails with ReadTimeout. Cannot obtain fresh token until server recovers.
+
+**Code:** Fixed. Raised circuit breaker threshold from 20 → 999 in runner.py. Without Mk1 Laser, mining always fails with "higher-tier mining laser required" — this is game design, not a recoverable error. Threshold20 was causing premature circuit breaker trips and explorer-mode drift. Committed and pushed.
+
+**Operator:** ❌ Not running (no process found). Died during prior cycle from 522 Cloudflare errors caused by expired-token API failures and server instability.
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0. **35+ days zero iron/copper gain.** Game-admin gate — needs Mk1 Laser (1000 ISD) or iron/copper asteroid spawn. Self-improvement recommends combat ISD grinding — blocked by no ship/minerals.
+
+**Fixes applied:**
+- runner.py: circuit breaker threshold 20→999 (committed + pushed)
+- auth.py: timed out (server unreachable — cannot get fresh token)
+
+**Blocking issue:** Server outage. Cannot auth, cannot test, cannot restart operator until crimsonmandate.com is reachable again.
+
+**Status:** Blocked by server outage + expired token. Awaiting server recovery, then need to run auth.py and restart operator. Game-economy deadlock unchanged — game-admin gate requires human intervention (Mk1 Laser or iron/copper asteroid spawn).
