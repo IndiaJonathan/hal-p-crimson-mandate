@@ -221,13 +221,99 @@ def run_cycle(cycle_num: int):
         ]
         mining = bool(tier0_near)
 
-        # ── Circuit breaker: suppress mining when failure count is high ──
-        # Always sync state before checking circuit breaker so counter is always current.
-        # Without this sync, a circuit-breaker return skips action_sync and failures stay stuck at 5.
-        state = action_sync(state, token)
-        save_state(state)
+        # ── Circuit breaker: check BEFORE action_sync (which resets failures to 0 on ok) ──
+        # Without this ordering, the check always sees 0 and never triggers.
         if scout and state.get('mining_failures', 0) >= 20:
             log(f"Circuit breaker: {state.get('mining_failures', 0)} mining failures — staying put")
+            state = action_sync(state, token)
+            save_state(state)
+            return True
+
+        # ── Stuck cycling detector: same target moved toward 3+ times without mining ──
+        # Break infinite loops by tracking consecutive move_unit toward same asteroid.
+        stuck_target = state.get('stuck_target', '')
+        stuck_count = state.get('stuck_count', 0)
+        last_target = state.get('last_move_target', '')
+
+        # ── Tier-0 mining or explore ──
+        # Mine tier-0 asteroid if scout is adjacent; otherwise explore toward Mars
+        # to find new asteroids. Circuit breaker (above) suppresses mining when failures are high.
+        if scout and tier0_near:
+            # Mine tier-0 asteroid with Basic Mining Array
+            target = tier0_near[0]
+            log(f"Mining tier-0 asteroid {target['id']} (Basic Mining Array)")
+            client_m = MMOClient(token, session_id)
+            client_m.start()
+            if client_m.wait_for_auth(timeout=8):
+                _ = client_m.get_world_state(timeout=10)
+                client_m._send({"type": "mmo_mine_asteroid", "payload": {
+                    "unitId": scout["id"],
+                    "asteroidId": target["id"]
+                }})
+                client_m.wait_for("mmo_asteroid_mined", timeout=15)
+            client_m.stop()
+            action_taken = f"Mining tier-0 asteroid {target['id']}"
+            # Clear stuck tracker on successful mine
+            state['stuck_target'] = ''
+            state['stuck_count'] = 0
+            state['last_move_target'] = ''
+            state = action_sync(state, token)
+            state['lastRun'] = dt.datetime.now(dt.timezone.utc).isoformat()
+            save_state(state)
+            return True
+        elif scout and scout_pos and distance_hex(scout_pos, {"q": 0, "r": 0}) > 20:
+            # Scout is far from home — don't drift to Mars, stay put
+            log(f"Scout far from origin — staying at current position")
+            state = action_sync(state, token)
+            state['lastRun'] = dt.datetime.now(dt.timezone.utc).isoformat()
+            save_state(state)
+            return True
+        else:
+            # Default: explore toward Mars to find new asteroids
+            # But first check if we're stuck cycling toward the same target
+            tier0_all = [
+                a for a in (ws_state.get('asteroids') or [])
+                if not a.get('isDepleted') and a.get('miningLevel', 0) == 0
+                and a.get('requiredComponentId') is None
+            ]
+            # Pick a different asteroid if stuck on current target
+            explore_target = {"q": 12, "r": -5}  # default Mars
+            if tier0_all:
+                if stuck_target and stuck_count >= 3:
+                    # Try a different tier-0 asteroid instead of the stuck one
+                    others = [a for a in tier0_all if a['id'] != stuck_target]
+                    if others:
+                        alt = others[0]
+                        explore_target = alt.get('position', {"q": 12, "r": -5})
+                        log(f"Stuck on {stuck_target} ({stuck_count}x) — diverting to {alt['id']} at ({explore_target['q']},{explore_target['r']})")
+                    else:
+                        log(f"Stuck on {stuck_target} ({stuck_count}x) — no alternate asteroid, going to Mars")
+                else:
+                    # Normal: move toward nearest tier-0 asteroid
+                    nearest = min(tier0_all, key=lambda a: distance_hex(scout_pos or {"q":0,"r":0}, a.get('position', {})))
+                    explore_target = nearest.get('position', {"q": 12, "r": -5})
+                    # Track stuck count
+                    if last_target == nearest['id']:
+                        state['stuck_count'] = stuck_count + 1
+                        state['stuck_target'] = nearest['id']
+                    else:
+                        state['stuck_count'] = 1
+                        state['stuck_target'] = nearest['id']
+                    state['last_move_target'] = nearest['id']
+            client_exp = MMOClient(token, session_id)
+            client_exp.start()
+            if client_exp.wait_for_auth(timeout=8):
+                _ = client_exp.get_world_state(timeout=10)
+                client_exp._send({"type": "mmo_move_unit", "payload": {
+                    "unitId": scout["id"] if scout else state.get('scout_id', ''),
+                    "targetHex": explore_target
+                }})
+                client_exp.wait_for("mmo_unit_moved", timeout=15)
+                log(f"Exploring: moving scout to ({explore_target['q']},{explore_target['r']})")
+            client_exp.stop()
+            state = action_sync(state, token)
+            state['lastRun'] = dt.datetime.now(dt.timezone.utc).isoformat()
+            save_state(state)
             return True
 
         # ── Tier-0 mining or explore ──
