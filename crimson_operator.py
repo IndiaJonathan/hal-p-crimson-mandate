@@ -230,48 +230,51 @@ def run_cycle(cycle_num: int):
             log(f"Circuit breaker: {state.get('mining_failures', 0)} mining failures — staying put")
             return True
 
-        # Stay at current asteroid if already in range and circuit breaker is clear
-        # (prevents Mars drift when scout is productively positioned at tier-0 asteroid)
+        # ── Tier-0 mining or explore ──
+        # Mine tier-0 asteroid if scout is adjacent; otherwise explore toward Mars
+        # to find new asteroids. Circuit breaker (above) suppresses mining when failures are high.
         if scout and tier0_near:
-            if tier0_near:
-                # Mine tier-0 asteroid with Basic Mining Array
-                target = tier0_near[0]
-                log(f"Mining tier-0 asteroid {target['id']} (Basic Mining Array)")
-                client_m = MMOClient(token, session_id)
-                client_m.start()
-                if client_m.wait_for_auth(timeout=8):
-                    _ = client_m.get_world_state(timeout=10)
-                    client_m._send({"type": "mmo_mine_asteroid", "payload": {
-                        "unitId": scout["id"],
-                        "asteroidId": target["id"]
-                    }})
-                    client_m.wait_for("mmo_asteroid_mined", timeout=15)
-                client_m.stop()
-                action_taken = f"Mining tier-0 asteroid {target['id']}"
-                state = action_sync(state, token)
-                state["lastRun"] = dt.datetime.now(dt.timezone.utc).isoformat()
-                save_state(state)
-                return True
-            elif scout_pos and distance_hex(scout_pos, {"q": 0, "r": 0}) > 20:
-                # Scout is far from home — don't drift to Mars, stay put
-                log(f"Scout far from origin — staying at current position")
-            else:
-                # Default: explore toward Mars
-                client_exp = MMOClient(token, session_id)
-                client_exp.start()
-                if client_exp.wait_for_auth(timeout=8):
-                    _ = client_exp.get_world_state(timeout=10)
-                    client_exp._send({"type": "mmo_move_unit", "payload": {
-                        "unitId": scout["id"] if scout else state.get('scout_id', ''),
-                        "targetHex": {"q": 12, "r": -5}
-                    }})
-                    client_exp.wait_for("mmo_unit_moved", timeout=15)
-                    log(f"Exploring: moving scout to Mars area (12,-5)")
-                client_exp.stop()
-                state = action_sync(state, token)
-                state["lastRun"] = dt.datetime.now(dt.timezone.utc).isoformat()
-                save_state(state)
-                return True
+            # Mine tier-0 asteroid with Basic Mining Array
+            target = tier0_near[0]
+            log(f"Mining tier-0 asteroid {target['id']} (Basic Mining Array)")
+            client_m = MMOClient(token, session_id)
+            client_m.start()
+            if client_m.wait_for_auth(timeout=8):
+                _ = client_m.get_world_state(timeout=10)
+                client_m._send({"type": "mmo_mine_asteroid", "payload": {
+                    "unitId": scout["id"],
+                    "asteroidId": target["id"]
+                }})
+                client_m.wait_for("mmo_asteroid_mined", timeout=15)
+            client_m.stop()
+            action_taken = f"Mining tier-0 asteroid {target['id']}"
+            state = action_sync(state, token)
+            state["lastRun"] = dt.datetime.now(dt.timezone.utc).isoformat()
+            save_state(state)
+            return True
+        elif scout and scout_pos and distance_hex(scout_pos, {"q": 0, "r": 0}) > 20:
+            # Scout is far from home — don't drift to Mars, stay put
+            log(f"Scout far from origin — staying at current position")
+            state["lastRun"] = dt.datetime.now(dt.timezone.utc).isoformat()
+            save_state(state)
+            return True
+        else:
+            # Default: explore toward Mars to find new asteroids
+            client_exp = MMOClient(token, session_id)
+            client_exp.start()
+            if client_exp.wait_for_auth(timeout=8):
+                _ = client_exp.get_world_state(timeout=10)
+                client_exp._send({"type": "mmo_move_unit", "payload": {
+                    "unitId": scout["id"] if scout else state.get('scout_id', ''),
+                    "targetHex": {"q": 12, "r": -5}
+                }})
+                client_exp.wait_for("mmo_unit_moved", timeout=15)
+                log(f"Exploring: moving scout to Mars area (12,-5)")
+            client_exp.stop()
+            state = action_sync(state, token)
+            state["lastRun"] = dt.datetime.now(dt.timezone.utc).isoformat()
+            save_state(state)
+            return True
 
     elif has_laser and asteroids:
         # ── Priority 5: Mine tier-1 asteroids ──

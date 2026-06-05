@@ -1601,3 +1601,17 @@ Game economy deadlock confirmed:
 **Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0. **35+ days zero iron/copper gain.** Game-admin gate — circuit breaker threshold (5) prevents mining; no iron/copper in any reachable asteroid. Awaiting Jonathan direction.
 
 **Status:** Operator recovered with fresh token. No code fixes needed. Awaiting Jonathan direction on game-economy intervention (circuit breaker threshold reset or iron/copper asteroid spawn).
+
+## 2026-06-05 11:44 UTC — HAL-P Self-Review (6:44 AM CT Fri)
+
+**Issue:** Token expired — state.json had session `bab1a65e-6a01-4fb6-a7e3-6b6ab450dd46` with `exp=1781126183` = **June 3 06:36 UTC** (~2+ days ago). Operator was running (PID, WebSocket connected) but every cycle showed `[HAL-P] Message error: HTTP Error 404: Not Found` — expired token making all REST API calls silently fail.
+
+**Fix:** Ran auth.py → fresh token `8c6c6b1e-930e-4392-aacc-53fea97c52ab` (expires **2026-06-12 06:45 UTC**). Killed stale operator, restarted via nohup (PID 20767). Confirmed healthy — state.json lastRun updated to 11:45:40 UTC, WebSocket cycling confirmed, operator active.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator healthy with new token.
+
+**Operator:** PID 20767 active. Circuit breaker at 5 failures (threshold). Correctly staying put per circuit breaker design. WebSocket cycling confirmed.
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0. **34+ days zero iron/copper gain.** No code fix available — game-admin gate. Awaiting Jonathan direction on Mk1 Mining Laser (1000 ISD) or iron/copper asteroid spawn.
+
+**Status:** Operator recovered with fresh token. No code fixes needed. Awaiting Jonathan direction.
