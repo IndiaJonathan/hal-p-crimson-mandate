@@ -90,7 +90,7 @@ class MMOClient:
                 time.sleep(backoff)
 
     def _on_open(self, ws):
-        self._send({"type": "auth", "payload": {"sessionId": self.token}})
+        self._send({"type": "auth", "token": self.token, "sessionId": self.session_id})
 
     _golden_asteroid_spawned = None
     _mining_failure_detected = False
@@ -118,7 +118,7 @@ class MMOClient:
                 # Also set instance flag — wait_for may miss it if the message arrives during sleep
                 self._mining_failure_detected = True
 
-        if msg_type == "auth_success":
+        if msg_type in ("auth_success", "connected"):
             self.authenticated = True
             self._send({"type": "mmo_join_world", "payload": {"worldId": 1}})
 
@@ -194,7 +194,19 @@ class MMOClient:
             return self._events.pop(msg_type, [])
 
     def wait_for_auth(self, timeout: float = 10.0) -> bool:
-        return bool(self.wait_for("auth_success", timeout))
+        # Server sends "connected" instead of "auth_success" — accept either
+        with self._cv:
+            end = time.time() + timeout
+            while time.time() < end:
+                if self._events.get("auth_success") or self._events.get("connected"):
+                    self._events.pop("auth_success", None)
+                    self._events.pop("connected", None)
+                    return True
+                remaining = end - time.time()
+                if remaining <= 0:
+                    break
+                self._cv.wait(timeout=min(remaining, 1.0))
+            return False
 
     def get_world_state(self, timeout: float = 15.0) -> dict:
         """Get full parsed world state or empty dict."""
