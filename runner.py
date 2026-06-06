@@ -81,7 +81,7 @@ class MMOClient:
                     on_error=lambda ws, e: None,
                     on_close=lambda ws, *a: None,
                 )
-                self.ws.run_forever(ping_interval=30, ping_timeout=10)
+                self.ws.run_forever(ping_interval=30, ping_timeout=10, timeout=10)
             except Exception:
                 pass
             if self.running and not self._die.is_set():
