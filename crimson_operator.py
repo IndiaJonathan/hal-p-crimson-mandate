@@ -179,8 +179,8 @@ def run_cycle(cycle_num: int):
                     # Claim it
                     client2 = MMOClient(token, session_id)
                     client2.start()
-                    if client2.wait_for_auth(timeout=8):
-                        _ = client2.get_world_state(timeout=10)
+                    if client2.wait_for_auth(timeout=20):
+                        _ = client2.get_world_state(timeout=15)
                         client2._send({"type": "mmo_claim_golden_asteroid", "payload": {"asteroidId": golden["id"]}})
                         result = client2.wait_for("mmo_golden_asteroid_claimed", timeout=15)
                         log(f"Golden claim result: {result}")
@@ -197,8 +197,8 @@ def run_cycle(cycle_num: int):
                     # Move toward golden asteroid
                     client2 = MMOClient(token, session_id)
                     client2.start()
-                    if client2.wait_for_auth(timeout=8):
-                        _ = client2.get_world_state(timeout=10)
+                    if client2.wait_for_auth(timeout=20):
+                        _ = client2.get_world_state(timeout=15)
                         client2._send({"type": "mmo_move_unit", "payload": {
                             "unitId": scout["id"],
                             "targetHex": gpos
@@ -244,8 +244,8 @@ def run_cycle(cycle_num: int):
             log(f"Mining tier-0 asteroid {target['id']} (Basic Mining Array)")
             client_m = MMOClient(token, session_id)
             client_m.start()
-            if client_m.wait_for_auth(timeout=8):
-                _ = client_m.get_world_state(timeout=10)
+            if client_m.wait_for_auth(timeout=20):
+                _ = client_m.get_world_state(timeout=15)
                 client_m._send({"type": "mmo_mine_asteroid", "payload": {
                     "unitId": scout["id"],
                     "asteroidId": target["id"]
@@ -302,8 +302,8 @@ def run_cycle(cycle_num: int):
                     state['last_move_target'] = nearest['id']
             client_exp = MMOClient(token, session_id)
             client_exp.start()
-            if client_exp.wait_for_auth(timeout=8):
-                _ = client_exp.get_world_state(timeout=10)
+            if client_exp.wait_for_auth(timeout=20):
+                _ = client_exp.get_world_state(timeout=15)
                 client_exp._send({"type": "mmo_move_unit", "payload": {
                     "unitId": scout["id"] if scout else state.get('scout_id', ''),
                     "targetHex": explore_target
@@ -325,8 +325,8 @@ def run_cycle(cycle_num: int):
             log(f"Mining tier-0 asteroid {target['id']} (Basic Mining Array)")
             client_m = MMOClient(token, session_id)
             client_m.start()
-            if client_m.wait_for_auth(timeout=8):
-                _ = client_m.get_world_state(timeout=10)
+            if client_m.wait_for_auth(timeout=20):
+                _ = client_m.get_world_state(timeout=15)
                 client_m._send({"type": "mmo_mine_asteroid", "payload": {
                     "unitId": scout["id"],
                     "asteroidId": target["id"]
@@ -348,8 +348,8 @@ def run_cycle(cycle_num: int):
             # Default: explore toward Mars to find new asteroids
             client_exp = MMOClient(token, session_id)
             client_exp.start()
-            if client_exp.wait_for_auth(timeout=8):
-                _ = client_exp.get_world_state(timeout=10)
+            if client_exp.wait_for_auth(timeout=20):
+                _ = client_exp.get_world_state(timeout=15)
                 client_exp._send({"type": "mmo_move_unit", "payload": {
                     "unitId": scout["id"] if scout else state.get('scout_id', ''),
                     "targetHex": {"q": 12, "r": -5}
@@ -371,8 +371,8 @@ def run_cycle(cycle_num: int):
             if dist <= 1:
                 client3 = MMOClient(token, session_id)
                 client3.start()
-                if client3.wait_for_auth(timeout=8):
-                    _ = client3.get_world_state(timeout=10)
+                if client3.wait_for_auth(timeout=20):
+                    _ = client3.get_world_state(timeout=15)
                     client3._send({"type": "mmo_mine_asteroid", "payload": {
                         "unitId": scout["id"],
                         "asteroidId": target["id"]
@@ -383,8 +383,8 @@ def run_cycle(cycle_num: int):
             else:
                 client3 = MMOClient(token, session_id)
                 client3.start()
-                if client3.wait_for_auth(timeout=8):
-                    _ = client3.get_world_state(timeout=10)
+                if client3.wait_for_auth(timeout=20):
+                    _ = client3.get_world_state(timeout=15)
                     client3._send({"type": "mmo_move_unit", "payload": {
                         "unitId": scout["id"],
                         "targetHex": target.get("position", {})

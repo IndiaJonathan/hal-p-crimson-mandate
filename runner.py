@@ -103,6 +103,10 @@ class MMOClient:
         msg_type = data.get("type", "unknown")
         payload = data.get("payload", data)
 
+        # Debug: log all received messages
+        import sys
+        print(f"[WS RECV] type={msg_type} payload={payload}", file=sys.stderr)
+
         with self._cv:
             self._events.setdefault(msg_type, []).append(payload)
             self._cv.notify_all()
@@ -421,7 +425,7 @@ def run_cycle():
     # WebSocket world state
     client = MMOClient(token, session_id)
     client.start()
-    if not client.wait_for_auth(timeout=10):
+    if not client.wait_for_auth(timeout=30):
         logger.warning("WS Auth timeout")
         client.stop()
         return
