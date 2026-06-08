@@ -74,14 +74,15 @@ class MMOClient:
         import websocket
         while self.running and not self._die.is_set():
             try:
+                ws_url = f"{WS_URL}?token={self.token}"
                 self.ws = websocket.WebSocketApp(
-                    WS_URL,
+                    ws_url,
                     on_open=self._on_open,
                     on_message=self._on_message,
                     on_error=lambda ws, e: None,
                     on_close=lambda ws, *a: None,
                 )
-                self.ws.run_forever(ping_interval=30, ping_timeout=10, timeout=10)
+                self.ws.run_forever(ping_interval=30, ping_timeout=10)
             except Exception:
                 pass
             if self.running and not self._die.is_set():
@@ -90,6 +91,7 @@ class MMOClient:
                 time.sleep(backoff)
 
     def _on_open(self, ws):
+        # Send both token and sessionId — game server WS auth may require sessionId for validation
         self._send({"type": "auth", "token": self.token, "sessionId": self.session_id})
 
     _golden_asteroid_spawned = None
@@ -123,8 +125,12 @@ class MMOClient:
                 self._mining_failure_detected = True
 
         if msg_type in ("auth_success", "connected"):
-            self.authenticated = True
-            self._send({"type": "mmo_join_world", "payload": {"worldId": 1}})
+            is_authed = payload.get("isAuthenticated", False) if isinstance(payload, dict) else False
+            if is_authed:
+                self.authenticated = True
+                self._send({"type": "mmo_join_world", "payload": {"worldId": 1}})
+            else:
+                logger.warning("Server rejected token — isAuthenticated=False. Token may be expired or invalid.")
 
         elif msg_type == "mmo_world_joined":
             self.world_joined = True
