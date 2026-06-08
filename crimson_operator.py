@@ -106,6 +106,28 @@ def run_cycle(cycle_num: int):
         client.stop()
         return False
 
+    # Detect server token rejection — re-auth if isAuthenticated=False
+    if not client.authenticated:
+        log("WS Auth rejected — server rejected token. Re-authing...")
+        client.stop()
+        import subprocess
+        auth_result = subprocess.run(
+            [sys.executable, os.path.join(AGENT_DIR, "auth.py")],
+            capture_output=True, text=True, cwd=AGENT_DIR
+        )
+        log(f"Re-auth result: {auth_result.stdout.strip()}")
+        if auth_result.returncode != 0:
+            log(f"Re-auth failed: {auth_result.stderr}")
+            return False
+        # Reload fresh state and restart operator with new token
+        state = load_state()
+        token = state.get("session", {}).get("token", "")
+        session_id = state.get("session", {}).get("sessionId", "")
+        log(f"Re-authed. Sleeping 90s before restart to break re-auth loop...")
+        time.sleep(90)
+        log(f"Re-authed. Restarting with sessionId={session_id[:8]}...")
+        os.execv(sys.executable, [sys.executable, os.path.join(AGENT_DIR, "crimson_operator.py")])
+
     ws_state = client.get_world_state(timeout=15)
     client.stop()
 
