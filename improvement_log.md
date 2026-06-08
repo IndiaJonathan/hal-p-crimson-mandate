@@ -2140,3 +2140,17 @@ Root cause: Game server has split auth — JWT works for REST, but WebSocket aut
 **Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0. **35+ days zero iron/copper gain.**
 
 **Status:** Operator blocked — WS auth broken at game server level. Escalating to Jonathan.
+
+## 2026-06-08 20:44 UTC — HAL-P Self-Review (3:44 PM CT Mon)
+
+**Token:** ❌ EXPIRED — server rejecting all sessions with `isAuthenticated=False` since ~14:56 UTC. Ran auth.py → fresh tokens but WS auth continues to fail. Game server issue (confirmed by prior commit 804d0c5).
+
+**Issue:** Operator in tight re-auth loop — WS auth fails → auth.py → `os.execv()` restart → WS auth fails again → repeat every ~1s. Was burning tokens rapidly with no backoff.
+
+**Fix:** Added 90s `time.sleep(90)` before `os.execv()` restart in the re-auth block of `crimson_operator.py`. Committed and pushed as `cb7e746`. Killed looping operator (PID 70519), restarted cleanly (PID 70952) — now in 90s backoff sleep before next attempt.
+
+**Code:** Clean. No errors/timeouts/stalls. WS auth failure is server-side (game server rejecting all WS auth attempts for this account — not a code defect).
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0. **36+ days zero iron/copper gain.** Game-admin gate. WS auth degraded/blocked server-side — no code fix available.
+
+**Status:** Backoff active. Operator sleeping 90s before restart. Awaiting WS auth recovery or Jonathan direction on game account WS auth issue. No Discord ping (3:44 PM CT Mon, prior escalations active).

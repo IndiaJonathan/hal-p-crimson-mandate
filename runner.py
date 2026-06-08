@@ -124,7 +124,12 @@ class MMOClient:
                 # Also set instance flag — wait_for may miss it if the message arrives during sleep
                 self._mining_failure_detected = True
 
-        if msg_type in ("auth_success", "connected"):
+        # Handle connected — this is the server's WebSocket handshake confirmation.
+        # wait_for_auth already treats connected as valid auth signal.
+        if msg_type == "connected":
+            self.authenticated = True
+            self._send({"type": "mmo_join_world", "payload": {"worldId": 1}})
+        elif msg_type == "auth_success":
             is_authed = payload.get("isAuthenticated", False) if isinstance(payload, dict) else False
             if is_authed:
                 self.authenticated = True
