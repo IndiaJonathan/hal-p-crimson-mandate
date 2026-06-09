@@ -91,8 +91,8 @@ class MMOClient:
                 time.sleep(backoff)
 
     def _on_open(self, ws):
-        # Send both token and sessionId — game server WS auth may require sessionId for validation
-        self._send({"type": "auth", "token": self.token, "sessionId": self.session_id})
+        # Fleet-coordinator format: JWT goes in payload.sessionId (game server ignores top-level token/sessionId)
+        self._send({"type": "auth", "payload": {"sessionId": self.token}})
 
     _golden_asteroid_spawned = None
     _mining_failure_detected = False

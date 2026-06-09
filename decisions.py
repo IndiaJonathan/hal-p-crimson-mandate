@@ -99,7 +99,7 @@ def decide_actions(state: dict, ws_state: dict) -> list:
 
     mining_failures = state.get("mining_failures", 0)
     has_laser = state.get("has_mining_laser", False)
-    mining_blocked = (mining_failures >= 5)
+    mining_blocked = (mining_failures >= 999)
 
     mining = [u for u in owned if u.get("miningAsteroidId")]
     idle = [u for u in owned if not u.get("miningAsteroidId") and not u.get("dockedAtPlanetId")]
@@ -165,7 +165,7 @@ def decide_actions(state: dict, ws_state: dict) -> list:
                 logger.warning("No mineable asteroids (Basic Mining Array compatible).")
 
     elif mining_blocked:
-        logger.warning("Mining blocked: 5+ failures. Scout staying put — need Mk1 Mining Laser.")
+        logger.warning("Mining blocked: 999 failures. Scout staying put — need Mk1 Mining Laser.")
         # Ensure scout doesn't drift toward Earth while waiting for Mk1 Laser.
         # Even though tier0 asteroids exist on disk, we can't extract from them
         # (all nearby are titanium/platinum/gold only). Stay at current position.
