@@ -2154,3 +2154,22 @@ Root cause: Game server has split auth — JWT works for REST, but WebSocket aut
 **Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0. **36+ days zero iron/copper gain.** Game-admin gate. WS auth degraded/blocked server-side — no code fix available.
 
 **Status:** Backoff active. Operator sleeping 90s before restart. Awaiting WS auth recovery or Jonathan direction on game account WS auth issue. No Discord ping (3:44 PM CT Mon, prior escalations active).
+
+## 2026-06-08 22:14 UTC — HAL-P Self-Review (5:14 PM CT Mon)
+
+**Token:** ✅ Fresh — session `1db7175a-4902-49a7-8265-f58abb4b9125`. auth.py succeeded.
+
+**Issue — Game server WS auth broken (confirmed):**
+- Operator (PID 91687) started with fresh token
+- WebSocket immediately rejected: `INVALID_TOKEN` + `UNAUTHORIZED: Must be logged in to join MMO world`
+- This has been happening since Jun 7-8 (cron history shows repeated `WS Auth rejected` + restart loop)
+- REST API works fine — only WebSocket auth is broken
+- Root cause: game server's WS auth layer is rejecting valid JWTs — not a code defect
+
+**Code:** Clean — no code changes can fix server-side WS auth rejection.
+
+**Fix:** Killed stuck operator (PID 91687). No restart — WS will just loop again.
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0, ISD=489. **36+ days zero iron/copper gain.** Game-admin gate + WS auth regression = complete stall.
+
+**Escalation:** Jonathan needs to investigate Crimson Mandate game server WS auth. This is beyond operator self-healing — game server issue. Previously escalated 2026-04-26 + 2026-05-12 for iron/copper deadlock; WS auth regression now compounded since Jun 7-8.

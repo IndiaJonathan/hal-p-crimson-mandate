@@ -181,6 +181,17 @@ class MMOClient:
         elif msg_type == "error":
             if payload.get("message"):
                 logger.warning(f"Server error: {payload.get('message')}")
+            # Invalidate auth if server reports token/session problem — prevents
+            # wait_for_auth() from returning True on a stale "connected" message
+            # followed by auth rejection error.
+            err_msg = payload.get("message", "")
+            if any(tag in err_msg for tag in ["Invalid or expired session token",
+                                               "Must be logged in",
+                                               "UNAUTHORIZED",
+                                               "INVALID_TOKEN",
+                                               "Invalid or expired",
+                                               "Not authenticated"]):
+                self.authenticated = False
 
     def _on_error(self, ws, error):
         pass
@@ -209,14 +220,22 @@ class MMOClient:
             return self._events.pop(msg_type, [])
 
     def wait_for_auth(self, timeout: float = 10.0) -> bool:
-        # Server sends "connected" instead of "auth_success" — accept either
+        # Wait for mmo_world_joined — the server only sends this after validating
+        # the token and sessionId. The initial `connected` event fires before auth
+        # validation completes, so relying on it alone lets INVALID_TOKEN races slip
+        # through as a false-positive auth success.
         with self._cv:
             end = time.time() + timeout
             while time.time() < end:
-                if self._events.get("auth_success") or self._events.get("connected"):
+                # auth_success with isAuthenticated=True is the explicit confirm path
+                if self._events.get("auth_success"):
                     self._events.pop("auth_success", None)
-                    self._events.pop("connected", None)
-                    return True
+                    if self.authenticated:
+                        return True
+                # mmo_world_joined is the authoritative post-auth join confirm
+                if self._events.get("mmo_world_joined"):
+                    self._events.pop("mmo_world_joined", None)
+                    return self.authenticated  # will be True if not invalidated
                 remaining = end - time.time()
                 if remaining <= 0:
                     break
