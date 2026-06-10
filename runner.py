@@ -549,10 +549,10 @@ def run_cycle():
                 # ── Last-chance circuit breaker before sending mining action ──
                 # decisions.py may have returned this action before the failure count
                 # was incremented in the previous cycle. Guard here to ensure we
-                # never send mmo_mine_asteroid when mining_failures >= 999.
-                # After 20 failures the server has consistently rejected Basic Mining Array
+                # never send mmo_mine_asteroid when mining_failures >= 5.
+                # After 5 failures the server has consistently rejected Basic Mining Array
                 # extraction — that is sufficient to conclude this asteroid needs Mk1 Laser.
-                if atype == "mine_asteroid" and state.get("mining_failures", 0) >= 999:
+                if atype == "mine_asteroid" and state.get("mining_failures", 0) >= 5:
                     logger.warning(f"Circuit breaker triggered: mining_failures={state['mining_failures']} — blocking mine_asteroid.")
                     c.stop()
                     continue
@@ -562,8 +562,8 @@ def run_cycle():
                 # ── Circuit breaker: suppress mining (not movement) when armed ──
                 # Allow move_unit through so the scout can keep progressing toward asteroids.
                 # Only block mine_asteroid to prevent wasted cycles on hopeless targets.
-                # Threshold: 20 (raised from 5 to allow action attempts without Mk1 Laser).
-                if atype == "mine_asteroid" and state.get("mining_failures", 0) >= 999:
+                # Threshold: 5 (Basic Mining Array consistently rejected = needs Mk1 Laser).
+                if atype == "mine_asteroid" and state.get("mining_failures", 0) >= 5:
                     logger.warning(f"Circuit breaker armed: blocking mine_asteroid. Scout stays mobile.")
                     c.stop()
                     continue
