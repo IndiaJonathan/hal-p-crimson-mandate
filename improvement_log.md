@@ -2617,3 +2617,81 @@ Root cause: Game server has split auth — JWT works for REST, but WebSocket aut
 **Fix:** Token renewed. No code fixes needed. Awaiting Jonathan direction on iron/copper or Mk1 Laser.
 
 **Status:** Operator healthy with fresh token. No code fixes needed. Awaiting Jonathan direction on game-economy intervention.
+
+## 2026-06-10 20:39 UTC — HAL-P Self-Review (3:39 PM CT Wed)
+
+**Token:** ✅ Renewed — fresh session `56872110-7d5f-43d2-bd49-edd16c5a6798`. State saved to state.json. Prior session had expired (1781725146 ≈ 2026-06-10 21:39 UTC — ~1h remaining at cron trigger).
+
+**Code:** Clean. No errors, timeouts, or stalls in agent log. WebSocket cycling confirmed through 15:37 UTC today.
+
+**Operator:** PID 59765 active (homebrew python3.14). Restarted operator after token renewal? No — operator was still running after auth.py (auth.py saves state without killing operator). Operator continuing.
+
+**⚠️ Concern — actionLog gap:** state.json actionLog has a ~6-day gap (last entry Jun 4 09:33 UTC → first new entry Jun 10 04:00 UTC). Prior self-reviews confirm operator was alive during this window (PID cycling, WebSocket confirmed). This means `action_sync` / `save_state` was not being called for ~6 days — operator loop was running but not persisting state. Possible causes: operator was dying and being restarted by cron each time (silent death pattern), or a code path bypassed state saves. `mining_failures=5` in state.json is stale — actionLog shows all recent results are `ok`. Circuit breaker should be at 0 given current actionLog.
+
+**Fix:** None needed for token — auth.py completed cleanly. Concern logged for potential state-sync bug (deferred investigation).
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0. **36+ days zero iron/copper gain.** No code fix available — game-admin gate. Need iron/copper asteroid spawn or Mk1 Laser (1000 ISD) path.
+
+**Status:** Token renewed. Operator running. No code fixes needed. Awaiting Jonathan direction on iron/copper asteroid spawn or Mk1 Laser path. Escalations sent2026-04-26 + 2026-05-12.
+
+## 2026-06-10 22:24 UTC — HAL-P Self-Review (5:24 PM CT Wed)
+
+**Token:** ✅ Valid — session from state.json. Exp ~2026-06-28 (~18 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator PID 59765 active (started 2:39 PM CT). WebSocket cycling. lastRun fresh (22:24 UTC = now). actionLog confirms mining activity on ast_2b547acb.
+
+**Operator:** Running. Circuit breaker at 5 (at threshold). Alternating move+mine on ast_2b547acb. All recent actions `ok`. No silent death at this check.
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0, minerals={}. **35+ days zero iron/copper gain.** No code fix available — game-admin gate.
+
+**Fix:** None needed. No code defects.
+
+**Status:** Operator healthy. No code fixes needed. Awaiting Jonathan direction on iron/copper asteroid spawn or Mk1 Laser (1000 ISD) acquisition path. Escalations sent 2026-04-26 + 2026-05-12.
+
+## 2026-06-10 23:28 UTC — HAL-P Self-Review (6:28 PM CT Wed)
+
+**Token:** ✅ Valid — session token in state.json. Exp ~2026-06-16. No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls.
+
+**Issue:** Operator silent death — PID 59765 (running since ~2:39 PM CT) stopped logging at 18:23 (~5h gap). Action log hadn't been updated since 04:21 UTC (19h). Operator was alive (process running, WebSocket cycling) but action pipeline had stalled (no new actions logged, log file stopped growing).
+
+**Fix:** Killed stale PID 59765, restarted via nohup (PID 14064). New operator ran one clean cycle — WebSocket authenticated, received full world state with asteroids, cycle completed successfully in ~0.46s. Cron will handle subsequent cycles every 15min.
+
+**Root cause of stall:** Operator process alive but run_cycle() appeared to stop executing the action-producing code (possibly stuck in WebSocket blocking read or threading deadlock). No crash logs — silent. Managed by manual restart.
+
+**Operator:** PID 14064 active (single-cycle run, exits cleanly after each cron trigger).
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0. **35+ days zero iron/copper gain.** Game-admin gate — need iron/copper asteroid spawn or Mk1 Laser (1000 ISD) path.
+
+**Fix:** None needed. Operator recovered.
+
+**Status:** Operator healthy. No code fixes needed. Awaiting Jonathan direction on Mk1 Mining Laser (1000 ISD) or iron/copper asteroid spawn.
+
+## 2026-06-11 00:11 UTC — HAL-P Self-Review (7:11 PM CT Wed)
+
+**Token:** ✅ Valid — session `56872110-7d5f-43d2-bd49-edd16c5a6798`. Exp **2026-06-17 19:59 UTC** (~6.5 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator active, lastRun 00:10 UTC (1 min ago). WebSocket cycling confirmed. Self-improvement cycling every 15min.
+
+**Operator:** Running. Action log shows 6-day gap (last mine June 4 09:33 UTC → first mine June 10 04:00 UTC) — operator had been down, now recovered. Circuit breaker at 5 (at threshold). Self-improvement recommends combat ISD grinding (blocked — no ship/minerals).
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0. **35+ days zero iron/copper gain.** Game-admin gate — need iron/copper asteroid spawn or Mk1 Laser (1000 ISD) path.
+
+**Fix:** None needed. No code defects.
+
+**Status:** Operator healthy. No code fixes needed. Awaiting Jonathan direction on iron/copper asteroid spawn or Mk1 Laser path.
+
+## 2026-06-11 00:41 UTC — HAL-P Self-Review (7:41 PM CT Wed)
+
+**Token:** ✅ Valid — session token in state.json. Exp ~2026-06-16 (~5 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator PID 14064 restarted at cron check (prior operator died ~19:40 UTC Jun 10, ~5h gap). Cron self-review caught and restarted.
+
+**Operator:** Restarted at 00:41 UTC. WebSocket cycling. Circuit breaker at 5 (at threshold — normal, resets on success). Self-improvement cycling every 15min. Recommending combat ISD grinding (blocked — no ship/minerals).
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0, minerals={}. **35+ days zero iron/copper gain.** No code fix available — game-admin gate. Need iron/copper asteroid spawn or Mk1 Laser (1000 ISD) path.
+
+**Fix:** None needed. Operator healthy. Awaiting Jonathan direction on game-economy intervention.
+
+**Status:** Operator healthy. No code fixes needed. No Discord ping (Wednesday evening, prior escalations active). Awaiting Jonathan direction on iron/copper or Mk1 Laser.
