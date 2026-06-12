@@ -96,6 +96,7 @@ class MMOClient:
 
     _golden_asteroid_spawned = None
     _mining_failure_detected = False
+    _move_failure_detected = False
 
     def _on_message(self, ws, msg):
         try:
@@ -123,6 +124,9 @@ class MMOClient:
                     self._events.setdefault("mining_failure_warning", []).append(err_msg)
                 # Also set instance flag — wait_for may miss it if the message arrives during sleep
                 self._mining_failure_detected = True
+            elif "unit must be within 1 hex" in err_msg or "not within 1 hex" in err_msg:
+                # Scout tried to move to a hex that's not adjacent — count as a failure
+                self._move_failure_detected = True
 
         # Handle connected — this is the server's WebSocket handshake confirmation.
         # wait_for_auth already treats connected as valid auth signal.
@@ -549,10 +553,10 @@ def run_cycle():
                 # ── Last-chance circuit breaker before sending mining action ──
                 # decisions.py may have returned this action before the failure count
                 # was incremented in the previous cycle. Guard here to ensure we
-                # never send mmo_mine_asteroid when mining_failures >= 20.
-                # After 20 failures the server has consistently rejected Basic Mining Array
+                # never send mmo_mine_asteroid when mining_failures >= 5.
+                # After 5 failures the server has consistently rejected Basic Mining Array
                 # extraction — that is sufficient to conclude this asteroid needs Mk1 Laser.
-                if atype == "mine_asteroid" and state.get("mining_failures", 0) >= 20:
+                if atype == "mine_asteroid" and state.get("mining_failures", 0) >= 5:
                     logger.warning(f"Circuit breaker triggered: mining_failures={state['mining_failures']} — blocking mine_asteroid.")
                     c.stop()
                     continue
@@ -562,8 +566,8 @@ def run_cycle():
                 # ── Circuit breaker: suppress mining (not movement) when armed ──
                 # Allow move_unit through so the scout can keep progressing toward asteroids.
                 # Only block mine_asteroid to prevent wasted cycles on hopeless targets.
-                # Threshold: 20 (Basic Mining Array consistently rejected = needs Mk1 Laser).
-                if atype == "mine_asteroid" and state.get("mining_failures", 0) >= 20:
+                # Threshold: 5 (Basic Mining Array consistently rejected = needs Mk1 Laser).
+                if atype == "mine_asteroid" and state.get("mining_failures", 0) >= 5:
                     logger.warning(f"Circuit breaker armed: blocking mine_asteroid. Scout stays mobile.")
                     c.stop()
                     continue
@@ -584,6 +588,13 @@ def run_cycle():
                             state["mining_failures"] = 0
                             save_state(state)
                             logger.info("✓ Mining Laser confirmed / yield received — circuit breaker reset.")
+
+                # Track move failures: scout tried to move to non-adjacent hex
+                if atype == "move_unit" and c._move_failure_detected:
+                    c._move_failure_detected = False  # reset for next cycle
+                    state["mining_failures"] = state.get("mining_failures", 0) + 1
+                    save_state(state)
+                    logger.warning(f"Move failed (not within 1 hex) — mining_failures now {state['mining_failures']}. Circuit breaker {'ARMED' if state['mining_failures'] >= 5 else 'counting'}.")
 
                 c.stop()
                 state = log_action(state, atype, str(payload), "ok")
