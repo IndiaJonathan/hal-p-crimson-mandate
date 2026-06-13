@@ -259,8 +259,8 @@ def run_cycle(cycle_num: int):
 
         # ── Tier-0 mining or explore ──
         # Mine tier-0 asteroid if scout is adjacent; otherwise explore toward Mars
-        # to find new asteroids. Circuit breaker (above) suppresses mining when failures are high.
-        if scout and tier0_near:
+        # to find new asteroids. Circuit breaker suppresses mining when failures >= 5.
+        if scout and tier0_near and state.get('mining_failures', 0) < 5:
             # Mine tier-0 asteroid with Basic Mining Array
             target = tier0_near[0]
             log(f"Mining tier-0 asteroid {target['id']} (Basic Mining Array)")
@@ -307,7 +307,13 @@ def run_cycle(cycle_num: int):
                     if others:
                         alt = others[0]
                         explore_target = alt.get('position', {"q": 12, "r": -5})
-                        log(f"Stuck on {stuck_target} ({stuck_count}x) — diverting to {alt['id']} at ({explore_target['q']},{explore_target['r']})")
+                        # Guard: if scout is already at the alternate's position, skip the move
+                        # to avoid infinite stuck loop (scout at same coords as alternate asteroid)
+                        if scout_pos and explore_target.get('q') == scout_pos.get('q') and explore_target.get('r') == scout_pos.get('r'):
+                            log(f"Stuck on {stuck_target} ({stuck_count}x) — alternate {alt['id']} is at scout's current pos ({explore_target['q']},{explore_target['r']}), staying put")
+                            explore_target = None
+                        else:
+                            log(f"Stuck on {stuck_target} ({stuck_count}x) — diverting to {alt['id']} at ({explore_target['q']},{explore_target['r']})")
                     else:
                         log(f"Stuck on {stuck_target} ({stuck_count}x) — no alternate asteroid, going to Mars")
                 else:
@@ -322,17 +328,24 @@ def run_cycle(cycle_num: int):
                         state['stuck_count'] = 1
                         state['stuck_target'] = nearest['id']
                     state['last_move_target'] = nearest['id']
-            client_exp = MMOClient(token, session_id)
-            client_exp.start()
-            if client_exp.wait_for_auth(timeout=20):
-                _ = client_exp.get_world_state(timeout=15)
-                client_exp._send({"type": "mmo_move_unit", "payload": {
-                    "unitId": scout["id"] if scout else state.get('scout_id', ''),
-                    "targetHex": explore_target
-                }})
-                client_exp.wait_for("mmo_unit_moved", timeout=15)
-                log(f"Exploring: moving scout to ({explore_target['q']},{explore_target['r']})")
-            client_exp.stop()
+            # Guard: if explore_target is None (e.g. alternate asteroid at scout's current pos),
+            # reset stuck state and stay put to avoid infinite loop
+            if explore_target is None:
+                state['stuck_count'] = 0
+                state['stuck_target'] = ''
+                log("Staying put — alternate asteroid at current position")
+            else:
+                client_exp = MMOClient(token, session_id)
+                client_exp.start()
+                if client_exp.wait_for_auth(timeout=20):
+                    _ = client_exp.get_world_state(timeout=15)
+                    client_exp._send({"type": "mmo_move_unit", "payload": {
+                        "unitId": scout["id"] if scout else state.get('scout_id', ''),
+                        "targetHex": explore_target
+                    }})
+                    client_exp.wait_for("mmo_unit_moved", timeout=15)
+                    log(f"Exploring: moving scout to ({explore_target['q']},{explore_target['r']})")
+                client_exp.stop()
             state = action_sync(state, token)
             state['lastRun'] = dt.datetime.now(dt.timezone.utc).isoformat()
             save_state(state)
@@ -340,8 +353,8 @@ def run_cycle(cycle_num: int):
 
         # ── Tier-0 mining or explore ──
         # Mine tier-0 asteroid if scout is adjacent; otherwise explore toward Mars
-        # to find new asteroids. Circuit breaker (above) suppresses mining when failures are high.
-        if scout and tier0_near:
+        # to find new asteroids. Circuit breaker suppresses mining when failures >= 5.
+        if scout and tier0_near and state.get('mining_failures', 0) < 5:
             # Mine tier-0 asteroid with Basic Mining Array
             target = tier0_near[0]
             log(f"Mining tier-0 asteroid {target['id']} (Basic Mining Array)")
