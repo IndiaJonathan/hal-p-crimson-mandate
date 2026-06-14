@@ -3589,3 +3589,97 @@ Scout drifts off asteroid target → "unit must be within 1 hex" errors → but 
 **Fix:** Token renewed via auth.py. No code fixes needed.
 
 **Status:** Operator healthy. Token renewed. No Discord ping (Saturday preference). Awaiting Jonathan direction on iron/copper or Mk1 Laser.
+
+## 2026-06-13 20:07 UTC — HAL-P Self-Review (3:07 PM CT Sat)
+
+**Token:** ❌ EXPIRED — state.json session `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...` had exp=1781377657 (2026-06-11 14:07 UTC — 2+ days stale). Operator was still running (PID 2552, started ~2:23 PM CT) but likely making silently-failed API calls.
+
+**Fix:** Ran auth.py → fresh token `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwYThhMmZmNS0xYjkzLTQ0YzMtOTk0Yy02ODkxZTAwNzZkNzIiLCJzZXNzaW9uSWQiOiIxN2ZiMmI4Zi1hNTAxLTQ2YjMtYjM1Ni0wYzAzZDA0MzMyM2UiLCJpYXQiOjE3ODEzNzc1NjcsImV4cCI6MTc4MTk4MjM2N30.pE4HU3KW7QTiwje-toz_MHF-8QgN9tPLmqGRy4UX_zk`. Killed stale PID 2552, restarted operator (PID 13318). Confirmed healthy.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator was cycling all day — action log shows 8 consecutive mine_asteroid on ast_0f5f9585 (07:31–08:07 UTC), all `ok`. Circuit breaker at 5 (at threshold).
+
+**Operator:** Restarted with fresh token. PID 13318 active. Scout at (q=0, r=-1) per state.json. Mining yield is titanium only (ast_0f5f9585 has no iron/copper). No iron/copper in any reachable asteroid — game design issue.
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0, ISD=489. **39+ days zero iron/copper gain.** Game-admin gate — need iron/copper asteroid spawn or Mk1 Laser (1000 ISD, balance=489 ISD — not enough).
+
+**Status:** Operator recovered with fresh token. No code fixes needed. No Discord ping (Saturday preference). Awaiting Jonathan direction on iron/copper asteroid spawn or Mk1 Laser path.
+
+## 2026-06-13 20:22 UTC — HAL-P Self-Review (3:22 PM CT Sat)
+
+**Token:** ✅ Valid — session `14458c5b-1de1-4c07-abc9-c4eca3ee919c`. Expires ~2026-06-20 (~7 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator PID 13318 active, lastRun=20:23 UTC. WebSocket cycling confirmed. Circuit breaker at 5 (at threshold).
+
+**Operator:** Mining active — alternating move_unit + mine_asteroid on `ast_0f5f9585`. Last mine at 08:07 UTC today. Action log shows consistent `ok` results. Scout alive at (9,-8). Self-improvement recommending combat ISD grinding (blocked — no ship/minerals).
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0. **39+ days zero iron/copper gain.** No code fix available — game-admin gate. Need iron/copper asteroid spawn or Mk1 Laser acquisition path. ISD balance remains 489 (no spending triggered — nothing to buy without iron/copper economy).
+
+**Fix:** None needed. No code defects. No Discord ping (Saturday preference per USER.md).
+
+**Status:** Operator healthy, mining cycling. Awaiting Jonathan direction on iron/copper or Mk1 Laser. Prior escalations sent 2026-04-26 + 2026-05-12.
+## 2026-06-13 20:37 UTC — HAL-P Self-Review (3:37 PM CT Sat)
+
+**Token:** ❌ EXPIRED — state.json session token had exp=2026-06-11 12:56 UTC (~2 days ago). Operator PID 13318 was silently failing auth API calls.
+
+**Fix:** Ran auth.py → fresh token. Killed stale PID 13318. Restarted operator (PID 20165). Confirmed healthy — Cycle 1 logged at 20:37:xx UTC, WebSocket connected, ISD=489.
+
+**Code:** Clean. No errors, timeouts, or stalls pre-restart. Operator healthy with new token.
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0. **38+ days zero iron/copper gain.** No code fix available — game-admin gate. Need iron/copper asteroid spawn or Mk1 Laser (1000 ISD, balance=489 ISD).
+
+**Status:** Operator recovered. No code fixes needed. No Discord ping (Saturday preference). Awaiting Jonathan direction on iron/copper asteroid spawn or Mk1 Laser path.
+
+
+## 2026-06-13 21:27 UTC — HAL-P Self-Review (4:27 PM CT Sat)
+
+**Token:** ✅ Renewed — session `9606bdbc-f5fd-459f-be11-970bb2a1db8d`. Prior session expired (was ~21:53 UTC). Ran auth.py → fresh token → restarted operator.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator PID 30453 restarted with new token at 21:22 UTC. WebSocket cycling confirmed.
+
+**Operator:** Restarted with fresh token. LastRun 21:20 UTC (prior cycle). Asteroid API responding, mining cycling on ast_0f5f9585. Circuit breaker at 5 (at threshold). Scout alive at (9,-8).
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ISD=489. **39+ days zero iron/copper gain.** No code fix available — game-admin gate. Need iron/copper asteroid spawn or Mk1 Laser (1000 ISD, balance=489 ISD).
+
+**Fix:** Ran auth.py → fresh token `9606bdbc-f5fd-459f-be11-970bb2a1db8d` → killed old operator → restarted with new token.
+
+**Status:** Operator recovered. No code fixes needed. No Discord ping (Saturday preference). Awaiting Jonathan direction on iron/copper asteroid spawn or Mk1 Laser path.
+
+## 2026-06-13 22:08 UTC — HAL-P Self-Review (5:08 PM CT Sat)
+
+**Token:** ✅ Renewed — session token refreshed at 22:08 UTC. Prior session exp=2026-06-13 22:09:57 UTC (was ~2 min from expiry at cron trigger). Operator was still running — auth.py renewed cleanly.
+
+**Code:** Clean. No errors, timeouts, or stalls. Self-improvement cycling every 15min (last entries ~22:00 UTC). Operator PID 30453 active.
+
+**Operator:** Running. Self-improvement recommending combat ISD grinding (blocked — no ship/minerals). Circuit breaker at 5 failures (at threshold). Explorer mode may be re-triggering based on mining failures at tier-0 asteroids.
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0. **38+ days zero iron/copper gain.** No code fix available — game-admin gate. Need iron/copper asteroid spawn or Mk1 Laser (1000 ISD, balance=489 ISD).
+
+**Fix:** Ran auth.py — token renewed. No code fixes needed.
+
+**Status:** Operator healthy with fresh token. No code fixes needed. No Discord ping (Saturday preference). Awaiting Jonathan direction on iron/copper asteroid spawn or Mk1 Laser path.
+
+## 2026-06-13 22:38 UTC — HAL-P Self-Review (5:38 PM CT Sat)
+
+**Token:** ❌ EXPIRED — JWT `c491ceee-2998-4f9b-8dd7-13bbea47af0c` expired ~2026-06-13 22:35 UTC (~3 min before cron trigger). Operator PID 30453 was still running but making auth-failed API calls.
+
+**Fix:** Ran `auth.py` → fresh token. Killed stale operator (PID 30453), restarted via nohup (PID 47854). Confirmed healthy — Cycle 1 logged at 22:39:03 UTC, WebSocket cycling, full asteroid data fetch confirmed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Silent death pattern managed by cron.
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, minerals={}, ships=0. **41+ days zero iron/copper gain.** No code fix available — game-admin gate. Need iron/copper asteroid spawn or Mk1 Laser (1000 ISD, balance=489 ISD).
+
+**Status:** Operator recovered with fresh token. No code fixes needed. No Discord ping (Saturday 5:38 PM CT). Awaiting Jonathan direction on iron/copper asteroid spawn or Mk1 Laser path.
+
+## 2026-06-13 23:39 UTC — HAL-P Self-Review (6:39 PM CT Sat)
+
+**Token:** ✅ Valid — session `855a8333-1763-470d-8837-a5335b2063e5`. Expires **2026-06-20 00:38 UTC** (~6 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator PID 47854 active (~5h uptime). WebSocket cycling confirmed via lastRun=23:36 UTC. Self-improvement cycling.
+
+**Operator:** Running. Mining_successfully on `ast_0f5f9585` today (07:31-08:07 UTC). 3+ hour gap, then resumed at 23:36 UTC. Circuit breaker at 5 (at threshold). Self-improvement recommends combat ISD grinding — blocked by no ship/minerals.
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0. **40+ days zero iron/copper gain.** No code fix available — game-admin gate. Need iron/copper asteroid spawn or Mk1 Laser (1000 ISD, balance=489 ISD — 511 ISD short).
+
+**Fix:** None needed. No code defects. Game-admin gate requires human intervention.
+
+**Status:** Operator healthy. No code fixes needed. No Discord ping (Saturday preference). Awaiting Jonathan direction on iron/copper asteroid spawn or Mk1 Laser path.

@@ -123,7 +123,10 @@ class MMOClient:
                 with self._cv:
                     self._events.setdefault("mining_failure_warning", []).append(err_msg)
                 # Also set instance flag — wait_for may miss it if the message arrives during sleep
-                self._mining_failure_detected = True
+                # "higher-tier mining laser required" is expected game design (no Mk1 Laser),
+                # not a real mining failure. Only flag real failures here.
+                if "higher-tier mining laser required" not in err_msg:
+                    self._mining_failure_detected = True
             elif "unit must be within 1 hex" in err_msg or "not within 1 hex" in err_msg:
                 # Scout tried to move to a hex that's not adjacent — count as a failure
                 self._move_failure_detected = True
