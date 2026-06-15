@@ -58,7 +58,7 @@ def main():
     result_msg = ""
     
     # If circuit breaker has fired, stay put — don't waste moves cycling home
-    if state.get("mining_failures", 0) >= 5:
+    if state.get("mining_failures", 0) >= 3:
         send(
             f"**🤖 HALP Crimson Mandate**\n"
             f" ISD: `{isd}` | Credits: `{credits}`\n"

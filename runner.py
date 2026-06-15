@@ -556,10 +556,10 @@ def run_cycle():
                 # ── Last-chance circuit breaker before sending mining action ──
                 # decisions.py may have returned this action before the failure count
                 # was incremented in the previous cycle. Guard here to ensure we
-                # never send mmo_mine_asteroid when mining_failures >= 5.
+                # never send mmo_mine_asteroid when mining_failures >= 3.
                 # After 5 failures the server has consistently rejected Basic Mining Array
                 # extraction — that is sufficient to conclude this asteroid needs Mk1 Laser.
-                if atype == "mine_asteroid" and state.get("mining_failures", 0) >= 5:
+                if atype == "mine_asteroid" and state.get("mining_failures", 0) >= 3:
                     logger.warning(f"Circuit breaker triggered: mining_failures={state['mining_failures']} — blocking mine_asteroid.")
                     c.stop()
                     continue
@@ -570,7 +570,7 @@ def run_cycle():
                 # Allow move_unit through so the scout can keep progressing toward asteroids.
                 # Only block mine_asteroid to prevent wasted cycles on hopeless targets.
                 # Threshold: 5 (Basic Mining Array consistently rejected = needs Mk1 Laser).
-                if atype == "mine_asteroid" and state.get("mining_failures", 0) >= 5:
+                if atype == "mine_asteroid" and state.get("mining_failures", 0) >= 3:
                     logger.warning(f"Circuit breaker armed: blocking mine_asteroid. Scout stays mobile.")
                     c.stop()
                     continue
@@ -597,7 +597,7 @@ def run_cycle():
                     c._move_failure_detected = False  # reset for next cycle
                     state["mining_failures"] = state.get("mining_failures", 0) + 1
                     save_state(state)
-                    logger.warning(f"Move failed (not within 1 hex) — mining_failures now {state['mining_failures']}. Circuit breaker {'ARMED' if state['mining_failures'] >= 5 else 'counting'}.")
+                    logger.warning(f"Move failed (not within 1 hex) — mining_failures now {state['mining_failures']}. Circuit breaker {'ARMED' if state["mining_failures"] >= 3 else 'counting'}.")
 
                 c.stop()
                 state = log_action(state, atype, str(payload), "ok")

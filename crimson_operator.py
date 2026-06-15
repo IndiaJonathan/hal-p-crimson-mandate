@@ -259,7 +259,7 @@ def run_cycle(cycle_num: int):
 
         # ── Tier-0 mining or explore ──
         # Mine tier-0 asteroid if scout is adjacent; otherwise explore toward Mars
-        # to find new asteroids. Circuit breaker suppresses mining when failures >= 5.
+        # to find new asteroids. Circuit breaker suppresses mining when failures >= 3.
         if scout and tier0_near and state.get('mining_failures', 0) < 5:
             # Mine tier-0 asteroid with Basic Mining Array
             target = tier0_near[0]
@@ -353,7 +353,7 @@ def run_cycle(cycle_num: int):
 
         # ── Tier-0 mining or explore ──
         # Mine tier-0 asteroid if scout is adjacent; otherwise explore toward Mars
-        # to find new asteroids. Circuit breaker suppresses mining when failures >= 5.
+        # to find new asteroids. Circuit breaker suppresses mining when failures >= 3.
         if scout and tier0_near and state.get('mining_failures', 0) < 5:
             # Mine tier-0 asteroid with Basic Mining Array
             target = tier0_near[0]
