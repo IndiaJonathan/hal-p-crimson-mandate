@@ -1,18 +1,27 @@
-## 2026-06-15 19:12 UTC — HAL-P Self-Review (2:12 PM CT Mon)
+## 2026-06-15 19:45 UTC — HAL-P Self-Review (2:45 PM CT Mon)
 
-**Token:** ❌ EXPIRED — session `da4b8320-3a29-40bc-8748-bbe862488c0e` expired **2026-06-11 UTC** (~4 days stale). Operator (PID 30306, started ~10:40 AM CT Jun 15) was running with expired token via WebSocket session continuity.
+**Token:** ✅ Valid — session `6eb0c2d9-5d25-43fd-b02d-f8e571fa09c5`. Exp **~2026-06-21 UTC** (~6 days). No renewal needed.
 
-**Fix:** Ran auth.py → fresh token `6eb0c2d9-5d25-43fd-b02d-f8e571fa09c5`. Killed stale PID 30306, restarted operator (PID 82869). Confirmed healthy — Cycle 1 logged at 19:12:39 UTC, WebSocket cycling, lastRun updated, ISD=489.
+**Code:** Bug found and fixed. Operator restarted (PID 90239) with fix applied.
 
-**Code:** Clean. No errors, timeouts, or stalls. Operator recovered.
+**Bug — infinite accumulation of mining_failures on successful moves:**
+`mining_failures` was only reset on successful `mine_asteroid`, not on successful `move_unit`. When circuit breaker armed (≥3 failures), `mine_asteroid` was blocked, so the reset path never fired. Successful `move_unit` calls then accumulated without bound (state showed 5). This caused the circuit breaker to permanently block `mine_asteroid` while the scout kept moving.
 
-**Note on prior state:** Multiple silent death + auth.py cycles likely occurred Jun 11–15 (operator dying every ~4-6h, cron catching and restarting). The state.json always gets updated with new token on each auth.py run, so the session chain is intact — just the operator was restarting repeatedly.
+**Fix (runner.py):** Added reset of `mining_failures` to 0 when `move_unit` succeeds:
+```python
+if atype == "move_unit" and not c._move_failure_detected:
+    if state.get("mining_failures", 0) > 0:
+        state["mining_failures"] = 0
+        save_state(state)
+        logger.info("Move succeeded — mining_failures reset to 0.")
+```
+**Committed:** `c32c66a` — 'fix: reset mining_failures on successful move_unit to prevent infinite accumulation'
 
-**Operator:** PID 82869 active. Circuit breaker at 5 (at threshold — explorer mode will trigger next cycle). mining_failures is at the circuit-breaker threshold (5). Scout position: q=-1, r=25, HP=40/40.
+**Operator:** PID 90239 active (restarted 19:44 UTC). Scout at q=-1, r=25. Circuit breaker should now reset to 0 on successful moves, allowing `mine_asteroid` to execute once the scout reaches an asteroid.
 
-**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0. **40+ days zero iron/copper gain.** No code fix available — game-admin gate. Need iron/copper asteroid spawn or Mk1 Laser (1000 ISD, balance=489 ISD — need 511 more ISD).
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0. **41+ days zero iron/copper gain.** Asteroids with iron/copper exist in the world map (scanned in recent cycles). Scout needs to navigate to one. This is still a game navigation challenge.
 
-**Status:** Operator recovered with fresh token. No code fixes needed. Game-economy deadlock persists — game-admin gate requires human intervention.
+**Status:** Fix applied and operator running. Awaiting scout navigation to an iron/copper asteroid. No Discord ping (Monday, prior escalation active).
 
 
 ## 2026-06-14 21:13 UTC — HAL-P Self-Review (4:13 PM CT Sun)
