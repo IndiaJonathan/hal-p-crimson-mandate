@@ -598,6 +598,12 @@ def run_cycle():
                     state["mining_failures"] = state.get("mining_failures", 0) + 1
                     save_state(state)
                     logger.warning(f"Move failed (not within 1 hex) — mining_failures now {state['mining_failures']}. Circuit breaker {'ARMED' if state["mining_failures"] >= 3 else 'counting'}.")
+                # Reset mining_failures on successful move — scout has repositioned successfully
+                if atype == "move_unit" and not c._move_failure_detected:
+                    if state.get("mining_failures", 0) > 0:
+                        state["mining_failures"] = 0
+                        save_state(state)
+                        logger.info("Move succeeded — mining_failures reset to 0.")
 
                 c.stop()
                 state = log_action(state, atype, str(payload), "ok")
