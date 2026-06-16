@@ -285,6 +285,11 @@ def run_cycle(cycle_num: int):
             return True
         elif scout and scout_pos and distance_hex(scout_pos, {"q": 0, "r": 0}) > 20:
             # Scout is far from home — don't drift to Mars, stay put
+            # Reset mining_failures so circuit breaker doesn't permanently block
+            # when scout eventually returns within range.
+            if state.get('mining_failures', 0) > 0:
+                state['mining_failures'] = 0
+                log(f"Scout far from origin — resetting mining_failures to 0.")
             log(f"Scout far from origin — staying at current position")
             state = action_sync(state, token)
             state['lastRun'] = dt.datetime.now(dt.timezone.utc).isoformat()
