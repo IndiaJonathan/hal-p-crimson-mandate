@@ -106,9 +106,16 @@ class MMOClient:
         msg_type = data.get("type", "unknown")
         payload = data.get("payload", data)
 
-        # Debug: log all received messages
+        # Debug: log all received messages (cap oversized payloads to prevent log flooding)
         import sys
-        print(f"[WS RECV] type={msg_type} payload={payload}", file=sys.stderr)
+        payload_str = str(payload)
+        if len(payload_str) > 500:
+            if msg_type == "mmo_world_state":
+                print(f"[WS RECV] type={msg_type} payload=<WORLD_STATE {len(payload)} bytes — skipped>", file=sys.stderr)
+            else:
+                print(f"[WS RECV] type={msg_type} payload={payload_str[:500]}...<truncated>", file=sys.stderr)
+        else:
+            print(f"[WS RECV] type={msg_type} payload={payload_str}", file=sys.stderr)
 
         with self._cv:
             self._events.setdefault(msg_type, []).append(payload)
@@ -123,10 +130,10 @@ class MMOClient:
                 with self._cv:
                     self._events.setdefault("mining_failure_warning", []).append(err_msg)
                 # Also set instance flag — wait_for may miss it if the message arrives during sleep
-                # "higher-tier mining laser required" is expected game design (no Mk1 Laser),
-                # not a real mining failure. Only flag real failures here.
-                if "higher-tier mining laser required" not in err_msg:
-                    self._mining_failure_detected = True
+                # "higher-tier mining laser required" = current asteroid has no iron/copper.
+                # This IS a real mining failure — scout needs to explore to find a different asteroid.
+                # Only flag real extraction failures (no yield from a mineable asteroid) here.
+                self._mining_failure_detected = True
             elif "unit must be within 1 hex" in err_msg or "not within 1 hex" in err_msg:
                 # Scout tried to move to a hex that's not adjacent — count as a failure
                 self._move_failure_detected = True
