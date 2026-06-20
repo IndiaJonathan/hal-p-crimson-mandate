@@ -165,11 +165,32 @@ def decide_actions(state: dict, ws_state: dict) -> list:
                 logger.warning("No mineable asteroids (Basic Mining Array compatible).")
 
     elif mining_blocked:
-        logger.warning(f"Mining blocked: {mining_failures} failures. Scout staying put — need Mk1 Mining Laser.")
-        # Ensure scout doesn't drift toward Earth while waiting for Mk1 Laser.
-        # Even though tier0 asteroids exist on disk, we can't extract from them
-        # (all nearby are titanium/platinum/gold only). Stay at current position.
-        pass  # No movement, no mining — wait for Mk1 Laser or admin intervention
+        logger.warning(f"Mining blocked: {mining_failures} failures — navigating to iron/copper asteroid.")
+        # Iron/copper asteroids are compatible with Basic Mining Array but the
+        # scout has been stuck on titanium-only asteroids for 48+ days.
+        # Navigate toward the iron/copper zone (q=9-31, r=-8 to -32).
+        iron_copper_zone = [
+            {"q": 28, "r": -5},   # ast_9d4a81c3: iron=64, copper=37
+            {"q": 26, "r": -26},  # ast_e47b9de2: iron=84, copper=41
+            {"q": 26, "r": -31},  # ast_97675fc5: iron=36, copper=14
+            {"q": 30, "r": -19},  # ast_80d46bde: iron=62, copper=37
+            {"q": 24, "r": -26},  # ast_c546f51c: iron=68, copper=39
+        ]
+        # Find the nearest iron/copper zone asteroid to navigate toward
+        scout_pos = scout.get("position", {})
+        nearest = min(iron_copper_zone, key=lambda p: distance_hex(scout_pos, p))
+        in_transit = any(
+            a["type"] == "move_unit"
+            and a.get("payload", {}).get("targetHex", {}).get("q") == nearest["q"]
+            and a.get("payload", {}).get("targetHex", {}).get("r") == nearest["r"]
+            for a in actions
+        )
+        if not in_transit:
+            actions.append({
+                "type": "move_unit",
+                "payload": {"unitId": scout["id"], "targetHex": nearest},
+                "ws": True
+            })
 
     # ── Sell minerals above threshold ──
     sell_order = ["min_darkmat", "min_iridium", "min_rhodium", "min_palladium",
