@@ -97,6 +97,7 @@ class MMOClient:
     _golden_asteroid_spawned = None
     _mining_failure_detected = False
     _move_failure_detected = False
+    _cargo_full_detected = False
 
     def _on_message(self, ws, msg):
         try:
@@ -206,6 +207,9 @@ class MMOClient:
                                                "Invalid or expired",
                                                "Not authenticated"]):
                 self.authenticated = False
+            # Track cargo-full errors — scout's hold fills up and needs to deposit at a planet
+            if "Cargo hold is full" in err_msg or "cargo hold is full" in err_msg:
+                self._cargo_full_detected = True
 
     def _on_error(self, ws, error):
         pass
@@ -611,6 +615,12 @@ def run_cycle():
                         state["mining_failures"] = 0
                         save_state(state)
                         logger.info("Move succeeded — mining_failures reset to 0.")
+                # Track cargo-full: scout's hold is full and needs to deposit at planet
+                if c._cargo_full_detected:
+                    c._cargo_full_detected = False  # reset for next cycle
+                    state["_cargo_full"] = True
+                    save_state(state)
+                    logger.warning("Cargo hold full — scout needs to deposit at planet.")
 
                 c.stop()
                 state = log_action(state, atype, str(payload), "ok")

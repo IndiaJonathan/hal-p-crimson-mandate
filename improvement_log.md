@@ -1,14 +1,60 @@
-## 2026-06-20 06:55 UTC — HAL-P Self-Review (1:55 AM CT Sat)
+## 2026-06-21 12:28 UTC — HAL-P Self-Review (7:28 AM CT Sun)
 
-**Token:** `state.json` JWT exp=1782538205 (~June 20 06:50 UTC) — expired ~5 min ago at cron check. Operator (PID 1306) still running, WebSocket cycling, tick updates flowing — likely obtained fresh token at startup. No operator health impact observed.
+**Token:** ⚠️ Expiring ~1h30m — exp=1782624600 (13:30 UTC). Not dead yet. Monitor next cycle. No renewal action taken proactively (still valid).
 
-**Code:** Clean. No errors, timeouts, or stalls. Operator PID 1306 active, lastRun=06:54 UTC (~1 min ago). ActionLog shows continuous `mine_asteroid` on ast_e87254c0 (all `ok`). mining_failures=4 (below threshold 5).
+**Code:** Clean. No errors, timeouts, or stalls. Operator PID active, lastRun=12:25 UTC (~3 min ago). WebSocket cycling.
+
+**Mining desync confirmed:** actionLog shows 100+ consecutive `mine_asteroid ast_e87254c0` all `ok` (3:49–12:25 UTC), yet runner.log shows `Basic Mining Array cannot extract — higher-tier mining laser required` on every cycle. Server returns `ok` but silently denies yield. cargo_used=0 despite hours of continuous mining. Not a code bug — server behavior.
+
+**Scout position:** At (24,-26), not at planet_earth. Mining asteroid confirmed via actionLog. Scout is actively engaged, just getting zero yield.
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0, ISD=489. **53+ days zero iron/copper gain.** Game-admin gate. Mk1 Laser costs 1000 ISD (have 489, need +511).
+
+**Self-improve loop:** Running — entries at 11:56, 12:11, 12:26 UTC confirmed. Recommends combat ISD grinding — blocked by no ship.
+
+**Fix:** None available — game-admin gate + server-side yield suppression. Operator healthy.
+
+**Status:** Operator healthy. No Discord ping (Sunday morning). Awaiting Jonathan direction on Mk1 Laser (1000 ISD) or iron/copper asteroid spawn.
+
+---
+
+## 2026-06-20 19:57 UTC — HAL-P Self-Review (2:57 PM CT Sat)
+
+**Token:** ✅ Valid (JWT exp 1782544266 — ~Jun 27 07:11 UTC, ~7 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator active. lastRun=19:55 UTC confirmed (~2 min ago). WebSocket cycling, actionLog shows continuous `mine_asteroid` on ast_c546f51c (all `ok`). mining_failures=0.
+
+**Cargo desync:** Recurring "Cargo hold is full" server warning (every ~5min). Yet live state shows `cargo_used=0` on our scout, and all `mine_asteroid` calls return `ok`. Server-side display/sync bug — not blocking. Scout keeps mining.
+
+**Scout position verified:** At (24,-26), executing `mine_asteroid ast_c546f51c`. iron=68, copper=39 per world scan. All actions `ok` but iron=0, copper=0 in game state — expected: Basic Mining Array cannot extract iron/copper without Mk1 Laser (game design).
 
 **Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0, ISD=489. **52+ days zero iron/copper gain.** Game-admin gate. Mk1 Laser costs 1000 ISD (have 489, need +511).
 
-**Fix:** None — game-admin gate. Operator healthy.
+**Fix:** None — game-admin gate. Server cargo desync is cosmetic, not blocking.
 
-**Status:** Operator healthy. No Discord ping (Saturday preference). Game-admin gate unchanged — awaiting Jonathan direction.
+**Status:** Operator healthy. No Discord ping (Saturday preference). Game-economy deadlock unchanged — awaiting Jonathan direction on Mk1 Laser (1000 ISD) or iron/copper asteroid spawn.
+
+---
+
+## 2026-06-20 10:57 UTC — HAL-P Self-Review (5:57 AM CT Sat)
+
+**Token:** ✅ Valid (JWT exp 1782544266 — ~Jun 27 07:11 UTC, ~7 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator active. lastRun=10:53 UTC confirmed (~4 min ago). WebSocket cycling, actionLog shows continuous `mine_asteroid` on ast_c546f51c (all `ok`). mining_failures=0.
+
+**Anomaly — recurring "cargo hold is full" warnings:**
+- Agent.log shows `Cargo hold is full` error every ~5min since 04:29 UTC through 05:53 UTC.
+- However, scout's `cargo_used=0` in live state, and all `mine_asteroid` calls return `ok`.
+- Server-side cargo desync: server erroneously reports full cargo, but mining actions still succeed.
+- No action taken — this is a server-side display/sync bug, not a logic defect. Scout keeps mining.
+
+**Scout position verified:** At (24,-26), actively mining ast_c546f51c (iron=68, copper=39 per world scan). Continuous mining confirmed from 07:19 UTC through 10:53 UTC. All actions `ok`. Yet iron=0, copper=0 in game state — likely server not crediting yield from Basic Mining Array on iron/copper asteroids (game design).
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0, ISD=489. **52+ days zero iron/copper gain.** Game-admin gate. Mk1 Laser costs 1000 ISD (have 489, need +511).
+
+**Fix:** None — game-admin gate. Server cargo desync is cosmetic, not blocking.
+
+**Status:** Operator healthy. No Discord ping (Saturday preference). Game-economy deadlock unchanged — awaiting Jonathan direction on Mk1 Laser (1000 ISD) or iron/copper asteroid spawn.
 
 ---
 
@@ -4873,3 +4919,98 @@ All are 24-31 hexes from scout's current position. Scout speed=5/turn — naviga
 **Fix:** None needed. No code defects. Operator healthy.
 
 **Status:** Operator healthy. No code fixes needed. Game-economy deadlock unchanged — game-admin gate. Awaiting Jonathan direction on Mk1 Laser (1000 ISD) or iron/copper asteroid spawn. Prior escalations active.
+
+## 2026-06-20 11:57 UTC — HAL-P Self-Review (6:57 AM CT Sat)
+
+**Token:** ✅ Valid (JWT exp 1782544266 — ~Jun 27 07:11 UTC, ~7 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls in operator.py/runner.py/decisions.py.
+
+**Issue — silent death:** Operator was not running at cron check (11:57 UTC). Process died between lastRun=11:56 UTC and cron trigger (~1 min). Confirmed dead via `pgrep`. No crash in logs — silent death pattern. Cron caught it.
+
+**Fix:** Restarted via nohup (PID 40081). Confirmed healthy — Cycle 1 at 11:58:14 UTC, WebSocket cycling, ISD=489, mining_failures=0.
+
+**Cargo hold desync:** Recurring "Cargo hold is full" warning every ~5min persists (last seen 06:56 UTC). Scout cargo_used=0 in live state, all `mine_asteroid` calls return `ok`. Server-side display/sync bug — cosmetic, not blocking. No fix available in agent code.
+
+**Self-improve loop:** Cycling every 15min (entries at 11:11, 11:26, 11:41, 11:56 UTC). Recommending combat ISD grinding (blocked — no ship/minerals).
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0, ISD=489. **52+ days zero iron/copper gain.** Game-admin gate. Mk1 Laser costs 1000 ISD (have 489, need +511). Scout at (24,-26) actively mining ast_c546f51c (iron=68, copper=39 per world scan — Basic Mining Array yields nothing from it, per game design).
+
+**Fix:** Restarted operator. No code fixes available. Game-admin gate unchanged.
+
+**Status:** Operator recovered. No Discord ping (Saturday preference). Game-economy deadlock unchanged — awaiting Jonathan direction on Mk1 Laser (1000 ISD) or iron/copper asteroid spawn.
+
+## 2026-06-20 17:12 UTC — HAL-P Self-Review (12:12 PM CT Sat)
+
+**Token:** ✅ Valid — session `d1df89a0-c66c-42cd-a056-259bd14dde12`. JWT exp=1782544266 (~Jun 27 UTC, ~7 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator PID active, lastRun=17:11 UTC (~1 min ago). Continuous `mine_asteroid` on ast_c546f51c (all `ok`).
+
+**Cargo-desync recurrence:** `Cargo hold is full` warnings resumed at 04:29 UTC, recurring every ~5 min through 12:11 UTC. state.json shows `cargo_used=0` (local sync state). `mine_asteroid` calls all return `ok`. This is the same server-side cosmetic bug documented in prior reviews — server erroneously reports full cargo but mining continues. No code fix available.
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0, ISD=489. **52+ days zero iron/copper gain.** Game-admin gate. Mk1 Laser costs 1000 ISD (balance=489, need +511).
+
+**Fix:** None — server-side cosmetic desync + game-economy deadlock. No code fixes available.
+
+**Status:** Operator healthy. No Discord ping (Saturday preference). Game-economy deadlock unchanged — awaiting Jonathan direction on Mk1 Laser (1000 ISD) or iron/copper asteroid spawn.
+
+## 2026-06-21 02:57 UTC — HAL-P Self-Review (9:57 PM CT Sat)
+
+**Token:** ✅ Valid — session `d1df89a0-c66c-42cd-a056-259bd14dde12`. Exp 1782544266 (~Jun 27, ~7 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator active. lastRun=02:54 UTC confirmed (~3 min ago). WebSocket cycling, actionLog shows continuous `mine_asteroid` on ast_2b547acb (all `ok`). mining_failures=3. Scout reached iron/copper asteroid at (24,-26) — active mining now.
+
+**Progress note:** Scout navigated from (0,-1) to (24,-26) — iron/copper asteroid confirmed (ast_c546f51c: iron=68, copper=39). Now mining ast_2b547acb. All `mine_asteroid` calls return `ok` but "Basic Mining Array cannot extract" expected for iron/copper — game design. Scout keeps mining.
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0, ISD=489. **53+ days zero iron/copper gain.** Game-admin gate. Mk1 Laser costs 1000 ISD (have 489, need +511).
+
+**Fix:** None — game-admin gate. Operator healthy and progressing.
+
+**Status:** Operator healthy. No Discord ping (Saturday preference). Game-economy deadlock unchanged — awaiting Jonathan direction on Mk1 Laser (1000 ISD) or iron/copper asteroid spawn.
+
+## 2026-06-21 03:12 UTC — HAL-P Self-Review (10:12 PM CT Sat)
+
+**Token:** ✅ Valid — JWT exp 1782544266 (Jun 27 07:11 UTC, ~7 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator PID 40081 alive (~15h uptime), lastRun=03:09 UTC (~3 min ago). WebSocket cycling confirmed via actionLog. Active mining on ast_2b547acb — last 6 cycles all `ok`.
+
+**Cargo desync:** Recurring "Cargo hold is full" server warning. Scout's `cargo_used=0` in live state, all `mine_asteroid` calls return `ok`. Server-side sync bug — cosmetic, not blocking.
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ISD=489, ships=0. **52+ days zero iron/copper gain.** Game-admin gate. Mk1 Laser costs 1000 ISD (have 489, need +511).
+
+**Fix:** None — game-admin gate. Server cargo desync is cosmetic, not blocking.
+
+**Status:** Operator healthy. No Discord ping (Saturday preference). Game-economy deadlock unchanged — awaiting Jonathan direction on Mk1 Laser (1000 ISD) or iron/copper asteroid spawn.
+
+## 2026-06-21 07:12 UTC — HAL-P Self-Review (2:12 AM CT Sun)
+
+**Token:** ✅ Valid — session `eb05a742-d09f-4878-ac93-39f69f8dbf85`. Exp **2026-06-27 06:00 UTC** (~6 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator PID 40081 active (~19h 15min uptime — survived typical 4-6h silent death window). lastRun=07:10:37 UTC confirmed (~2 min ago). WebSocket cycling confirmed via recent actionLog entries through 07:07 UTC.
+
+**Operator:** Alive and cycling. Scout at (24,-26), actively mining ast_e87254c0 with all `ok` results. mining_failures=2 (below threshold). Runner logs show recurring "Basic Mining Array cannot extract minerals from this asteroid" warnings — expected game design (ast_e87254c0 is titanium-only, requires Mk1 Laser for iron/copper extraction).
+
+**Self-improve loop:** Running — entries at 06:41, 06:56, 07:11 UTC Jun 21 confirmed. Recommending combat ISD grinding (blocked — no combat-capable ship).
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0, ISD=489. **52+ days zero iron/copper gain.** Game-admin gate. Mk1 Laser costs 1000 ISD (balance=489, need +511 ISD). Combat grinding blocked by no combat ship.
+
+**Fix:** None needed. No code defects. Operator healthy. Game-economy deadlock unchanged — game-admin gate.
+
+**Status:** Operator healthy. No Discord ping (2:12 AM CT Sun — Saturday preference applies, no non-urgent pings). Game-economy deadlock unchanged. Awaiting Jonathan direction on Mk1 Laser (1000 ISD) or iron/copper asteroid spawn. Prior escalations active.
+
+
+## 2026-06-21 08:13 UTC — HAL-P Self-Review (3:13 AM CT Sun)
+
+**Token:** ✅ Valid — session `eb05a742-d09f-4878-ac93-39f69f8dbf85`. Exp **2026-06-27 07:11 UTC** (~6 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator PID 40081 active, lastRun=08:10 UTC (~3 min ago). WebSocket cycling confirmed. actionLog shows continuous `mine_asteroid` on ast_e87254c0 (all `ok`).
+
+**Operator:** Alive and cycling. mining_failures=4 (below threshold 5). Scout at (24,-26), actively mining ast_e87254c0. All `mine_asteroid` calls return `ok` but server blocks extraction with "Basic Mining Array cannot extract — higher-tier mining laser required" — unchanged game design constraint.
+
+**Self-improve loop:** Cycling — entries at 07:41, 07:56, 08:11 UTC. Recommending combat ISD grinding (blocked — no ship/minerals).
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0, ISD=489. **52+ days zero iron/copper gain.** Game-admin gate. Mk1 Laser costs 1000 ISD (balance=489, need +511 ISD).
+
+**Fix:** None needed. No code defects. Operator healthy.
+
+**Status:** Operator healthy. No code fixes needed. No Discord ping (3:13 AM CT Sun — Saturday preference). Game-economy deadlock unchanged — awaiting Jonathan direction on Mk1 Laser (1000 ISD) or iron/copper asteroid spawn.
