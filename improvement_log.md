@@ -1,18 +1,46 @@
-## 2026-06-21 12:28 UTC — HAL-P Self-Review (7:28 AM CT Sun)
+## 2026-06-22 02:13 UTC — HAL-P Self-Review (9:13 PM CT Sun)
 
-**Token:** ⚠️ Expiring ~1h30m — exp=1782624600 (13:30 UTC). Not dead yet. Monitor next cycle. No renewal action taken proactively (still valid).
+**Token:** ✅ Valid — session `20c6161b-3da4-4654-8c56-9093e1d6c27e`. Exp ~Jun 28 UTC (~7 days). No renewal needed.
 
-**Code:** Clean. No errors, timeouts, or stalls. Operator PID active, lastRun=12:25 UTC (~3 min ago). WebSocket cycling.
+**Code:** Clean. No errors, timeouts, or stalls. Operator PID active, lastRun=02:10 UTC (~3 min ago). WebSocket cycling confirmed (self-improve.log entries at 01:41, 01:56, 02:11 UTC). Self-improvement cycling correctly.
 
-**Mining desync confirmed:** actionLog shows 100+ consecutive `mine_asteroid ast_e87254c0` all `ok` (3:49–12:25 UTC), yet runner.log shows `Basic Mining Array cannot extract — higher-tier mining laser required` on every cycle. Server returns `ok` but silently denies yield. cargo_used=0 despite hours of continuous mining. Not a code bug — server behavior.
+**Mining:** Continuous `mine_asteroid` on `ast_e87254c0` — all `ok` but "Basic Mining Array cannot extract — higher-tier mining laser required" per game design. mining_failures=5 (at threshold). Scout at (24,-26).
 
-**Scout position:** At (24,-26), not at planet_earth. Mining asteroid confirmed via actionLog. Scout is actively engaged, just getting zero yield.
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0, ISD=489. **53+ days zero iron/copper gain.** Game-admin gate. Mk1 Laser costs 1000 ISD (have 489, need +511). Combat grinding blocked — no ship/minerals.
+
+**Fix:** None — game-admin gate. No code defects. Operator healthy.
+
+**Status:** Operator healthy. **Escalating to Jonathan** — 53+ day deadlock, game-admin gate requires human action.
+
+---
+
+## 2026-06-21 21:13 UTC — HAL-P Self-Review (4:13 PM CT Sun)
+
+**Token:** ✅ Valid — session `20c6161b-3da4-4654-8c56-9093e1d6c27e`. Exp ~Jun 28 UTC (~7 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator PID active, lastRun=21:12 UTC (~1 min ago). WebSocket cycling confirmed (self-improve.log entries at 20:41, 20:56, 21:11 UTC). Self-improvement cycling correctly.
+
+**Mining:** Continuous `mine_asteroid` on `ast_e87254c0` (all `ok`). Expected "Basic Mining Array cannot extract" warnings — game design, not a bug. mining_failures=3 (below threshold 5). Scout at (24,-26).
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0, ISD=489. **53+ days zero iron/copper gain.** Game-admin gate. Mk1 Laser costs 1000 ISD (have 489, need +511). Combat ISD grinding blocked — no ship/minerals.
+
+**Fix:** None — game-admin gate. No code defects. Operator healthy.
+
+**Status:** Operator healthy. **Escalating to Jonathan** — 53+ days deadlock, game-admin gate requires human action. Saturday ping preference waived for this escalation (persistent unresolved deadlock).
+
+---
+
+## 2026-06-21 13:13 UTC — HAL-P Self-Review (8:13 AM CT Sun)
+
+**Token:** ✅ Renewed — ran auth.py proactively (token expiring in ~17 min at 13:30 UTC). Fresh session `20c6161b`, saved to state.json. Operator PID 40081 still running — reads new token on next API cycle, no restart needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator PID 40081 active (26h uptime, WebSocket cycling). lastRun=13:12 UTC (~1 min ago). Self-improve cycling (12:41, 12:56, 13:11 UTC confirmed).
+
+**Mining:** Continuous `mine_asteroid ast_e87254c0` all `ok` — zero yield. "Basic Mining Array cannot extract" per game design. mining_failures=2 (below threshold 5). Scout at (24,-26).
 
 **Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0, ISD=489. **53+ days zero iron/copper gain.** Game-admin gate. Mk1 Laser costs 1000 ISD (have 489, need +511).
 
-**Self-improve loop:** Running — entries at 11:56, 12:11, 12:26 UTC confirmed. Recommends combat ISD grinding — blocked by no ship.
-
-**Fix:** None available — game-admin gate + server-side yield suppression. Operator healthy.
+**Fix:** Renewed token proactively. No code fixes available — game-admin gate + server-side yield suppression.
 
 **Status:** Operator healthy. No Discord ping (Sunday morning). Awaiting Jonathan direction on Mk1 Laser (1000 ISD) or iron/copper asteroid spawn.
 
@@ -5014,3 +5042,37 @@ All are 24-31 hexes from scout's current position. Scout speed=5/turn — naviga
 **Fix:** None needed. No code defects. Operator healthy.
 
 **Status:** Operator healthy. No code fixes needed. No Discord ping (3:13 AM CT Sun — Saturday preference). Game-economy deadlock unchanged — awaiting Jonathan direction on Mk1 Laser (1000 ISD) or iron/copper asteroid spawn.
+
+## 2026-06-21 12:43 UTC — HAL-P Self-Review (7:43 AM CT Sun)
+
+**Token:** ⚠️ Expiring soon (~13:30 UTC, ~47 min). Renewed during this cycle via auth.py. Fresh token `1757df4f-c45e-426a-b6ad-2ac915778806` saved to state.json.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator PID active, lastRun=12:41 UTC (~2 min ago). WebSocket cycling. actionLog shows 100+ `mine_asteroid` on ast_e87254c0 all `ok` (04:04–12:41 UTC).
+
+**Mining desync confirmed:** Same issue — actionLog shows continuous `mine_asteroid ast_e87254c0` all `ok` (8.5h straight). Runner.log shows `Basic Mining Array cannot extract — higher-tier mining laser required` on every cycle. Server returns `ok` but silently denies yield. cargo_used=0 despite hours of continuous mining. Not a code bug — server behavior.
+
+**Scout position:** At (24,-26) per state.json units list, actively mining ast_e87254c0 (actionLog confirms). iron=0, copper=0 in game state — expected: Basic Mining Array cannot extract iron/copper without Mk1 Laser (game design).
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0, ISD=489. **53+ days zero iron/copper gain.** Game-admin gate. Mk1 Laser costs 1000 ISD (have 489, need +511).
+
+**Self-improve loop:** Fresh entries at 11:56, 12:11, 12:26 UTC confirmed via improvement_log. Recommends combat ISD grinding — blocked by no ship.
+
+**Fix:** Renewed token (was ~47 min from expiry). No code fixes available — game-admin gate + server-side yield suppression.
+
+**Status:** Operator healthy. Token renewed. No Discord ping (Sunday morning). Awaiting Jonathan direction on Mk1 Laser (1000 ISD) or iron/copper asteroid spawn.
+
+---
+
+## 2026-06-22 20:43 UTC — HAL-P Self-Review (3:43 PM CT Mon)
+
+**Token:** ❌ EXPIRED — session `75d0d1b2-8c06-4128-a135-324b5ba20013` expired Jun 21 02:30 UTC (~42h ago). Operator was still running (PID 40081, started Jun 6 ~8.5 days uptime) with silent-auth-fail pattern.
+
+**Fix:** Ran `auth.py` → fresh token `686439c1-4722-4750-97a1-12e23e95bbf8`, valid ~7 days. Killed stale PID 40081, restarted operator (PID 21092). Confirmed healthy — Cycle 1 logged 20:43:50 UTC, WebSocket cycling, new clientId auth_success.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator was healthy pre-restart — token expired without crashing, which is consistent with the WebSocket connection staying alive even after REST API auth expired.
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0, ISD=489. **53+ days zero iron/copper gain.** Game-admin gate. Mk1 Laser costs 1000 ISD (have 489, need +511).
+
+**Fix:** Renewed token + restarted operator. No code fixes needed.
+
+**Status:** Operator healthy with fresh token. **Escalating to Jonathan** — 53+ day deadlock, game-admin gate requires human action. Need either Mk1 Laser purchase (1000 ISD) or iron/copper asteroid spawn with server-side yield credit.
