@@ -130,8 +130,36 @@ def decide_actions(state: dict, ws_state: dict) -> list:
             and a.get("requiredComponentId") is None
         ]
 
+    # ── Cargo-full guard: must deposit before mining ──
+    if scout and scout.get("cargoUsed", 0) >= scout.get("cargoCapacity", 100):
+        scout_pos = scout.get("position", {})
+        planets = ws_state.get("planets") or state.get("planets", [])
+        if planets and not scout.get("dockedAtPlanetId"):
+            nearest_planet = min(
+                planets,
+                key=lambda p: distance_hex(scout_pos, p.get("position", {}))
+            )
+            ppos = nearest_planet.get("position", {})
+            dist = distance_hex(scout_pos, ppos)
+            logger.warning(f"Cargo full ({scout.get('cargoUsed')}/{scout.get('cargoCapacity')}) — moving to {nearest_planet.get('name')} at {ppos} (dist={dist}).")
+            if dist > 1:
+                in_transit = any(
+                    a["type"] == "move_unit"
+                    and a.get("payload", {}).get("targetHex", {}).get("q") == ppos.get("q")
+                    and a.get("payload", {}).get("targetHex", {}).get("r") == ppos.get("r")
+                    for a in actions
+                )
+                if not in_transit:
+                    actions.append({
+                        "type": "move_unit",
+                        "payload": {"unitId": scout["id"], "targetHex": ppos},
+                        "ws": True
+                    })
+        elif scout.get("dockedAtPlanetId"):
+            logger.info(f"Cargo full and docked at {scout.get('dockedAtPlanetId')} — deposit attempted.")
+
     # ── Mine or move to asteroid ──
-    if scout and not mining and asteroids_in_world and not mining_blocked:
+    elif scout and not mining and asteroids_in_world and not mining_blocked:
         target = find_nearest_asteroid(scout.get("position", {}), tier0_asteroids, max_tier=0)
         if target:
             tpos = target.get("position", {})
