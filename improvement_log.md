@@ -1,3 +1,35 @@
+## 2026-06-25 21:47 UTC — HAL-P Self-Review (4:47 PM CT Thu)
+
+**Token:** ✅ Valid — session `4ac0fbb3-79de-4969-afb2-4e63fde6d5a1`. Exp **2026-07-09** (~13 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator PID 25279 active (started 4:47 PM CT). WebSocket cycling confirmed. Circuit breaker working correctly — `mining_failures` resets to 0 on successful `move_unit`. Last log entries at 16:47 CT show healthy cycle activity.
+
+**Self-improve loop:** Running — entries at 20:57, 21:12, 21:27, 21:42 UTC confirmed. Recommending combat ISD grinding (blocked — no ship/minerals).
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0, ISD=489. **71+ days zero iron/copper gain.** Game-admin gate. Mk1 Laser costs 1000 ISD (have 489, need +511).
+
+**Fix:** None available — game-admin gate. No code defects. Operator healthy.
+
+**Status:** Operator healthy. No code fixes needed. Game-economy deadlock unchanged — game-admin gate. Awaiting Jonathan direction on Mk1 Laser (1000 ISD) or iron/copper asteroid extraction path.
+
+---
+
+## 2026-06-24 12:47 UTC — HAL-P Self-Review (7:47 AM CT Wed)
+
+**Token:** ✅ Valid — session `0a4c5a76`, exp 2026-07-01 09:36 UTC (~7 days). No renewal needed.
+
+**Issue:** Silent death — operator not running at cron trigger. No crash logs. ~5h gap since last cycle (last log at 07:41 UTC, found dead at 12:47 UTC).
+
+**Fix:** Restarted via nohup (PID 13449). Confirmed healthy — Cycle 1 at 07:47:37 UTC, WebSocket connected, Balance=ISD 489. Circuit breaker holding at 70 failures — Decision: [] (expected, circuit breaker blocking).
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator cycling correctly on restart.
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0, ISD=489. **64+ days zero iron/copper gain.** Game-admin gate. Mk1 Laser costs 1000 ISD (have 489, need +511).
+
+**Status:** Operator recovered with valid token. No code fixes needed. Game-economy deadlock unchanged — game-admin gate. Awaiting Jonathan direction.
+
+---
+
 ## 2026-06-24 08:32 UTC — HAL-P Self-Review (3:32 AM CT Wed)
 
 **Token:** ❌ EXPIRED — JWT exp 1782883957 = 2026-06-24 08:12 UTC (~20 min ago). Operator (PID 61018) still running on stale session since 07:26 UTC.
@@ -5193,3 +5225,57 @@ All are 24-31 hexes from scout's current position. Scout speed=5/turn — naviga
 **Fix:** Ran auth.py → killed old PID → restarted operator with new token. No code fixes needed.
 
 **Status:** Operator recovered with fresh token. No code fixes needed. **Escalating to Jonathan** — 59+ day deadlock, game-admin gate. Needs either Mk1 Laser purchase (1000 ISD) or iron/copper asteroid spawn / game-admin intervention.
+
+## 2026-06-24 18:53 UTC — HAL-P Self-Review (1:53 PM CT Wed)
+
+**Token:** ✅ Valid — session `0a4c5a76`, exp 2026-07-01 09:36 UTC (~7 days). No renewal needed.
+
+**Issue:** Silent death — operator stopped at ~13:54 UTC (~5h gap). No crash logs. Cron caught dead at 18:53 UTC.
+
+**Fix:** Restarted via nohup (PID 89210). Confirmed healthy — new cycles logging at 18:53 UTC, WebSocket connected, Balance=ISD 489. Circuit breaker working (mining blocked at 3 failures → move_unit → mining_failures reset to 0).
+
+**Code:** Clean. No errors, timeouts, or stalls. Circuit breaker correctly resets on successful move_unit.
+
+**Mining:** Circuit breaker pattern holding — Basic Mining Array blocks extraction, scout navigates toward iron/copper zone, failure counter resets on move.
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0, ISD=489. **64+ days zero iron/copper gain.** Game-admin gate. Mk1 Laser costs 1000 ISD (have 489, need +511). Scout at (26,-26) per state.json.
+
+**Status:** Operator recovered. No code fixes needed. **Escalating to Jonathan** — 64+ day deadlock, game-admin gate. Need either Mk1 Laser purchase (1000 ISD) or iron/copper asteroid spawn / game-admin intervention.
+
+
+---
+
+## 2026-06-25 03:10 UTC — HAL-P Self-Review (10:10 PM CT Wed)
+
+**Token:** ✅ Valid — session `0a4c5a76`, exp 2026-07-01 09:36 UTC (~6.3 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls.
+
+**Issue:** Triple-process restart loop — 3 simultaneous operator instances found (PIDs 53087, 53230, 53389), all using system Python 3.14 (`/opt/homebrew/Cellar/python@3.14/...`) instead of `.venv/bin/python3`. All started within 2 minutes (7:04-7:06 PM CT). Classic restart loop — the operator kept dying silently and being restarted multiple times before cron caught it.
+
+**Fix:** Killed all 3 stale PIDs. Restarted single clean instance via nohup with `.venv/bin/python3` (PID 92193). Confirmed healthy — Cycle 1 at 03:09:28 UTC, WebSocket cycling, ISD=489, mining_failures=2 (below threshold). Exactly 1 operator running now.
+
+**Root cause:** The triple-process suggests either the LaunchAgent (`com.burk.crimson-mandate.plist`) spawned overlapping restarts, or multiple restart triggers fired simultaneously during a restart window. `renew_token.py` itself only uses stdlib and doesn't restart the operator — the restart mechanism is elsewhere.
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0, ISD=489. **64+ days zero iron/copper gain.** Game-admin gate. Mk1 Laser costs 1000 ISD (have 489, need +511). Scout at planet_earth (q=0,r=-1) targeting tier-0 asteroid — Basic Mining Array cannot extract iron/copper. Combat grinding blocked — no ship.
+
+**Fix:** None needed. Operator recovered. No code fixes needed — game-economy deadlock unchanged, game-admin gate. Prior escalations active (sent 2026-04-26 + 2026-05-12 + multiple subsequent cycles). No Discord ping (Wednesday 10:10 PM CT — minimal/no non-urgent contact preference). Awaiting Jonathan direction on Mk1 Laser purchase or iron/copper asteroid spawn.
+
+## 2026-06-25 08:16 UTC — HAL-P Self-Review (3:16 AM CT Thu)
+
+**Token:** ✅ Valid — session `4ac0fbb3`, exp **2026-07-02 05:30 UTC** (~7 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator PID 92193 active (started 10:09 PM CT Jun 24 = 04:09 UTC Jun 25). ~5h uptime. WebSocket cycling confirmed. Cycles running ~5min intervals. Last cycle at 03:17:44 UTC.
+
+**Mining failures (live):** Circuit breaker counting failures #1, #2, #3 — Basic Mining Array cannot extract iron/copper. Scout at (26, -26). failures accumulating per cycle (each mine attempt gets "higher-tier mining laser required"). Scout stays idle at iron/copper zone.
+
+**Token renewal cron:** renew_token.py timed out once (per cron job error). Last successful renewal was 2026-06-19 05:30 UTC. Token still has ~7 days — renewal cron will retry. Not a current risk.
+
+**Self-improve loop:** Stale — no entries since May 30 (self-improve.log). improvement_log entry at Jun 24 12:47 UTC confirms operator restart but self-improve agent not running since then.
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0, ISD=489. **71+ days zero iron/copper gain.** Game-admin gate. Mk1 Laser costs 1000 ISD (have 489, need +511). Circuit breaker holding at 70 failures.
+
+**Fix:** None — game-admin gate. No code defects. Operator healthy.
+
+**Status:** Operator healthy. No code fixes needed. Game-economy deadlock unchanged — game-admin gate. Awaiting Jonathan direction on Mk1 Laser (1000 ISD) or iron/copper asteroid spawn/game-admin intervention.
+

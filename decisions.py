@@ -142,7 +142,7 @@ def decide_actions(state: dict, ws_state: dict) -> list:
             ppos = nearest_planet.get("position", {})
             dist = distance_hex(scout_pos, ppos)
             logger.warning(f"Cargo full ({scout.get('cargoUsed')}/{scout.get('cargoCapacity')}) — moving to {nearest_planet.get('name')} at {ppos} (dist={dist}).")
-            if dist > 1:
+            if dist > 0:
                 in_transit = any(
                     a["type"] == "move_unit"
                     and a.get("payload", {}).get("targetHex", {}).get("q") == ppos.get("q")
@@ -155,6 +155,8 @@ def decide_actions(state: dict, ws_state: dict) -> list:
                         "payload": {"unitId": scout["id"], "targetHex": ppos},
                         "ws": True
                     })
+            else:
+                logger.info(f"Scout at planet hex (dist=0, docked={scout.get('dockedAtPlanetId')}) — docking.")
         elif scout.get("dockedAtPlanetId"):
             logger.info(f"Cargo full and docked at {scout.get('dockedAtPlanetId')} — deposit attempted.")
 

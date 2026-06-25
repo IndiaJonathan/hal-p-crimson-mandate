@@ -126,14 +126,13 @@ class MMOClient:
         # (the components API check is unreliable — server returns non-success on that endpoint)
         if msg_type == "error":
             err_msg = payload.get("message", "")
-            if "Basic Mining Array cannot extract" in err_msg:
+            if "Basic Mining Array cannot extract" in err_msg or "higher-tier mining laser" in err_msg:
                 # Fire a custom event so run_cycle can pick it up without needing the components API
                 with self._cv:
                     self._events.setdefault("mining_failure_warning", []).append(err_msg)
                 # Also set instance flag — wait_for may miss it if the message arrives during sleep
-                # "higher-tier mining laser required" = current asteroid has no iron/copper.
-                # This IS a real mining failure — scout needs to explore to find a different asteroid.
-                # Only flag real extraction failures (no yield from a mineable asteroid) here.
+                # "higher-tier mining laser required" = current asteroid needs Mk1 Laser.
+                # This IS a real mining failure — scout needs to explore iron/copper zone.
                 self._mining_failure_detected = True
             elif "unit must be within 1 hex" in err_msg or "not within 1 hex" in err_msg:
                 # Scout tried to move to a hex that's not adjacent — count as a failure
