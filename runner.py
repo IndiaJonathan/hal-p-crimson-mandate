@@ -591,6 +591,7 @@ def run_cycle():
                         c._mining_failure_detected = False  # reset for next cycle
                         # Mining Laser not present — server warned on this call
                         state["has_mining_laser"] = False
+                        state["mining_laser_confirmed_missing"] = True  # permanent flag: repositioning won't help
                         state["mining_failures"] = state.get("mining_failures", 0) + 1
                         save_state(state)
                         logger.warning(f"Mining Laser missing (failure #{state['mining_failures']}) — circuit breaker {'ARMED' if state['mining_failures'] >= 999 else 'counting'}."[:120])
@@ -608,12 +609,15 @@ def run_cycle():
                     state["mining_failures"] = state.get("mining_failures", 0) + 1
                     save_state(state)
                     logger.warning(f"Move failed (not within 1 hex) — mining_failures now {state['mining_failures']}. Circuit breaker {'ARMED' if state["mining_failures"] >= 3 else 'counting'}.")
-                # Reset mining_failures on successful move — scout has repositioned successfully
+                # Reset mining_failures on successful move ONLY if laser is not permanently confirmed missing.
+                # If laser_confirmed_missing=True, repositioning doesn't fix the issue — don't reset.
                 if atype == "move_unit" and not c._move_failure_detected:
-                    if state.get("mining_failures", 0) > 0:
+                    if state.get("mining_failures", 0) > 0 and not state.get("mining_laser_confirmed_missing"):
                         state["mining_failures"] = 0
                         save_state(state)
-                        logger.info("Move succeeded — mining_failures reset to 0.")
+                        logger.info("Move succeeded — mining_failures reset to 0 (laser not confirmed missing).")
+                    elif state.get("mining_laser_confirmed_missing"):
+                        logger.info("Move succeeded — laser confirmed missing, mining_failures held at {}.".format(state.get("mining_failures", 0)))
                 # Track cargo-full: scout's hold is full and needs to deposit at planet
                 if c._cargo_full_detected:
                     c._cargo_full_detected = False  # reset for next cycle
