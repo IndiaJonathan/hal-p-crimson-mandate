@@ -574,6 +574,14 @@ def run_cycle():
                     c.stop()
                     continue
 
+                # stop cycling move_unit when laser is permanently confirmed missing.
+                # Without a laser, move_unit succeeds but mine_asteroid stays permanently
+                # blocked → infinite loop of successful moves. Put the scout to rest.
+                if atype == "move_unit" and state.get("mining_laser_confirmed_missing", False) and state.get("mining_failures", 0) >= 3:
+                    logger.warning("Circuit breaker: laser confirmed missing + mining_failures=5 — blocking move_unit to prevent infinite loop.")
+                    c.stop()
+                    continue
+
                 time.sleep(3)
 
                 # ── Circuit breaker: suppress mining (not movement) when armed ──
