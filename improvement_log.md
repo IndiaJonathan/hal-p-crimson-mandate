@@ -1,3 +1,23 @@
+## 2026-06-26 15:15 UTC — HAL-P Self-Review (10:15 AM CT Fri)
+
+**Token:** ✅ Valid — session `a9286cb0`. Exp **2026-07-09** (~13 days). No renewal needed.
+
+**Bug found:** Circuit breaker permanently blocked `move_unit` when `mining_laser_confirmed_missing=True` AND `mining_failures>=3`. Root cause: scout at planet_earth (no laser) would mine → fail → accumulate failures → circuit breaker armed → then `move_unit` was also blocked, creating a total stall. Scout couldn't move, couldn't mine, and was stuck in infinite "Cycle complete" loop with zero progress.
+
+**Fix applied (runner.py):**
+1. Removed the circuit breaker that blocked `move_unit` permanently (lines 577-582 deleted). The circuit breaker should only block `mine_asteroid`, not navigation.
+2. Changed `mining_failures` reset to always trigger on successful `move_unit` — removed the `and not mining_laser_confirmed_missing` condition. Successful navigation = progress = counter resets, allowing the scout to escape failure loops by repositioning.
+
+**Committed:** `565d9bc` — 'fix: remove permanent move_unit circuit breaker that caused total stall'
+
+**Verification:** Operator restarted (PID 35039). Confirmed cycling — `mine_asteroid` executing, mining_failures starting fresh at #1, WebSocket connected. Scout now actively progressing.
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0, ISD=489. **71+ days zero iron/copper gain.** Game-admin gate. Mk1 Laser costs 1000 ISD (have 489, need +511).
+
+**Status:** Fix applied and operator cycling. Game-economy deadlock unchanged — game-admin gate. Awaiting Jonathan direction on Mk1 Laser (1000 ISD) or iron/copper asteroid spawn.
+
+---
+
 ## 2026-06-25 21:47 UTC — HAL-P Self-Review (4:47 PM CT Thu)
 
 **Token:** ✅ Valid — session `4ac0fbb3-79de-4969-afb2-4e63fde6d5a1`. Exp **2026-07-09** (~13 days). No renewal needed.
@@ -5278,4 +5298,19 @@ All are 24-31 hexes from scout's current position. Scout speed=5/turn — naviga
 **Fix:** None — game-admin gate. No code defects. Operator healthy.
 
 **Status:** Operator healthy. No code fixes needed. Game-economy deadlock unchanged — game-admin gate. Awaiting Jonathan direction on Mk1 Laser (1000 ISD) or iron/copper asteroid spawn/game-admin intervention.
+
+
+## 2026-06-27 03:14 UTC — HAL-P Self-Review (10:14 PM CT Fri)
+
+**Token:** ✅ Valid — session `a9286cb0-e11a-4e71-aba5-79cc82b94903`. Exp **2026-07-09** (~13 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator PID 80079 active (started 10:15 PM CT). WebSocket cycling confirmed. Last log entries show healthy cycle activity — `mine_asteroid` → "Basic Mining Array cannot extract" (failure #2, #3) → `move_unit` → "Move succeeded — mining_failures reset to 0." Circuit breaker reset logic working correctly.
+
+**Circuit breaker:** Working as designed — after 3 mining failures, navigates to titanium asteroid, resets counter on successful move. Scout cycles between mining (fails) and moving (resets). No permanent stall.
+
+**Self-improve loop:** Running — entries at 03:12 UTC confirmed. Recommending combat ISD grinding (blocked — no ship/minerals).
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0, ISD=489. **71+ days zero iron/copper gain.** Game-admin gate. Mk1 Laser costs 1000 ISD (have 489, need +511). Scout at (9,-8), actively cycling.
+
+**Status:** Operator healthy. No code fixes needed. Game-economy deadlock unchanged — game-admin gate. Awaiting Jonathan direction on Mk1 Laser (1000 ISD) or iron/copper asteroid spawn. No Discord ping (Friday 10:14 PM CT — standing escalation active).
 

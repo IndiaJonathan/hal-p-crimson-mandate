@@ -3,6 +3,9 @@ Crimson Mandate Agent — Persistent State Memory
 """
 import json
 import os
+import fcntl
+import tempfile
+import shutil
 from datetime import datetime, timezone
 
 STATE_FILE = os.path.join(os.path.dirname(__file__), "state.json")
@@ -11,13 +14,38 @@ STATE_FILE = os.path.join(os.path.dirname(__file__), "state.json")
 def load_state():
     if not os.path.exists(STATE_FILE):
         return {}
-    with open(STATE_FILE, "r") as f:
-        return json.load(f)
+    try:
+        with open(STATE_FILE, "r") as f:
+            return json.load(f)
+    except (json.JSONDecodeError, IOError) as e:
+        # Corrupt or partially written file — back it up and return empty
+        backup = STATE_FILE + ".corrupt." + dt.now().strftime("%Y%m%d%H%M%S")
+        try:
+            shutil.copy2(STATE_FILE, backup)
+        except Exception:
+            pass
+        try:
+            os.unlink(STATE_FILE)
+        except Exception:
+            pass
+        return {}
 
 
 def save_state(state):
-    with open(STATE_FILE, "w") as f:
-        json.dump(state, f, indent=2)
+    # Atomic write: write to temp file then rename, with exclusive lock
+    dir_name = os.path.dirname(STATE_FILE) or "."
+    tmp_fd, tmp_path = tempfile.mkstemp(dir=dir_name, suffix=".json.tmp")
+    try:
+        fcntl.flock(tmp_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        with os.fdopen(tmp_fd, "w") as f:
+            json.dump(state, f, indent=2)
+        os.rename(tmp_path, STATE_FILE)
+    except Exception:
+        try:
+            os.unlink(tmp_path)
+        except Exception:
+            pass
+        raise
 
 
 def get_session():
