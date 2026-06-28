@@ -100,8 +100,10 @@ def decide_actions(state: dict, ws_state: dict) -> list:
     mining_failures = state.get("mining_failures", 0)
     has_laser = state.get("has_mining_laser", False)
     mining_blocked = (mining_failures >= 3)
+    laser_missing = state.get("mining_laser_confirmed_missing", False)
 
     mining = [u for u in owned if u.get("miningAsteroidId")]
+
     idle = [u for u in owned if not u.get("miningAsteroidId") and not u.get("dockedAtPlanetId")]
 
     pending = state.get("_pending_minerals", {})
@@ -197,7 +199,6 @@ def decide_actions(state: dict, ws_state: dict) -> list:
                 logger.warning("No mineable asteroids (Basic Mining Array compatible).")
 
     elif mining_blocked:
-        laser_missing = state.get("mining_laser_confirmed_missing", False)
         if laser_missing:
             # Mk1 Laser confirmed missing — iron/copper asteroids also require Mk1 Laser.
             # Mine titanium (Basic Mining Array compatible) while saving for Mk1 Laser.
