@@ -345,6 +345,7 @@ def action_sync(state: dict, token: str) -> dict:
                 state["has_mining_laser"] = has_laser
                 if has_laser:
                     state["mining_failures"] = 0
+                    state["mining_laser_confirmed_missing"] = False
                     logger.info(f"✓ Mining Laser detected!")
                 # Do NOT reset mining_failures here when has_laser=False —
                 # that would defeat the circuit breaker by spuriously clearing the count.
@@ -613,8 +614,9 @@ def run_cycle():
                     state["mining_failures"] = state.get("mining_failures", 0) + 1
                     save_state(state)
                     logger.warning(f"Move failed (not within 1 hex) — mining_failures now {state['mining_failures']}. Circuit breaker {'ARMED' if state["mining_failures"] >= 3 else 'counting'}.")
-                # Reset mining_failures on successful move — always, even when laser is confirmed missing.
-                # Repositioning may land on a titanium asteroid where Basic Mining Array works.
+                # Reset mining_failures on successful move — always reset on successful navigation.
+                # The laser confirmation is a one-time flag; successful repositioning IS progress.
+                # Counter must be low when scout reaches iron/copper asteroid with a laser.
                 if atype == "move_unit" and not c._move_failure_detected:
                     if state.get("mining_failures", 0) > 0:
                         state["mining_failures"] = 0

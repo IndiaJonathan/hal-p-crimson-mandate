@@ -161,7 +161,9 @@ def decide_actions(state: dict, ws_state: dict) -> list:
             logger.info(f"Cargo full and docked at {scout.get('dockedAtPlanetId')} — deposit attempted.")
 
     # ── Mine or move to asteroid ──
-    elif scout and not mining and asteroids_in_world and not mining_blocked:
+    # laser_missing is a hard gate: without Mk1 laser, Basic Mining Array cannot extract from
+    # titanium asteroids (which are all within range). Block mining entirely once confirmed missing.
+    elif scout and not mining and asteroids_in_world and not mining_blocked and not laser_missing:
         target = find_nearest_asteroid(scout.get("position", {}), tier0_asteroids, max_tier=0)
         if target:
             tpos = target.get("position", {})
