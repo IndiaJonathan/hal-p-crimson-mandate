@@ -581,7 +581,11 @@ def run_cycle():
                 # Only block mine_asteroid to prevent wasted cycles on hopeless targets.
                 # Threshold: 3 (Basic Mining Array consistently rejected = needs Mk1 Laser).
                 if atype == "mine_asteroid" and state.get("mining_failures", 0) >= 3:
-                    logger.warning(f"Circuit breaker armed: blocking mine_asteroid. Scout stays mobile.")
+                    # Must increment here too — otherwise state persists at 2 and decider
+                    # keeps returning mine_asteroid every cycle (staleness bug).
+                    state["mining_failures"] = state.get("mining_failures", 0) + 1
+                    save_state(state)
+                    logger.warning(f"Circuit breaker armed: blocking mine_asteroid (failures now {state['mining_failures']}). Scout stays mobile.")
                     c.stop()
                     continue
 

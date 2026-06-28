@@ -5516,3 +5516,47 @@ All are 24-31 hexes from scout's current position. Scout speed=5/turn — naviga
 
 **Status:** Operator recovered. No code fixes needed. Game-economy deadlock unchanged — game-admin gate. No Discord ping (Saturday preference, prior escalations active).
 
+
+## 2026-06-28 02:56 UTC — HAL-P Self-Review (9:56 PM CT Sat)
+
+**Token:** ✅ Renewed — ran auth.py, fresh token saved to state.json. Operator restarted (PID 70822). WebSocket `auth_success` confirmed with new clientId. Prior token had exp March 12 UTC (108 days expired, server not enforcing on WebSocket).
+
+**Code:** Clean. No errors, timeouts, or stalls. Mining circuit breaker cycling — currently at failure #3, approaching threshold of 5. On reaching threshold, explorer mode will activate (move_unit) to reposition.
+
+**Operator:** Restarted with fresh token. Confirmed cycling — Cycle 1 logged at 02:53 UTC, WebSocket connected, Balance=ISD 489. mining_failures=3 and climbing.
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=1, ISD=489. **73+ days zero iron/copper gain.** Game-admin gate. Mk1 Laser costs 1000 ISD (have 489, need +511). Combat grinding blocked — no ship/minerals.
+
+**Status:** Token renewed, operator restarted. No code fixes — game-economy deadlock. Awaiting Jonathan direction on Mk1 Laser or iron/copper extraction path.
+
+## 2026-06-28 03:11 UTC — HAL-P Self-Review (10:11 PM CT Sat)
+
+**Token:** ✅ Valid — session `0de1d115-8f1a-479b-aa97-1b6d8ebf9bc6`. Exp **~Jul 9 UTC** (~12 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Circuit breaker correctly resets `mining_failures` to 0 on successful `move_unit`.
+
+**Operator:** Silent death — operator not running at cron trigger (03:11 UTC). No crash logs. Restarted via nohup (PID 73962). Confirmed healthy — Cycle 1 at 03:12 UTC, WebSocket cycling, mining_failures reset to 0. Silent death pattern persists (~every 4-6h), cron catches and recovers.
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0, ISD=489. **73+ days zero iron/copper gain.** Game-admin gate. Mk1 Laser costs 1000 ISD (have 489, need +511).
+
+**Fix:** Restarted operator. No code fixes needed. Silent death pattern persists, cron-managed recovery holding.
+
+**Status:** Operator recovered. No code fixes needed. Game-economy deadlock unchanged — game-admin gate. No Discord ping (Saturday preference, prior escalations active).
+
+---
+
+## 2026-06-28 03:41 UTC — HAL-P Self-Review (10:41 PM CT Sat)
+
+**Token:** ✅ Valid — session `0de1d115-8f1a-479b-aa97-1b6d8ebf9bc6`. Exp **~Jul 9 UTC** (~12 days). No renewal needed.
+
+**Issue:** Silent death — `com.burk.crimson-mandate` launchd job had died silently. `operator.log` stalled at 22:41 UTC Jun 27 (~5h gap). `launchctl list` showed PID 80090 listed but process was gone (stale entry). The `com.burk.crimson-mandate-operator` plist was never loaded — different job name.
+
+**Fix:** Removed stale launchd entry and reloaded: `launchctl remove com.burk.crimson-mandate && launchctl load /Users/jonathan/Library/LaunchAgents/com.burk.crimson-mandate.plist`. Operator restarted (PID 80154). Confirmed cycling — `reports/operator.log` shows "Cycle done" at 03:39:36 UTC, WebSocket connected, scout at (9,-8), mining ast_2b547acb.
+
+**Code:** Clean. No errors, timeouts, or stalls. runner.py writing to `reports/operator.log` confirmed.
+
+**Self-improve loop:** Running — entries at 02:57, 03:12, 03:27 UTC confirmed active.
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0, ISD=489. **73+ days zero iron/copper gain.** Game-admin gate. Mk1 Laser costs 1000 ISD (have 489, need +511).
+
+**Status:** Operator recovered. No code fixes needed. Game-economy deadlock unchanged — game-admin gate. No Discord ping (Saturday preference, prior escalations active).

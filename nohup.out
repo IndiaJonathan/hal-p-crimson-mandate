@@ -1,0 +1,21 @@
+2026-06-27 15:21:46,596 [INFO] runner: ═══ Crimson Mandate Agent Cycle ═══
+2026-06-27 15:21:47,292 [INFO] runner: Balance: ISD 489 | Credits 0
+2026-06-27 15:21:47,489 [INFO] websocket: Websocket connected
+[WS RECV] type=connected payload={'clientId': '07d7a41f-e5c2-43e4-bb85-ffcf6468ffff', 'message': 'Welcome to Crimson Mandate'}
+[WS RECV] type=auth_success payload={'clientId': '07d7a41f-e5c2-43e4-bb85-ffcf6468ffff', 'userId': '0a8a2ff5-1b93-44c3-994c-6891e0076d72', 'displayName': 'Player_07d7a4', 'isAuthenticated': True}
+[WS RECV] type=mmo_world_state payload=<WORLD_STATE 5 bytes — skipped>
+[WS RECV] type=ftue_guidance payload={'stage': 'BRAND_NEW', 'hintText': 'Welcome, Commander! Click on your Scout ship to select it.', 'highlightType': 'hex', 'highlightTarget': '0,0'}
+2026-06-27 15:21:47,818 [INFO] runner: Owned: 1 units | Asteroids: 582 | Planets: 7
+2026-06-27 15:21:47,819 [INFO] runner: Decision: ['mine_asteroid']
+2026-06-27 15:21:47,995 [INFO] websocket: Websocket connected
+[WS RECV] type=connected payload={'clientId': '6ad63697-c04e-40ea-b959-6fd2b776e8c0', 'message': 'Welcome to Crimson Mandate'}
+[WS RECV] type=auth_success payload={'clientId': '6ad63697-c04e-40ea-b959-6fd2b776e8c0', 'userId': '0a8a2ff5-1b93-44c3-994c-6891e0076d72', 'displayName': 'Player_6ad636', 'isAuthenticated': True}
+[WS RECV] type=mmo_world_state payload=<WORLD_STATE 5 bytes — skipped>
+[WS RECV] type=ftue_guidance payload={'stage': 'BRAND_NEW', 'hintText': 'Welcome, Commander! Click on your Scout ship to select it.', 'highlightType': 'hex', 'highlightTarget': '0,0'}
+[WS RECV] type=mmo_world_state payload=<WORLD_STATE 5 bytes — skipped>
+[WS RECV] type=ftue_guidance payload={'stage': 'BRAND_NEW', 'hintText': 'Welcome, Commander! Click on your Scout ship to select it.', 'highlightType': 'hex', 'highlightTarget': '0,0'}
+[WS RECV] type=error payload={'unitId': 'unit_scout_0a8a2ff5-1b93-44c3-994c-6891e0076d72_1', 'asteroidId': 'ast_2b547acb', 'message': 'Your Basic Mining Array cannot extract minerals from this asteroid. A higher-tier mining laser is required.'}
+2026-06-27 15:21:48,279 [WARNING] runner: Server error: Your Basic Mining Array cannot extract minerals from this asteroid. A higher-tier mining laser is required.
+[WS RECV] type=mmo_tick_update payload={'tick': 1999310, 'units': [], 'asteroids': []}
+2026-06-27 15:21:51,354 [WARNING] runner: Mining Laser missing (failure #3) — circuit breaker counting.
+2026-06-27 15:21:52,120 [INFO] runner: ═══ Cycle complete ═══
