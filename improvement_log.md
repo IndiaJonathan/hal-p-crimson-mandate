@@ -1,3 +1,17 @@
+## 2026-06-29 22:40 UTC — HAL-P Self-Review (5:40 PM CT Mon)
+
+**Root cause identified:** `decisions.py` always routed to `move_unit` when `laser_missing=True`, preventing mining attempts. The Basic Mining Array CAN mine iron/copper/lead asteroids (tier 0) — the code comment was factually wrong ("iron/copper require Mk1 Laser"). Because mining was never attempted, `mining_failures` never incremented and the circuit breaker never activated. Scout looped navigation indefinitely.
+
+**Fix applied:** Restructured `decisions.py` — removed the hard gate on `laser_missing`. Mining is now attempted on tier0 asteroids regardless of `laser_missing`. The game rejects with "Basic Mining Array cannot extract" for incompatible asteroids, which properly increments `mining_failures` in `runner.py`, allowing the circuit breaker to activate after 3 failures.
+
+**Commit:** `f835c95` — pushed to main.
+
+**Token:** ✅ Valid. No renewal needed.
+
+**Status:** Fix deployed. Next cycle should attempt `mine_asteroid` action.
+
+---
+
 ## 2026-06-29 21:40 UTC — HAL-P Self-Review (4:40 PM CT Mon)
 
 **Token:** ✅ Valid — session `0e37278f`. Exp **2026-07-06 05:32 UTC** (~6.9 days). No renewal needed.
