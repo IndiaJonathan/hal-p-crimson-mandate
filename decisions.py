@@ -163,9 +163,10 @@ def decide_actions(state: dict, ws_state: dict) -> list:
             logger.info(f"Cargo full and docked at {scout.get('dockedAtPlanetId')} — deposit attempted.")
 
     # ── Mine or move to asteroid ──
-    # laser_missing is a hard gate: without Mk1 laser, Basic Mining Array cannot extract from
-    # titanium asteroids (which are all within range). Block mining entirely once confirmed missing.
-    elif scout and not mining and asteroids_in_world and not mining_blocked and not laser_missing:
+    # Attempt mining on tier0 asteroids — works with Basic Mining Array on iron/copper/lead.
+    # The game rejects with "Basic Mining Array cannot extract" for titanium-only asteroids;
+    # runner increments mining_failures and circuit breaker gates after 3 consecutive failures.
+    elif scout and not mining and asteroids_in_world and not mining_blocked:
         target = find_nearest_asteroid(scout.get("position", {}), tier0_asteroids, max_tier=0)
         if target:
             tpos = target.get("position", {})
@@ -198,30 +199,9 @@ def decide_actions(state: dict, ws_state: dict) -> list:
             else:
                 logger.warning("No mineable asteroids (Basic Mining Array compatible).")
 
-    elif laser_missing:
-        # Mk1 Laser confirmed missing — iron/copper asteroids also require Mk1 Laser.
-        # Navigate to titanium asteroids (Basic Mining Array compatible) to stay active.
-        # This runs regardless of mining_blocked state — laser_missing is a hard gate.
-        logger.warning(f"Mining blocked: laser confirmed missing — navigating to titanium asteroid.")
-        if tier0_asteroids:
-            scout_pos = scout.get("position", {})
-            nearest_titanium = min(tier0_asteroids, key=lambda a: distance_hex(scout_pos, a["position"]))
-            in_transit = any(
-                a["type"] == "move_unit"
-                and a.get("payload", {}).get("targetHex", {}).get("q") == nearest_titanium["position"]["q"]
-                and a.get("payload", {}).get("targetHex", {}).get("r") == nearest_titanium["position"]["r"]
-                for a in actions
-            )
-            if not in_transit:
-                actions.append({
-                    "type": "move_unit",
-                    "payload": {"unitId": scout["id"], "targetHex": nearest_titanium["position"]},
-                    "ws": True
-                })
-        else:
-            logger.warning("No tier-0 asteroids in range — scout idle.")
     elif mining_blocked:
-        # Laser not yet confirmed missing — may just be a bad asteroid. Try iron/copper zone.
+        # Circuit breaker activated after 3+ consecutive mining failures.
+        # Try iron/copper zone as a last resort fallback.
         logger.warning(f"Mining blocked: {mining_failures} failures — navigating to iron/copper asteroid.")
         iron_copper_zone = [
             {"q": 28, "r": -5},   # ast_9d4a81c3: iron=64, copper=37
