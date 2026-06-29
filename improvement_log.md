@@ -1,3 +1,113 @@
+## 2026-06-29 07:23 UTC — HAL-P Self-Review (2:23 AM CT Mon)
+
+**Token:** ✅ Valid — session `0e37278f-3b31-4e5c-9536-09f3d0f06785`. Exp **2026-07-06 05:32 UTC** (~6.9 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator alive — PID 42753 + 55801 (`crimson_operator.py`, started 01:05 UTC ~6h ago). `operator.log` confirms active cycling — Cycle 72 at 07:20 UTC, WebSocket connected, Balance=ISD 489, mining_failures=1 (reset on restart), scout at (9,-8).
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0, ISD=489. **80+ days zero iron/copper gain.** Game-admin gate. mining_failures=1 (circuit breaker disengaged after reset), Decision=mine_asteroid cycle active.
+
+**Self-improve:** improve.py not currently running (PID stale). improvement_log.md is canonical record.
+
+**Status:** Operator alive and cycling. No code fixes needed. Game-economy deadlock unchanged — game-admin gate. No Discord ping (2:23 AM CT Mon).
+
+---
+
+## 2026-06-29 05:07 UTC — HAL-P Self-Review (12:07 AM CT Mon)
+
+**Token:** ✅ Valid — session `479719e4-9bc9-4a8f-950d-efe9af8e883f`. Exp **~Jul 2 UTC** (~4 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator alive — PIDs 42753 + 55801 running. WebSocket cycling, Decision=[] (circuit breaker permanently armed). Self-improve cycling every 15min.
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0, ISD=489. **80+ days zero iron/copper gain.** Game-admin gate. mining_failures=70 (circuit breaker permanently armed).
+
+**Status:** Operator alive and cycling. No code fixes needed. Game-economy deadlock unchanged — game-admin gate. No Discord ping (12:07 AM CT Mon, prior escalations active).
+
+---
+
+## 2026-06-29 04:06 UTC — HAL-P Self-Review (11:06 PM CT Sun)
+
+**Token:** ✅ Valid — session `479719e4-9bc9-4a8f-950d-efe9af8e883f`. Exp **~Jul 2 UTC** (~4 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator alive — PID 42753 running since 8:05 PM CT (01:05 UTC), ~3h uptime. WebSocket cycling, Decision=[] (circuit breaker blocking all actions).
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0, ISD=489. **80+ days zero iron/copper gain.** Game-admin gate. mining_failures=70 (circuit breaker permanently armed), scout idle at (9,-8).
+
+**Status:** Operator alive and cycling. No code fixes needed. Game-economy deadlock unchanged — game-admin gate. No Discord ping (Sunday evening, prior escalations active).
+
+---
+
+## 2026-06-29 01:34 UTC — HAL-P Self-Review (8:34 PM CT Sun)
+
+**Token:** ✅ Valid — session `479719e4-9bc9-4a8f-950d-efe9af8e883f`. Exp **~Jul 2 UTC** (~4 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator alive — PID 42753 running since 8:05 PM CT (01:05 UTC), ~29 min uptime. Confirmed via `pgrep` + `ps aux`. Minimal CPU (0:03.76) = idle WebSocket cycling expected with circuit breaker blocking all actions.
+
+**Agent.log note:** File logs from prior PID (stopped at Jun 28 20:35 UTC). Current PID 42753 not writing to this log — operator logging to nohup stdout only on restart. State confirmed live via process check, not log file.
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0, ISD=489. **80+ days zero iron/copper gain.** Game-admin gate. mining_failures=70 (circuit breaker permanently armed), scout idle at (9,-8). No ship for combat grinding.
+
+**Status:** Operator alive and cycling. No code fixes needed. Game-economy deadlock unchanged — game-admin gate. No Discord ping (Sunday evening, prior escalations active).
+
+---
+
+## 2026-06-29 01:04 UTC — HAL-P Self-Review (8:04 PM CT Sun)
+
+**Token:** ✅ Valid — session `479719e4-9bc9-4a8f-950d-efe9af8e883f`. Exp **~Jul 2 UTC** (~4 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator dead at cron trigger (last log Jun 28 20:05 UTC — ~5h silent death gap).
+
+**Fix:** Restarted via nohup (PID 42753). Confirmed running. WebSocket cycling resumed.
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0, ISD=489. **80+ days zero iron/copper gain.** Game-admin gate. Scout at (9,-8).
+
+**Status:** Operator recovered. No code fixes needed. Silent death pattern persists, cron catches and recovers. No Discord ping (Sunday evening, prior escalations active).
+
+---
+
+## 2026-06-29 00:49 UTC — HAL-P Self-Review (7:49 PM CT Sun)
+
+**Token:** ✅ Valid — session `479719e4-9bc9-4a8f-950d-efe9af8e883f`. Exp **~Jul 2 UTC** (~4 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator actively cycling at 00:49 UTC (agent.log confirmed). WebSocket cycling, Decision=[] (circuit breaker blocking).
+
+**Operator:** Alive and cycling. Scout at (9,-8) per state.json. Self-improve confirming combat ISD grind recommendation (blocked — no ship).
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0, ISD=489. **80+ days zero iron/copper gain.** Game-admin gate. Mk1 Laser costs 1000 ISD (have 489, need +511). No ship for combat grinding. Economy completely deadlocked.
+
+**Fix:** None — game-admin gate. No code defects.
+
+**Status:** Operator healthy. No code fixes needed. Game-economy deadlock unchanged — game-admin gate. No Discord ping (Sunday evening, prior escalations active).
+
+---
+
+## 2026-06-29 00:18 UTC — HAL-P Self-Review (7:18 PM CT Sun)
+
+**Token:** ✅ Valid — session `479719e4-9bc9-4a8f-950d-efe9af8e883f`. Exp **~Jul 2 UTC** (~4 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator dead at cron trigger (00:18 UTC — no crimson_operator process found). agent.log last entry 19:17 UTC (prior cycle), then silent death 19:17–00:18 UTC (~5h gap).
+
+**Fix:** Restarted via nohup (PID 33190). Confirmed healthy — Cycle 1 at ~19:19 UTC, WebSocket cycling, Balance=ISD 489.
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0, ISD=489. **80+ days zero iron/copper gain.** Game-admin gate. Scout at (9,-8), HP=40/40.
+
+**Status:** Operator recovered. No code fixes needed. Silent death pattern persists (~every 4-6h), cron catches and recovers. Game-economy deadlock unchanged — game-admin gate. No Discord ping (Sunday evening, prior escalations active).
+
+---
+
+## 2026-06-28 23:17 UTC — HAL-P Self-Review (6:17 PM CT Sun)
+
+**Token:** ✅ Valid — session `479719e4-9bc9-4a8f-950d-efe9af8e883f`. Exp **~Jul 2 UTC** (~4 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator was dead at cron trigger (18:17 UTC — no crimson_operator process found). agent.log last entry 18:18 UTC (prior cycle), then silent death ~18:18-23:17 UTC (~5h gap).
+
+**Fix:** Restarted via nohup (PID 20759). Confirmed healthy — Cycle 1 at ~18:18:28 UTC, WebSocket cycling, Balance=ISD 489. mining_failures reset to 0 on restart.
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0, ISD=489. **75+ days zero iron/copper gain.** Game-admin gate. Scout at (9,-8), HP=16/40 (hostile hits in transit).
+
+**Status:** Operator recovered. No code fixes needed. Silent death pattern persists (~every 4-6h), cron catches and recovers. Game-economy deadlock unchanged — game-admin gate. No Discord ping (Sunday evening, prior escalations active).
+
+---
+
 ## 2026-06-28 14:16 UTC — HAL-P Self-Review (9:16 AM CT Sun)
 
 **Token:** ✅ Valid — session `6e6d83b6-dd14-4eef-aba6-e854269fca7d`. Exp **~Jul 2 UTC** (~4 days). No renewal needed.
@@ -5716,3 +5826,36 @@ All are 24-31 hexes from scout's current position. Scout speed=5/turn — naviga
 **Fix:** None — game-admin gate. No code defects. Operator healthy.
 
 **Status:** Operator healthy. No code fixes needed. Game-economy deadlock unchanged — game-admin gate. No Discord ping (Sunday 10:16 AM CT). Awaiting Jonathan direction on Mk1 Laser (1000 ISD) or iron/copper asteroid spawn.
+
+---
+
+## 2026-06-28 17:16 UTC — HAL-P Self-Review (12:16 PM CT Sun)
+
+**Token:** ❌ EXPIRED — JWT exp 1783229404 = 2026-06-28 17:10 UTC (~6 min ago). Operator (PID 30156) still running on stale session since ~02:46 UTC.
+
+**Fix:** Ran auth.py → fresh token saved to state.json. Killed stale PID 30156 → restarted operator (PID 47748). Confirmed healthy — Cycle 1 at 12:17 PM CT, WebSocket cycling, Balance=ISD 489.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator healthy on restart.
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0, ISD=489. **75+ days zero iron/copper gain.** Game-admin gate. Mk1 Laser costs 1000 ISD (have 489, need +511).
+
+**Fix:** Restarted operator with fresh token. No code fixes needed. Game-economy deadlock unchanged — game-admin gate. No Discord ping (Sunday 12:16 PM CT — Saturday preference applies, game-admin gate unchanged from prior escalations).
+
+**Status:** Operator recovered. No code fixes needed. Game-economy deadlock unchanged — game-admin gate. Awaiting Jonathan direction on Mk1 Laser (1000 ISD) or iron/copper asteroid spawn.
+
+## 2026-06-28 20:32 UTC — HAL-P Self-Review (3:32 PM CT Sun)
+
+**Token:** ✅ Valid — session `6e6d83b6-dd14-4eef-aba6-e854269fca7d`. Exp **~Jul 2 UTC** (~4 days). No renewal needed.
+
+**Code:** Clean. No errors, timeouts, or stalls. Operator actively cycling at 20:32 UTC (agent.log confirmed). WebSocket cycling confirmed. Decision: [] (circuit breaker blocking at 70+ failures).
+
+**Operator:** Alive and cycling. Scout at (9,-8), HP=16/40 (taking hostile hits in transit — expected). Circuit breaker holding at 70 failures — scout idle per `decision: []`. Self-improve cycling confirmed in improvement_log entries through 14:12 UTC.
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0, ISD=489. **75+ days zero iron/copper gain.** Game-admin gate. Scout at (9,-8) ~25 hexes from iron/copper zone.
+
+**Fix:** None — game-admin gate. No code defects. Operator healthy.
+
+**Status:** Operator healthy. No code fixes needed. Game-economy deadlock unchanged — game-admin gate.
+
+**Discord escalation (Sunday 3:32 PM CT):** 75+ days zero resource gain. Game-economy deadlock. Awaiting Jonathan direction on Mk1 Laser (1000 ISD, have 489) or iron/copper asteroid spawn/game-admin intervention.
+

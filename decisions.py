@@ -198,52 +198,52 @@ def decide_actions(state: dict, ws_state: dict) -> list:
             else:
                 logger.warning("No mineable asteroids (Basic Mining Array compatible).")
 
-    elif mining_blocked:
-        if laser_missing:
-            # Mk1 Laser confirmed missing — iron/copper asteroids also require Mk1 Laser.
-            # Mine titanium (Basic Mining Array compatible) while saving for Mk1 Laser.
-            logger.warning(f"Mining blocked: laser confirmed missing — navigating to titanium asteroid.")
-            if tier0_asteroids:
-                scout_pos = scout.get("position", {})
-                nearest_titanium = min(tier0_asteroids, key=lambda a: distance_hex(scout_pos, a["position"]))
-                in_transit = any(
-                    a["type"] == "move_unit"
-                    and a.get("payload", {}).get("targetHex", {}).get("q") == nearest_titanium["position"]["q"]
-                    and a.get("payload", {}).get("targetHex", {}).get("r") == nearest_titanium["position"]["r"]
-                    for a in actions
-                )
-                if not in_transit:
-                    actions.append({
-                        "type": "move_unit",
-                        "payload": {"unitId": scout["id"], "targetHex": nearest_titanium["position"]},
-                        "ws": True
-                    })
-            else:
-                logger.warning("No tier-0 asteroids in range — scout idle.")
-        else:
-            # Laser not yet confirmed missing — may just be a bad asteroid. Try iron/copper zone.
-            logger.warning(f"Mining blocked: {mining_failures} failures — navigating to iron/copper asteroid.")
-            iron_copper_zone = [
-                {"q": 28, "r": -5},   # ast_9d4a81c3: iron=64, copper=37
-                {"q": 26, "r": -26},  # ast_e47b9de2: iron=84, copper=41
-                {"q": 26, "r": -31},  # ast_97675fc5: iron=36, copper=14
-                {"q": 30, "r": -19},  # ast_80d46bde: iron=62, copper=37
-                {"q": 24, "r": -26},  # ast_c546f51c: iron=68, copper=39
-            ]
+    elif laser_missing:
+        # Mk1 Laser confirmed missing — iron/copper asteroids also require Mk1 Laser.
+        # Navigate to titanium asteroids (Basic Mining Array compatible) to stay active.
+        # This runs regardless of mining_blocked state — laser_missing is a hard gate.
+        logger.warning(f"Mining blocked: laser confirmed missing — navigating to titanium asteroid.")
+        if tier0_asteroids:
             scout_pos = scout.get("position", {})
-            nearest = min(iron_copper_zone, key=lambda p: distance_hex(scout_pos, p))
+            nearest_titanium = min(tier0_asteroids, key=lambda a: distance_hex(scout_pos, a["position"]))
             in_transit = any(
                 a["type"] == "move_unit"
-                and a.get("payload", {}).get("targetHex", {}).get("q") == nearest["q"]
-                and a.get("payload", {}).get("targetHex", {}).get("r") == nearest["r"]
+                and a.get("payload", {}).get("targetHex", {}).get("q") == nearest_titanium["position"]["q"]
+                and a.get("payload", {}).get("targetHex", {}).get("r") == nearest_titanium["position"]["r"]
                 for a in actions
             )
             if not in_transit:
                 actions.append({
                     "type": "move_unit",
-                    "payload": {"unitId": scout["id"], "targetHex": nearest},
+                    "payload": {"unitId": scout["id"], "targetHex": nearest_titanium["position"]},
                     "ws": True
                 })
+        else:
+            logger.warning("No tier-0 asteroids in range — scout idle.")
+    elif mining_blocked:
+        # Laser not yet confirmed missing — may just be a bad asteroid. Try iron/copper zone.
+        logger.warning(f"Mining blocked: {mining_failures} failures — navigating to iron/copper asteroid.")
+        iron_copper_zone = [
+            {"q": 28, "r": -5},   # ast_9d4a81c3: iron=64, copper=37
+            {"q": 26, "r": -26},  # ast_e47b9de2: iron=84, copper=41
+            {"q": 26, "r": -31},  # ast_97675fc5: iron=36, copper=14
+            {"q": 30, "r": -19},  # ast_80d46bde: iron=62, copper=37
+            {"q": 24, "r": -26},  # ast_c546f51c: iron=68, copper=39
+        ]
+        scout_pos = scout.get("position", {})
+        nearest = min(iron_copper_zone, key=lambda p: distance_hex(scout_pos, p))
+        in_transit = any(
+            a["type"] == "move_unit"
+            and a.get("payload", {}).get("targetHex", {}).get("q") == nearest["q"]
+            and a.get("payload", {}).get("targetHex", {}).get("r") == nearest["r"]
+            for a in actions
+        )
+        if not in_transit:
+            actions.append({
+                "type": "move_unit",
+                "payload": {"unitId": scout["id"], "targetHex": nearest},
+                "ws": True
+            })
 
     # ── Sell minerals above threshold ──
     sell_order = ["min_darkmat", "min_iridium", "min_rhodium", "min_palladium",
