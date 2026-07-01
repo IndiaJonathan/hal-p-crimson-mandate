@@ -1,3 +1,29 @@
+## 2026-07-01 21:47 UTC — HAL-P Self-Review (4:47 PM CT Wed)
+
+**Token:** ✅ Valid — session `0e37278f-3b31-4e5c-9536-09f3d0f06785`. Exp **2026-07-06 05:32 UTC** (~5.9 days). No renewal needed.
+
+**Code error found + fixed:** `'MMOClient' object has no attribute '_mine_not_adjacent_detected'` at 16:46:59 UTC.
+
+**Root cause:** Four runner.py flag attributes (`_mining_failure_detected`, `_move_failure_detected`, `_mine_not_adjacent_detected`, `_cargo_full_detected`) were being **set on `self`** (the Runner instance) in the WebSocket message handler, but **accessed on `c`** (the MMOClient instance) in the action result handlers. This caused AttributeError whenever those flags were checked after being set.
+
+**Fix applied:** Changed all `c._*_detected` accesses to `self._*_detected` in runner.py:
+- Line 597/598: `_mining_failure_detected`
+- Line 605/608: `_mine_not_adjacent_detected`
+- Line 621/622/629: `_move_failure_detected`
+- Line 635/636: `_cargo_full_detected`
+
+**Committed:** `b3ba478` — 'fix: correct flag attribute access from c._* to self._* for all client event flags'
+
+**Operator:** Restarted with fix (PID 98595).
+
+**improve.py:** Cycling — entries at 19:13, 19:28, 19:43 UTC confirmed. Recommending combat ISD grinding (blocked — no ship).
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0, ISD=489. **83+ days zero iron/copper gain.** Game-admin gate. Mk1 Laser costs 1000 ISD (have 489, need +511). No in-game ISD grinding path without a ship.
+
+**Status:** Fix applied and operator cycling. Game-economy deadlock unchanged — game-admin gate.
+
+---
+
 ## 2026-07-01 19:47 UTC — HAL-P Self-Review (2:47 PM CT Wed)
 
 **Token:** ✅ Valid — session `0e37278f-3b31-4e5c-9536-09f3d0f06785`. Exp **2026-07-06 05:32 UTC** (~5.9 days). No renewal needed.
