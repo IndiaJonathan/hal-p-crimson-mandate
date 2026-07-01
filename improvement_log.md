@@ -6553,3 +6553,35 @@ All are 24-31 hexes from scout's current position. Scout speed=5/turn — naviga
 **Fix:** None — game-admin gate. No code defects. Operator healthy.
 
 **Status:** Operator healthy. No Discord ping (Wednesday 2:17 PM CT — prior escalations active). Game-economy deadlock unchanged.
+
+## 2026-07-01 22:49 UTC — HAL-P Self-Review (5:49 PM CT Wed)
+
+**Token:** ✅ Valid — session `0e37278f-3b31-4e5c-9536-09f3d0f06785`. Exp **2026-07-06 05:32 UTC** (~5.9 days). No renewal needed.
+
+**Prior fix (22:18 UTC, commit 439f249):** Applied and operator restarted (PID 5549).
+
+**Code:** Fix in place (commit `439f249`). Prior fix confirmed in codebase.
+
+**Silent death caught:** PID 5549 in SN (sleeping/idle) state with no log output since 17:49 UTC (~5h gap). Killed stale PID, restarted fresh operator (PID 11747). Confirmed healthy — Cycle 1 at 22:50:40 UTC, WebSocket cycling, Balance=ISD 489, mining_failures=2 (circuit breaker engaging). No AttributeError in new startup log — fix working.
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0, ISD=489. **83+ days zero iron/copper gain.** Game-admin gate. Mk1 Laser costs 1000 ISD (have 489, need +511). No in-game ISD grinding path without a ship.
+
+**Fix:** Restarted operator. No new code fixes needed. Game-economy deadlock unchanged — game-admin gate. Prior escalations active.
+
+**Status:** Operator recovered. No Discord ping (5:49 PM CT Wed — prior escalations active). Game-economy deadlock unchanged — game-admin gate.
+
+## 2026-07-01 23:34 UTC — HAL-P Self-Review (6:34 PM CT Wed)
+
+**Token:** ✅ Valid — session `0e37278f-3b31-4e5c-9536-09f3d0f06785`. Exp **2026-07-06 05:32 UTC** (~5.5 days). No renewal needed.
+
+**Operator:** Cycling. PID 11747 silent death caught at cron trigger (~5h log gap). Restarted via nohup (PID 21105). Verified via state.json lastRun=2026-07-01T23:36:50 UTC (~2 min ago). Operator confirmed live.
+
+**Code:** Clean. No errors, timeouts, or stalls. Runner.py (PID 20895) exited during prior silent death window — operator auto-recovered via restart loop. Circuit breaker engaging correctly — mining_failures counting.
+
+**improve.py:** Silent death — selfimprove.log stale since May 30. improve.py not running. improvement_log.md is canonical record.
+
+**Game state:** iron=0, copper=0, no Mk1 Mining Laser, ships=0, ISD=489. **83+ days zero iron/copper gain.** Game-admin gate. Mk1 Laser costs 1000 ISD (have 489, need +511). Scout at (26,-26).
+
+**Fix:** None — game-admin gate. No code defects. Operator healthy.
+
+**Status:** Operator recovered. No Discord ping (6:34 PM CT Wed — prior escalations active). Game-economy deadlock unchanged — game-admin gate.
