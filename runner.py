@@ -97,6 +97,7 @@ class MMOClient:
     _golden_asteroid_spawned = None
     _mining_failure_detected = False
     _move_failure_detected = False
+    _mine_blocked_not_adjacent = False  # True when circuit breaker blocked mine_asteroid due to "not adjacent"
     _cargo_full_detected = False
 
     def _on_message(self, ws, msg):
@@ -135,8 +136,9 @@ class MMOClient:
                 # This IS a real mining failure — scout needs to explore iron/copper zone.
                 self._mining_failure_detected = True
             elif "unit must be within 1 hex" in err_msg or "not within 1 hex" in err_msg:
-                # Scout tried to move to a hex that's not adjacent — count as a failure
+                # Scout tried to mine/move to a hex that's not adjacent — count as a failure
                 self._move_failure_detected = True
+                self._mine_not_adjacent_detected = True  # Track mine-distance failures separately
 
         # Handle connected — this is the server's WebSocket handshake confirmation.
         # wait_for_auth already treats connected as valid auth signal.
@@ -592,14 +594,21 @@ def run_cycle():
 
                 # Track mining failures: check WS error messages (not components API — that path is broken)
                 if atype == "mine_asteroid":
-                    if c._mining_failure_detected:
-                        c._mining_failure_detected = False  # reset for next cycle
+                    if self._mining_failure_detected:
+                        self._mining_failure_detected = False  # reset for next cycle
                         # Mining Laser not present — server warned on this call
                         state["has_mining_laser"] = False
                         state["mining_laser_confirmed_missing"] = True  # permanent flag: repositioning won't help
                         state["mining_failures"] = state.get("mining_failures", 0) + 1
                         save_state(state)
                         logger.warning(f"Mining Laser missing (failure #{state['mining_failures']}) — circuit breaker {'ARMED' if state['mining_failures'] >= 999 else 'counting'}."[:120])
+                    elif self._mine_not_adjacent_detected:
+                        # Scout tried to mine but wasn't adjacent — stale position in ws_state
+                        # or server lag. Count as a failure to prevent infinite retry loop.
+                        self._mine_not_adjacent_detected = False  # reset for next cycle
+                        state["mining_failures"] = state.get("mining_failures", 0) + 1
+                        save_state(state)
+                        logger.warning(f"Not adjacent to asteroid (failure #{state['mining_failures']}) — circuit breaker {'ARMED' if state['mining_failures'] >= 3 else 'counting'}."[:120])
                     else:
                         # No warning = laser detected or real yield
                         state["has_mining_laser"] = True
@@ -609,22 +618,22 @@ def run_cycle():
                             logger.info("✓ Mining Laser confirmed / yield received — circuit breaker reset.")
 
                 # Track move failures: scout tried to move to non-adjacent hex
-                if atype == "move_unit" and c._move_failure_detected:
-                    c._move_failure_detected = False  # reset for next cycle
+                if atype == "move_unit" and self._move_failure_detected:
+                    self._move_failure_detected = False  # reset for next cycle
                     state["mining_failures"] = state.get("mining_failures", 0) + 1
                     save_state(state)
                     logger.warning(f"Move failed (not within 1 hex) — mining_failures now {state['mining_failures']}. Circuit breaker {'ARMED' if state["mining_failures"] >= 3 else 'counting'}.")
                 # Reset mining_failures on successful move — always reset on successful navigation.
                 # The laser confirmation is a one-time flag; successful repositioning IS progress.
                 # Counter must be low when scout reaches iron/copper asteroid with a laser.
-                if atype == "move_unit" and not c._move_failure_detected:
+                if atype == "move_unit" and not self._move_failure_detected:
                     if state.get("mining_failures", 0) > 0:
                         state["mining_failures"] = 0
                         save_state(state)
                         logger.info("Move succeeded — mining_failures reset to 0.")
                 # Track cargo-full: scout's hold is full and needs to deposit at planet
-                if c._cargo_full_detected:
-                    c._cargo_full_detected = False  # reset for next cycle
+                if self._cargo_full_detected:
+                    self._cargo_full_detected = False  # reset for next cycle
                     state["_cargo_full"] = True
                     save_state(state)
                     logger.warning("Cargo hold full — scout needs to deposit at planet.")

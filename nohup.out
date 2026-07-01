@@ -1,10 +1,55 @@
-2026-06-28 18:04:35,228 [INFO] runner: ═══ Crimson Mandate Agent Cycle ═══
-2026-06-28 18:04:35,897 [INFO] runner: Balance: ISD 489 | Credits 0
-2026-06-28 18:04:36,149 [INFO] websocket: Websocket connected
-[WS RECV] type=connected payload={'clientId': '61178d8e-6cd5-4d64-ad0c-340b981fd77c', 'message': 'Welcome to Crimson Mandate'}
-[WS RECV] type=auth_success payload={'clientId': '61178d8e-6cd5-4d64-ad0c-340b981fd77c', 'userId': '0a8a2ff5-1b93-44c3-994c-6891e0076d72', 'displayName': 'Player_61178d', 'isAuthenticated': True}
+[2026-06-30 08:12:22 UTC] Starting Crimson Mandate Autonomous Operator
+[2026-06-30 08:12:22 UTC] Owner: HAL-P | Cycle interval: 5 minutes
+[2026-06-30 08:12:22 UTC] ═══ Cycle 1 starting ═══
+[2026-06-30 08:12:23 UTC] Balance: ISD=489, Credits=0, Laser=False, Failures=1
+2026-06-30 03:12:23,842 [INFO] websocket: Websocket connected
+[WS RECV] type=connected payload={'clientId': 'de424d2b-a1d0-4834-98e8-d6745dc5f692', 'message': 'Welcome to Crimson Mandate'}
+[WS RECV] type=auth_success payload={'clientId': 'de424d2b-a1d0-4834-98e8-d6745dc5f692', 'userId': '0a8a2ff5-1b93-44c3-994c-6891e0076d72', 'displayName': 'Player_de424d', 'isAuthenticated': True}
+[WS RECV] type=mmo_world_state payload=<WORLD_STATE 5 bytes — skipped>
+[2026-06-30 08:12:24 UTC] Mining tier-0 asteroid ast_e10d67fa (Basic Mining Array)
+2026-06-30 03:12:24,404 [INFO] websocket: Websocket connected
+[WS RECV] type=connected payload={'clientId': '1bfb0e35-4a05-4b83-a6a2-3c4a2fcb0b0a', 'message': 'Welcome to Crimson Mandate'}
+[WS RECV] type=auth_success payload={'clientId': '1bfb0e35-4a05-4b83-a6a2-3c4a2fcb0b0a', 'userId': '0a8a2ff5-1b93-44c3-994c-6891e0076d72', 'displayName': 'Player_1bfb0e', 'isAuthenticated': True}
 [WS RECV] type=mmo_world_state payload=<WORLD_STATE 5 bytes — skipped>
 [WS RECV] type=ftue_guidance payload={'stage': 'BRAND_NEW', 'hintText': 'Welcome, Commander! Click on your Scout ship to select it.', 'highlightType': 'hex', 'highlightTarget': '0,0'}
-2026-06-28 18:04:36,568 [INFO] runner: Owned: 1 units | Asteroids: 582 | Planets: 7
-2026-06-28 18:04:36,568 [INFO] runner: Decision: []
-2026-06-28 18:04:37,255 [INFO] runner: ═══ Cycle complete ═══
+[WS RECV] type=mmo_world_state payload=<WORLD_STATE 5 bytes — skipped>
+[WS RECV] type=ftue_guidance payload={'stage': 'BRAND_NEW', 'hintText': 'Welcome, Commander! Click on your Scout ship to select it.', 'highlightType': 'hex', 'highlightTarget': '0,0'}
+[WS RECV] type=error payload={'unitId': 'unit_scout_0a8a2ff5-1b93-44c3-994c-6891e0076d72_1', 'asteroidId': 'ast_e10d67fa', 'message': 'Your Basic Mining Array cannot extract minerals from this asteroid. A higher-tier mining laser is required.'}
+2026-06-30 03:12:24,722 [WARNING] runner: Server error: Your Basic Mining Array cannot extract minerals from this asteroid. A higher-tier mining laser is required.
+[WS RECV] type=mmo_tick_update payload={'tick': 2214720, 'units': [], 'asteroids': []}
+[2026-06-30 08:17:42 UTC] ═══ Cycle 2 starting ═══
+[2026-06-30 08:17:43 UTC] Balance: ISD=489, Credits=0, Laser=False, Failures=1
+2026-06-30 03:17:43,382 [INFO] websocket: Websocket connected
+[WS RECV] type=connected payload={'clientId': '8fa0662b-337f-4a01-9451-593634cbef55', 'message': 'Welcome to Crimson Mandate'}
+[WS RECV] type=auth_success payload={'clientId': '8fa0662b-337f-4a01-9451-593634cbef55', 'userId': '0a8a2ff5-1b93-44c3-994c-6891e0076d72', 'displayName': 'Player_8fa066', 'isAuthenticated': True}
+[WS RECV] type=mmo_world_state payload=<WORLD_STATE 5 bytes — skipped>
+[WS RECV] type=ftue_guidance payload={'stage': 'BRAND_NEW', 'hintText': 'Welcome, Commander! Click on your Scout ship to select it.', 'highlightType': 'hex', 'highlightTarget': '0,0'}
+[2026-06-30 08:17:43 UTC] Mining tier-0 asteroid ast_e10d67fa (Basic Mining Array)
+2026-06-30 03:17:43,988 [INFO] websocket: Websocket connected
+[WS RECV] type=connected payload={'clientId': '09935a33-e1ee-402e-9bfd-820a19642f27', 'message': 'Welcome to Crimson Mandate'}
+[WS RECV] type=auth_success payload={'clientId': '09935a33-e1ee-402e-9bfd-820a19642f27', 'userId': '0a8a2ff5-1b93-44c3-994c-6891e0076d72', 'displayName': 'Player_09935a', 'isAuthenticated': True}
+[WS RECV] type=mmo_world_state payload=<WORLD_STATE 5 bytes — skipped>
+[WS RECV] type=ftue_guidance payload={'stage': 'BRAND_NEW', 'hintText': 'Welcome, Commander! Click on your Scout ship to select it.', 'highlightType': 'hex', 'highlightTarget': '0,0'}
+[WS RECV] type=mmo_world_state payload=<WORLD_STATE 5 bytes — skipped>
+[WS RECV] type=ftue_guidance payload={'stage': 'BRAND_NEW', 'hintText': 'Welcome, Commander! Click on your Scout ship to select it.', 'highlightType': 'hex', 'highlightTarget': '0,0'}
+[WS RECV] type=error payload={'unitId': 'unit_scout_0a8a2ff5-1b93-44c3-994c-6891e0076d72_1', 'asteroidId': 'ast_e10d67fa', 'message': 'Your Basic Mining Array cannot extract minerals from this asteroid. A higher-tier mining laser is required.'}
+2026-06-30 03:17:44,354 [WARNING] runner: Server error: Your Basic Mining Array cannot extract minerals from this asteroid. A higher-tier mining laser is required.
+[WS RECV] type=mmo_tick_update payload={'tick': 2215040, 'units': [], 'asteroids': []}
+[2026-06-30 08:23:00 UTC] ═══ Cycle 3 starting ═══
+[2026-06-30 08:23:00 UTC] Balance: ISD=489, Credits=0, Laser=False, Failures=0
+2026-06-30 03:23:01,233 [INFO] websocket: Websocket connected
+[WS RECV] type=connected payload={'clientId': 'eb53edb0-8171-47c3-98df-f5a6c08fccae', 'message': 'Welcome to Crimson Mandate'}
+[WS RECV] type=auth_success payload={'clientId': 'eb53edb0-8171-47c3-98df-f5a6c08fccae', 'userId': '0a8a2ff5-1b93-44c3-994c-6891e0076d72', 'displayName': 'Player_eb53ed', 'isAuthenticated': True}
+[WS RECV] type=mmo_world_state payload=<WORLD_STATE 5 bytes — skipped>
+[WS RECV] type=ftue_guidance payload={'stage': 'BRAND_NEW', 'hintText': 'Welcome, Commander! Click on your Scout ship to select it.', 'highlightType': 'hex', 'highlightTarget': '0,0'}
+[2026-06-30 08:23:01 UTC] Mining tier-0 asteroid ast_e10d67fa (Basic Mining Array)
+2026-06-30 03:23:01,829 [INFO] websocket: Websocket connected
+[WS RECV] type=connected payload={'clientId': '838c5275-4a37-4012-96f7-1b22aa5e0fc9', 'message': 'Welcome to Crimson Mandate'}
+[WS RECV] type=auth_success payload={'clientId': '838c5275-4a37-4012-96f7-1b22aa5e0fc9', 'userId': '0a8a2ff5-1b93-44c3-994c-6891e0076d72', 'displayName': 'Player_838c52', 'isAuthenticated': True}
+[WS RECV] type=mmo_world_state payload=<WORLD_STATE 5 bytes — skipped>
+[WS RECV] type=ftue_guidance payload={'stage': 'BRAND_NEW', 'hintText': 'Welcome, Commander! Click on your Scout ship to select it.', 'highlightType': 'hex', 'highlightTarget': '0,0'}
+[WS RECV] type=mmo_world_state payload=<WORLD_STATE 5 bytes — skipped>
+[WS RECV] type=ftue_guidance payload={'stage': 'BRAND_NEW', 'hintText': 'Welcome, Commander! Click on your Scout ship to select it.', 'highlightType': 'hex', 'highlightTarget': '0,0'}
+[WS RECV] type=error payload={'unitId': 'unit_scout_0a8a2ff5-1b93-44c3-994c-6891e0076d72_1', 'asteroidId': 'ast_e10d67fa', 'message': 'Your Basic Mining Array cannot extract minerals from this asteroid. A higher-tier mining laser is required.'}
+2026-06-30 03:23:02,186 [WARNING] runner: Server error: Your Basic Mining Array cannot extract minerals from this asteroid. A higher-tier mining laser is required.
+[WS RECV] type=mmo_tick_update payload={'tick': 2215360, 'units': [], 'asteroids': []}
