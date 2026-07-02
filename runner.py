@@ -621,12 +621,13 @@ def run_cycle():
                 if atype == "mine_asteroid":
                     if c._mining_failure_detected:
                         c._mining_failure_detected = False  # reset for next cycle
-                        # Mining Laser not present — server warned on this call
-                        state["has_mining_laser"] = False
-                        state["mining_laser_confirmed_missing"] = True  # permanent flag: repositioning won't help
+                        # "Basic Mining Array cannot extract" / "higher-tier laser required" = asteroid
+                        # incompatibility, NOT a broken laser. The 00:19 UTC breakthrough proved the
+                        # Basic Mining Array CAN extract iron/copper. DO NOT set permanent flag.
+                        # Just count it so the circuit breaker can do its job.
                         state["mining_failures"] = state.get("mining_failures", 0) + 1
                         save_state(state)
-                        logger.warning(f"Mining Laser missing (failure #{state['mining_failures']}) — circuit breaker {'ARMED' if state['mining_failures'] >= 999 else 'counting'}."[:120])
+                        logger.warning(f"Mining failure #{state['mining_failures']} (incompatible asteroid) — circuit breaker {'ARMED' if state['mining_failures'] >= 3 else 'counting'}."[:120])
                     elif c._mine_not_adjacent_detected:
                         # Scout tried to mine but wasn't adjacent — stale position in ws_state
                         # or server lag. Count as a failure to prevent infinite retry loop.
