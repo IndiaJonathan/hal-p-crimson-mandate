@@ -136,7 +136,7 @@ class MMOClient:
                 # "higher-tier mining laser required" = current asteroid needs Mk1 Laser.
                 # This IS a real mining failure — scout needs to explore iron/copper zone.
                 self._mining_failure_detected = True
-            elif "unit must be within 1 hex" in err_msg or "not within 1 hex" in err_msg:
+            elif "unit must be within 1 hex" in err_msg.lower() or "not within 1 hex" in err_msg.lower():
                 # Scout tried to mine/move to a hex that's not adjacent — count as a failure
                 self._move_failure_detected = True
                 self._mine_not_adjacent_detected = True  # Track mine-distance failures separately
