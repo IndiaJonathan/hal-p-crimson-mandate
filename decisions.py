@@ -121,9 +121,10 @@ def decide_actions(state: dict, ws_state: dict) -> list:
                 "payload": {"unitId": scout["id"], "targetHex": ppos},
                 "ws": True
             })
-        elif dist == 0:
-            logger.info(f"Scout at planet {nearest_planet.get('name')} — staying docked.")
-        return actions
+        # Do NOT early-return at dist=0 — if already at planet with laser_missing=True,
+        # the scout is STALLED (no mining attempted = no failure accumulation = circuit
+        # breaker never triggers). Fall through to mining logic below so failures
+        # accumulate and circuit breaker forces navigation to a new asteroid.
 
     mining = [u for u in owned if u.get("miningAsteroidId")]
 
