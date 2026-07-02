@@ -97,6 +97,7 @@ class MMOClient:
     _golden_asteroid_spawned = None
     _mining_failure_detected = False
     _move_failure_detected = False
+    _mine_not_adjacent_detected = False
     _mine_blocked_not_adjacent = False  # True when circuit breaker blocked mine_asteroid due to "not adjacent"
     _cargo_full_detected = False
 
