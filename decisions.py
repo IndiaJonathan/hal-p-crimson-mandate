@@ -102,6 +102,29 @@ def decide_actions(state: dict, ws_state: dict) -> list:
     mining_blocked = (mining_failures >= 3)
     laser_missing = state.get("mining_laser_confirmed_missing", False)
 
+    # ── Laser missing: navigate to nearest planet instead of cycling asteroids ──
+    if laser_missing and scout:
+        scout_pos = scout.get("position", {})
+        nearest_planet = find_nearest_planet(scout_pos, planets_in_world)
+        ppos = nearest_planet.get("position", {})
+        dist = distance_hex(scout_pos, ppos)
+        logger.warning(f"Laser missing — navigating to {nearest_planet.get('name')} at {ppos} (dist={dist}).")
+        in_transit = any(
+            a["type"] == "move_unit"
+            and a.get("payload", {}).get("targetHex", {}).get("q") == ppos.get("q")
+            and a.get("payload", {}).get("targetHex", {}).get("r") == ppos.get("r")
+            for a in actions
+        )
+        if not in_transit and dist > 0:
+            actions.append({
+                "type": "move_unit",
+                "payload": {"unitId": scout["id"], "targetHex": ppos},
+                "ws": True
+            })
+        elif dist == 0:
+            logger.info(f"Scout at planet {nearest_planet.get('name')} — staying docked.")
+        return actions
+
     mining = [u for u in owned if u.get("miningAsteroidId")]
 
     idle = [u for u in owned if not u.get("miningAsteroidId") and not u.get("dockedAtPlanetId")]
@@ -201,27 +224,21 @@ def decide_actions(state: dict, ws_state: dict) -> list:
 
     elif mining_blocked:
         # Circuit breaker activated after 3+ consecutive mining failures.
-        # Try iron/copper zone as a last resort fallback.
-        logger.warning(f"Mining blocked: {mining_failures} failures — navigating to iron/copper asteroid.")
-        iron_copper_zone = [
-            {"q": 28, "r": -5},   # ast_9d4a81c3: iron=64, copper=37
-            {"q": 26, "r": -26},  # ast_e47b9de2: iron=84, copper=41
-            {"q": 26, "r": -31},  # ast_97675fc5: iron=36, copper=14
-            {"q": 30, "r": -19},  # ast_80d46bde: iron=62, copper=37
-            {"q": 24, "r": -26},  # ast_c546f51c: iron=68, copper=39
-        ]
+        # Navigate to nearest planet — iron/copper zone asteroids also need Mk1 laser.
+        logger.warning(f"Mining blocked: {mining_failures} failures — navigating to planet.")
         scout_pos = scout.get("position", {})
-        nearest = min(iron_copper_zone, key=lambda p: distance_hex(scout_pos, p))
+        nearest_planet = find_nearest_planet(scout_pos, planets_in_world)
+        ppos = nearest_planet.get("position", {})
         in_transit = any(
             a["type"] == "move_unit"
-            and a.get("payload", {}).get("targetHex", {}).get("q") == nearest["q"]
-            and a.get("payload", {}).get("targetHex", {}).get("r") == nearest["r"]
+            and a.get("payload", {}).get("targetHex", {}).get("q") == ppos.get("q")
+            and a.get("payload", {}).get("targetHex", {}).get("r") == ppos.get("r")
             for a in actions
         )
         if not in_transit:
             actions.append({
                 "type": "move_unit",
-                "payload": {"unitId": scout["id"], "targetHex": nearest},
+                "payload": {"unitId": scout["id"], "targetHex": ppos},
                 "ws": True
             })
 
