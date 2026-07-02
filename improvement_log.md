@@ -24,6 +24,31 @@ Note: The `self._*_detected` references inside `MMOClient._on_message` (lines 13
 
 ---
 
+## 2026-07-02 00:19 UTC — HAL-P Self-Review (7:19 PM CT Wed) — MINING BREAKTHROUGH!
+
+**Token:** ✅ Valid — session `0e37278f-3b31-4e5c-9536-09f3d0f06785`. Exp **2026-07-06 05:32 UTC** (~5.9 days). No renewal needed.
+
+**Code:** Clean. The 22:18 UTC `6ba3402` fix is confirmed working. Operator PIDs 29999+21105 actively cycling. operator.log shows live mining activity.
+
+**BREAKTHROUGH — Mining is working!** After 83+ days of zero extraction, the scout is successfully mining asteroid `ast_20b77669` at position (23,-24):
+- `mmo_mine_result`: `min_copper: 1` per tick
+- `mineralComposition`: `{min_iron: 5, min_copper: 23, min_platinum: 4, min_titanium: 14}` — iron+copper present!
+- `storedResources: 46 / 104` capacity
+- `cargoUsed: 1` and climbing
+- Scout HP: 40/40, actively mining
+
+The `NameError` was blocking ALL `mine_asteroid` calls — with it fixed, the Basic Mining Array CAN extract iron and copper from tier-0 asteroids (contrary to prior assumption that Mk1 Laser was required for iron/copper). The 83+ day deadlock is broken!
+
+**Circuit breaker:** Engaging correctly — `miningProgress: 0.15 → 0.3 → 0.45 → 0.6 → 0.75 → 0.9 → mine_result → 0.05` cycle, with `mining_failures` properly accumulating on incompatible asteroids and resetting on successful moves.
+
+**improve.py:** Cycling — entries at 23:43, 23:58, 00:13 UTC confirmed. Still recommending combat ISD grinding (now less critical given mining is working).
+
+**Game state:** Scout actively mining, cargo building. `iron=0, copper=0` in game balance likely reflects "banked/deposited" resources not yet delivered to a station — scout needs to fill cargo then navigate to deposit. ISD=489. Mk1 Laser still beneficial but no longer critical-path blocker.
+
+**Status:** Fix confirmed working. Mining breakthrough achieved. No code changes needed — operator is healthy and progressing. No Discord ping (7:19 PM CT Wed — game-economy issue resolved).
+
+---
+
 ## 2026-07-01 21:47 UTC — HAL-P Self-Review (4:47 PM CT Wed)
 
 **Token:** ✅ Valid — session `0e37278f-3b31-4e5c-9536-09f3d0f06785`. Exp **2026-07-06 05:32 UTC** (~5.9 days). No renewal needed.

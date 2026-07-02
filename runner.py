@@ -515,6 +515,30 @@ def run_cycle():
         if u["id"] in fresh_positions:
             u["position"] = fresh_positions[u["id"]]
 
+    # ── Patch mining state from latest tick update before decisions ──
+    # ws_state is a snapshot from mmo_world_state and doesn't include tick-update fields
+    # like miningAsteroidId. Without this, decide_actions re-issues mine_asteroid every cycle
+    # (seeing null miningAsteroidId) and toggles off the active session, resetting progress.
+    tick_units = None
+    with client._cv:
+        ticks = client._events.get("mmo_tick_update", [])
+        if ticks:
+            tick_units = ticks[-1].get("units", [])
+    if tick_units:
+        tick_units_by_id = {u["id"]: u for u in tick_units}
+        for u in ws_state.get("units", []):
+            if u["id"] in tick_units_by_id:
+                t = tick_units_by_id[u["id"]]
+                u["miningAsteroidId"] = t.get("miningAsteroidId")
+                u["miningProgress"] = t.get("miningProgress", 0)
+                u["cargoUsed"] = t.get("cargoUsed", 0)
+        for u in state.get("units", []):
+            if u["id"] in tick_units_by_id:
+                t = tick_units_by_id[u["id"]]
+                u["miningAsteroidId"] = t.get("miningAsteroidId")
+                u["miningProgress"] = t.get("miningProgress", 0)
+                u["cargoUsed"] = t.get("cargoUsed", 0)
+
     # ── Combat: Attack nearby enemies if scout has attack power ──
     scout = next((u for u in owned if u.get("type") == "Scout"), None)
     combat_happened = False
